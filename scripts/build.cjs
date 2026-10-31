@@ -1,0 +1,11 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.join(__dirname, '..');
+const catalogs = Object.fromEntries(fs.readdirSync(path.join(root,'i18n')).filter(f=>f.endsWith('.json')).sort().map(f=>[f.slice(0,-5),JSON.parse(fs.readFileSync(path.join(root,'i18n',f),'utf8'))]));
+const source = fs.readFileSync(path.join(root,'braumeister-display-card.js'),'utf8');
+const marker = 'const BUNDLED_LANGUAGES = {};';
+if(source.split(marker).length!==2) throw Error('Missing or duplicate bundle marker');
+const output = source.replace(marker,()=>`const BUNDLED_LANGUAGES = ${JSON.stringify(catalogs)};`);
+fs.mkdirSync(path.join(root,'dist'),{recursive:true});
+fs.writeFileSync(path.join(root,'dist/braumeister-display-card.js'),output);
+console.log('Built dist/braumeister-display-card.js with '+Object.keys(catalogs).length+' catalogs');

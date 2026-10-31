@@ -1,4 +1,32 @@
-# Braumeister Display 0.4.2
+# Braumeister Display 0.5.0
+
+![Recipe editing in English](images/recipe-edit-en.png)
+
+## Install through HACS
+
+1. In HACS, open the menu and select **Custom repositories**.
+2. Add `https://github.com/DanielP-1337/braumeister-display-card` as **Dashboard**.
+3. Download the card and reload the browser.
+4. Verify the JavaScript module resource is
+   `/hacsfiles/braumeister-display-card/braumeister-display-card.js`.
+   If resources are managed in YAML, register this URL there yourself.
+
+When migrating from the manual install, replace/remove the old
+`/local/braumeister-display-card.js` resource. Load only one copy of the card.
+Keep your card YAML and entity IDs. Do not uninstall the companion integration.
+
+The HACS bundle contains all eight language catalogs. No JSON copy is required.
+Optional files in `/config/www/braumeister-i18n/` override bundled translations;
+`i18n_path` can select another `/local/` directory. Existing overrides are kept
+outside the HACS-managed directory and survive upgrades. Missing JSON requests
+are harmless; built-in translations remain available. Remove obsolete custom
+files if you want the bundled translations to take effect.
+
+The source file in the repository root remains suitable for manual installation
+with JSON files as described below. The self-contained HACS file is in `dist/`.
+A GitHub release alone does not add a repository to the HACS default catalog.
+
+## Manual installation and compatibility
 
 Standalone Home Assistant frontend card. Companion integration:
 https://github.com/omphteliba/ha-speidel-braumeister
@@ -10,7 +38,7 @@ no integration, bridge, firmware or cloud credentials.
 Copy `braumeister-display-card.js` to `/config/www/braumeister-display-card.js`
 and `i18n/*.json` to `/config/www/braumeister-i18n/` (see localization below).
 Register the dashboard JavaScript module resource as
-`/local/braumeister-display-card.js?v=0.4.2` (update the existing resource).
+`/local/braumeister-display-card.js?v=0.5.0` (update the existing resource).
 Reload the browser. Keep your existing card YAML and entity IDs; see example.yaml.
 HACS integration updates do not copy this dashboard file to www.
 
@@ -57,7 +85,7 @@ This validates the observed automatic-brew scenario on that device; it is not a
 claim that manual-mode actuators restart automatically or that the bridge
 implements process persistence. The device owns the brewing process and timer.
 
-## Display-only localization (card 0.4.2)
+## Display-only localization (card 0.5.0)
 
 This update only changes the custom card. The Python integration, original
 MySpeidel strings, entity IDs, states, attributes and service payloads remain
@@ -76,7 +104,7 @@ Copy-Item -Path "$repoPath\i18n\*.json" -Destination "$wwwPath\braumeister-i18n"
 ```
 
 Change the EXISTING dashboard resource URL to
-`/local/braumeister-display-card.js?v=0.4.2` (JavaScript module), then reload the
+`/local/braumeister-display-card.js?v=0.5.0` (JavaScript module), then reload the
 browser with Ctrl+F5. Do not add a second resource for the same custom card.
 No integration copy or HA restart is needed for this frontend-only update.
 Back up any locally customized language files before copying over them.
@@ -158,12 +186,14 @@ when the device is offline, powered off, or in another state.
 
 ## Development
 
-No npm dependencies or build step are required. With Node.js installed:
+No npm dependencies are required. The deterministic build embeds the editable JSON catalogs into the HACS distribution. With Node.js installed:
 
 ```sh
 node --check braumeister-display-card.js
 node test.cjs
 node test-i18n.cjs
+node scripts/build.cjs
+node test-bundle.cjs
 ```
 
 Automated checks cover offline masking, escaping, command routing, eight language
@@ -175,7 +205,7 @@ English and German recipe-editing text on the 20 L Plus.
 - Boiling target/elapsed time and the next-hop countdown are not displayed yet.
 - Device controls remain disabled; only the separately configured smart plug
   and its power-on behavior selector can be controlled.
-- Installation is currently manual; this is not yet a HACS frontend release.
+- HACS custom-repository installation is supported. Default-catalog inclusion is a separate review process.
 - Native-speaker review of the initial translations is welcome.
 
 ## Origin and license

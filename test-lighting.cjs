@@ -23,6 +23,30 @@ require('./dist/braumeister-display-card.js');
   assert.equal(screen(),originalScreen,'LCD markup must stay unchanged');
   assert(card.shadowRoot.innerHTML.includes('text-decoration:underline'));
  }
+ // Real HA state updates must redraw rings without changing persisted config.
+ for(const saved of ['#00cfff','default','off']) {
+  const powerConfig={...config,button_color:saved,entities:{...config.entities,plug:'switch.brew',connection:'sensor.cloud'}};
+  const before=JSON.stringify(powerConfig);
+  card.setConfig(powerConfig);
+  const update=(plug,cloud)=>{card.hass={states:{...(plug===undefined?{}:{'switch.brew':{state:plug}}),'sensor.cloud':{state:cloud}}};};
+  const check=(expected,active)=>{
+   assert(card.shadowRoot.innerHTML.includes(`border:5px solid ${expected}`));
+   assert(card.shadowRoot.innerHTML.includes(`.ring{border-color:${active};`));
+   assert.equal(JSON.stringify(card.config),before,'Power masking must not mutate the saved configuration');
+  };
+  const normal=saved==='off'?'#666666':saved==='default'?'#f4f4f4':saved;
+  const selected=saved==='default'?'#ffda16':normal;
+  for(const page of ['display','recipe','power','details']) {
+   card.page=page;
+   update('on','online');check(normal,selected);
+   update('off','online');check('#666666','#666666');
+   update('on','offline');check(normal,selected);
+   update('off','offline');check('#666666','#666666');
+   for(const uncertain of ['unknown','unavailable',undefined]) {update(uncertain,'offline');check(normal,selected);}
+   update('on','online');check(normal,selected);
+  }
+ }
+ console.log('PASS: plug on/off transitions, saved colors preserved, deliberate lights off, all pages, cloud independence and uncertain/missing plug states');
  const editor=Card.getConfigElement();editor.setConfig(config);await editor._languageReady;
  assert.equal((editor.shadowRoot.innerHTML.match(/class="swatch"/g)||[]).length,8);
  assert(editor.shadowRoot.innerHTML.includes('type="color"'));

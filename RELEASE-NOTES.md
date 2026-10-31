@@ -1,14 +1,12 @@
-# Braumeister Display Card 0.6.0
+# Braumeister Display Card 0.6.1
 
-Choose a common color for the four navigation rings in the card editor under
-Appearance → Button lighting. Includes eight presets, a native color picker,
-HEX entry, Default, and Lights off. Save the editor to persist the selection.
-The selected tab is underlined even when lighting is off.
+The four navigation rings now follow the configured smart plug. A confirmed
+`off` state temporarily darkens all rings. The saved color remains unchanged
+and returns when the plug is on. A deliberate Lights off selection stays dark.
 
-All eight languages are bundled. Existing YAML/entity mappings are preserved.
-LCD colors and brightness, backend states, and device commands are unchanged.
-The setting controls this card only, not the physical Braumeister lighting.
-Presets are visual approximations, not official Speidel color values.
+Cloud outages, missing plug entities and unknown/unavailable plug states do not
+count as confirmed power-off. No new configuration is required: the existing
+`entities.plug` mapping is used. LCD appearance and device commands are unchanged.
 
-Automated regression and editor tests pass. A real HA editor/device smoke test
-is still required. This release does not imply HACS default catalog inclusion.
+Automated tests cover power transitions, all navigation pages, saved color
+preservation, cloud outages and missing/unknown/unavailable plug states.

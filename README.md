@@ -1,4 +1,4 @@
-# Braumeister Display 0.6.0
+# Braumeister Display 0.6.1
 
 ![Recipe editing in English](images/recipe-edit-en.png)
 
@@ -34,7 +34,11 @@ The HA preview updates immediately; use **Save** to persist the card configurati
 The editor preserves existing entity mappings and other YAML settings. Edit those
 in the YAML editor as before. Labels follow the card's language setting.
 
-All four lower navigation rings share the selected color. The active tab is
+All four lower navigation rings share the selected color. When the configured
+`entities.plug` reports `off`, all rings become dark without changing the saved
+color. When it reports `on`, the saved selection returns (including Lights off).
+Cloud connectivity does not affect ring lighting. A missing plug entity or an
+`unknown` / `unavailable` plug state does not count as confirmed power-off. The active tab is
 underlined, including with the lighting off. **Default** preserves the previous
 white/yellow ring colors. LCD colors and brightness stay unchanged. These are
 local card preferences; no device command or hardware color synchronization is
@@ -60,7 +64,7 @@ no integration, bridge, firmware or cloud credentials.
 Copy `braumeister-display-card.js` to `/config/www/braumeister-display-card.js`
 and `i18n/*.json` to `/config/www/braumeister-i18n/` (see localization below).
 Register the dashboard JavaScript module resource as
-`/local/braumeister-display-card.js?v=0.6.0` (update the existing resource).
+`/local/braumeister-display-card.js?v=0.6.1` (update the existing resource).
 Reload the browser. Keep your existing card YAML and entity IDs; see example.yaml.
 HACS integration updates do not copy this dashboard file to www.
 
@@ -107,7 +111,7 @@ This validates the observed automatic-brew scenario on that device; it is not a
 claim that manual-mode actuators restart automatically or that the bridge
 implements process persistence. The device owns the brewing process and timer.
 
-## Display-only localization (card 0.6.0)
+## Display-only localization (card 0.6.1)
 
 This update only changes the custom card. The Python integration, original
 MySpeidel strings, entity IDs, states, attributes and service payloads remain
@@ -126,7 +130,7 @@ Copy-Item -Path "$repoPath\i18n\*.json" -Destination "$wwwPath\braumeister-i18n"
 ```
 
 Change the EXISTING dashboard resource URL to
-`/local/braumeister-display-card.js?v=0.6.0` (JavaScript module), then reload the
+`/local/braumeister-display-card.js?v=0.6.1` (JavaScript module), then reload the
 browser with Ctrl+F5. Do not add a second resource for the same custom card.
 No integration copy or HA restart is needed for this frontend-only update.
 Back up any locally customized language files before copying over them.

@@ -35,7 +35,7 @@ try {
     }
     if (-not $run) { throw 'No validation run found. Check GitHub Actions before retrying.' }
     Invoke-Checked 'gh' @('run','watch',"$run",'--repo',$repoName,'--exit-status')
-    Invoke-Checked 'gh' @('release','create','v0.6.0','dist/braumeister-display-card.js','--repo',$repoName,'--target',$sha,'--title','Braumeister Display Card 0.6.0','--notes-file','RELEASE-NOTES.md','--latest')
-    Invoke-Checked 'gh' @('release','view','v0.6.0','--repo',$repoName,'--json','url,tagName,assets')
+    Invoke-Checked 'gh' @('release','create','v0.6.1','dist/braumeister-display-card.js','--repo',$repoName,'--target',$sha,'--title','Braumeister Display Card 0.6.1','--notes-file','RELEASE-NOTES.md','--latest')
+    Invoke-Checked 'gh' @('release','view','v0.6.1','--repo',$repoName,'--json','url,tagName,assets')
 }
 finally { Pop-Location }

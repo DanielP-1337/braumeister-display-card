@@ -90,5 +90,21 @@
   "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Durée signalée par l’intégration, pas encore vérifiée comme durée restante. Les entités disponibles ne fournissent ni liste de recettes ni programme des paliers.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H affichent les valeurs de l’intégration. Les états XHR corrects nécessitent la correction du parseur de la PR #8.",
   "Rezepte bearbeiten": "Modifier les recettes",
-  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Les recettes peuvent uniquement être modifiées sur myspeidel.com ou directement sur le Braumeister."
+  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Les recettes peuvent uniquement être modifiées sur myspeidel.com ou directement sur le Braumeister.",
+  "Darstellung": "Apparence",
+  "Tastenbeleuchtung": "Éclairage des boutons",
+  "Standard": "Par défaut",
+  "Licht aus": "Éclairage éteint",
+  "Eigene Farbe": "Couleur personnalisée",
+  "HEX-Farbe": "Couleur HEX",
+  "Rot": "Rouge",
+  "Orange": "Orange",
+  "Gelb": "Jaune",
+  "Grün": "Vert",
+  "Cyan": "Cyan",
+  "Blau": "Bleu",
+  "Magenta": "Magenta",
+  "Weiß": "Blanc",
+  "Nur die Tastenringe dieser Karte ändern sich.": "Seuls les anneaux des boutons de cette carte changent.",
+  "Bitte #RRGGBB eingeben.": "Saisissez #RRGGBB."
 }

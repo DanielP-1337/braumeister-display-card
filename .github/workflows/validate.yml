@@ -20,6 +20,7 @@ jobs:
       - run: git diff --exit-code -- dist/
       - run: node --check dist/braumeister-display-card.js
       - run: node test-bundle.cjs
+      - run: node test-lighting.cjs
   hacs:
     runs-on: ubuntu-latest
     steps:

@@ -90,5 +90,21 @@
   "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.",
   "Rezepte bearbeiten": "Rezepte bearbeiten",
-  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich."
+  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.",
+  "Darstellung": "Darstellung",
+  "Tastenbeleuchtung": "Tastenbeleuchtung",
+  "Standard": "Standard",
+  "Licht aus": "Licht aus",
+  "Eigene Farbe": "Eigene Farbe",
+  "HEX-Farbe": "HEX-Farbe",
+  "Rot": "Rot",
+  "Orange": "Orange",
+  "Gelb": "Gelb",
+  "Grün": "Grün",
+  "Cyan": "Cyan",
+  "Blau": "Blau",
+  "Magenta": "Magenta",
+  "Weiß": "Weiß",
+  "Nur die Tastenringe dieser Karte ändern sich.": "Nur die Tastenringe dieser Karte ändern sich.",
+  "Bitte #RRGGBB eingeben.": "Bitte #RRGGBB eingeben."
 }

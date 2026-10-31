@@ -1,4 +1,4 @@
-/* Braumeister Display 0.5.0 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.6.0 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -99,6 +99,7 @@
   "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Time reported by the integration; not yet verified as remaining time. The available entities do not provide a recipe list or mash schedule.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H show the values reported by the integration. Correct XHR states require the parser fix from PR #8."
 };
+  Object.assign(ENGLISH, {"Darstellung": "Appearance", "Tastenbeleuchtung": "Button lighting", "Standard": "Default", "Licht aus": "Lights off", "Eigene Farbe": "Custom color", "HEX-Farbe": "HEX color", "Rot": "Red", "Orange": "Orange", "Gelb": "Yellow", "Grün": "Green", "Cyan": "Cyan", "Blau": "Blue", "Magenta": "Magenta", "Weiß": "White", "Nur die Tastenringe dieser Karte ändern sich.": "Only the button rings on this card change.", "Bitte #RRGGBB eingeben.": "Enter #RRGGBB."});
   const BUNDLED_LANGUAGES = {};
   const languageCache = new Map();
   const normalizeLanguage = value => {
@@ -113,6 +114,10 @@
       .catch(() => ({})));
     return languageCache.get(url);
   };
+  // Strict CSS allowlist: never interpolate arbitrary YAML into a style block.
+  const lightingValue = value => value === 'off' ? 'off'
+    : typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? value.toLowerCase() : 'default';
+  const presets = [['Rot','#ff3030'],['Orange','#ff8c00'],['Gelb','#ffda16'],['Grün','#20d050'],['Cyan','#00cfff'],['Blau','#305bff'],['Magenta','#da30ff'],['Weiß','#f4f4f4']];
   class BraumeisterDisplay extends HTMLElement {
     constructor() {
       super(); this.attachShadow({mode:'open'}); this.page='display'; this.pending=false;
@@ -146,7 +151,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.5.0`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.6.0`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -183,6 +188,7 @@
       }
       return ['step','mode','connection','pump','heater','plug','behavior'].includes(key) ? this.translate(value) : value;
     }
+    static getConfigElement(){return document.createElement('braumeister-display-card-editor');}
     getCardSize(){return 10;}
     getGridOptions(){return {columns:12,rows:'auto',min_columns:6};}
     state(key){return this._hass?.states[this.ids[key]]?.state;}
@@ -224,6 +230,8 @@
         const disabled=this.pending||!available?'disabled':'';
         body=`<h2>${T('Zwischenstecker')}</h2>${row('Schaltzustand','plug')}${row('Gesamtleistung','power','W')}<div class="power-buttons"><button data-power="turn_on" ${disabled}>${T('Einschalten')}</button><button data-power="turn_off" ${disabled}>${T('Ausschalten')}</button></div><label>${T('Nach Stromausfall')}<select id="behavior" ${this.pending||!options.length?'disabled':''}><option disabled ${!options.includes(this.state('behavior'))?'selected':''}>${T('Bitte wählen')}</option>${options.map(o=>`<option value="${E(o)}" ${this.state('behavior')===o?'selected':''}>${T(({on:'Ein',off:'Aus',previous:'Vorheriger Zustand',toggle:'Zustand umkehren'})[o]||o)}</option>`).join('')}</select></label><p class="hint">${T('Schaltet die gesamte Stromversorgung des Braumeisters.')}</p>`;
       }
+      const lighting=lightingValue(this.config.button_color);
+      const ringColor=lighting==='off'?'#666666':lighting==='default'?'#f4f4f4':lighting;
       this.shadowRoot.innerHTML=`<style>
       :host{display:block;color:#080808;font-family:Arial,sans-serif;container-type:inline-size}*{box-sizing:border-box}
       ha-card{display:block;background:linear-gradient(135deg,#505050,#060606);padding:clamp(14px,5cqw,34px);border-radius:16px;color:#080808;overflow:hidden}
@@ -236,12 +244,73 @@
       .phase{font-size:clamp(19px,4cqw,28px);font-weight:bold;margin:24px 0 8px;overflow-wrap:anywhere}.sub{font-size:14px}
       .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys button{background:#ffda16;border-radius:10px;font-size:36px;font-weight:bold;width:56px;height:56px;color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}small{display:block;font-size:11px;margin-top:7px}
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
-      footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid #f4f4f4;border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:#ffda16;background:black;color:#ffda16}
+      footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
       </style><ha-card><div class="screen"><header><span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${this.state('alarm')==='on'?`<div class="notice">${T('Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${i}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
+  class BraumeisterDisplayEditor extends HTMLElement {
+    constructor(){
+      super(); this.attachShadow({mode:'open'});
+      this.shadowRoot.addEventListener('click',event=>{
+        const button=event.target.closest('button[data-color]');
+        if(button) this.updateColor(button.dataset.color);
+      });
+      this.shadowRoot.addEventListener('input',event=>{
+        if(event.target.id==='picker') this.updateColor(event.target.value, false);
+        if(event.target.id==='hex') {
+          const valid=/^#[0-9a-f]{6}$/i.test(event.target.value);
+          event.target.setCustomValidity(valid?'':this.translate('Bitte #RRGGBB eingeben.'));
+          event.target.setAttribute('aria-invalid',String(!valid));
+          if(valid) this.updateColor(event.target.value, false);
+        }
+      });
+    }
+    setConfig(config){
+      // HA can echo config-changed while the native picker is still open.
+      if(this.config && JSON.stringify(config)===JSON.stringify(this.config)) return;
+      this.config={...config};this.refreshLanguage();this.render();
+    }
+    set hass(value){this._hass=value;this.refreshLanguage();}
+    refreshLanguage(){BraumeisterDisplay.prototype.refreshLanguage.call(this);}
+    translate(key,params){return BraumeisterDisplay.prototype.translate.call(this,key,params);}
+    updateColor(value, redraw=true){
+      const color=lightingValue(value);
+      this.config={...this.config,button_color:color};
+      if(redraw) this.render();
+      else {
+        // Keep the native picker and text field mounted while typing/dragging.
+        for(const button of this.shadowRoot.querySelectorAll('[data-color]')) button.setAttribute('aria-pressed',String(button.dataset.color===color));
+        const hex=this.shadowRoot.querySelector('#hex'), picker=this.shadowRoot.querySelector('#picker');
+        if(hex.value.toLowerCase()!==color) hex.value=color;
+        hex.setCustomValidity('');hex.setAttribute('aria-invalid','false');
+        picker.value=color;
+      }
+      this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
+    }
+    render(){
+      if(!this.config) return;
+      const T=key=>esc(this.translate(key)), color=lightingValue(this.config.button_color);
+      const custom=color.startsWith('#')?color:'#ffda16';
+      this.shadowRoot.innerHTML=`<style>
+        :host{display:block}fieldset{border:1px solid var(--divider-color,#888);border-radius:8px;padding:16px}
+        .palette{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}button,input{font:inherit}
+        button{cursor:pointer;background:var(--card-background-color,white);color:var(--primary-text-color,black);border:2px solid #888;border-radius:6px;padding:8px}
+        .swatch{width:40px;height:40px;border-radius:50%;background:var(--swatch)}
+        button[aria-pressed=true]{outline:3px solid var(--primary-color,#008bd2);outline-offset:3px}
+        button:focus-visible,input:focus-visible{outline:3px dashed var(--primary-color,#008bd2);outline-offset:3px}
+        label{display:block;margin:12px 0 6px}input[type=text]{width:140px;padding:8px}input[type=color]{width:64px;height:40px;vertical-align:middle}
+        p{font-size:13px;line-height:1.5}input[aria-invalid=true]{border:2px solid #c62828}
+      </style><h3>${T('Darstellung')}</h3><fieldset><legend>${T('Tastenbeleuchtung')}</legend>
+        <div class="palette">${[['Standard','default'],['Licht aus','off']].map(([name,value])=>`<button type="button" data-color="${value}" aria-pressed="${color===value}">${T(name)}</button>`).join('')}</div>
+        <div class="palette">${presets.map(([name,value])=>`<button type="button" class="swatch" style="--swatch:${value}" data-color="${value}" title="${T(name)}" aria-label="${T(name)}" aria-pressed="${color===value}"></button>`).join('')}</div>
+        <label for="picker">${T('Eigene Farbe')}</label><input id="picker" type="color" value="${custom}">
+        <label for="hex">${T('HEX-Farbe')}</label><input id="hex" type="text" value="${custom}" pattern="#[0-9a-fA-F]{6}" maxlength="7" spellcheck="false" aria-describedby="hex-help"><p id="hex-help">${T('Bitte #RRGGBB eingeben.')}</p>
+        <p>${T('Nur die Tastenringe dieser Karte ändern sich.')}</p></fieldset>`;
+    }
+  }
+  if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.5.0'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.6.0'});
 })();

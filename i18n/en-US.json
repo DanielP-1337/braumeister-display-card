@@ -90,5 +90,21 @@
   "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Time reported by the integration; not yet verified as remaining time. The available entities do not provide a recipe list or mash schedule.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H show the values reported by the integration. Correct XHR states require the parser fix from PR #8.",
   "Rezepte bearbeiten": "Edit recipes",
-  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Recipes can only be edited on myspeidel.com or directly on the Braumeister."
+  "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Recipes can only be edited on myspeidel.com or directly on the Braumeister.",
+  "Darstellung": "Appearance",
+  "Tastenbeleuchtung": "Button lighting",
+  "Standard": "Default",
+  "Licht aus": "Lights off",
+  "Eigene Farbe": "Custom color",
+  "HEX-Farbe": "HEX color",
+  "Rot": "Red",
+  "Orange": "Orange",
+  "Gelb": "Yellow",
+  "Grün": "Green",
+  "Cyan": "Cyan",
+  "Blau": "Blue",
+  "Magenta": "Magenta",
+  "Weiß": "White",
+  "Nur die Tastenringe dieser Karte ändern sich.": "Only the button rings on this card change.",
+  "Bitte #RRGGBB eingeben.": "Enter #RRGGBB."
 }

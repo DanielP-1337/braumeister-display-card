@@ -13,6 +13,7 @@ try {
     Invoke-Checked 'node' @('test-i18n.cjs')
     Invoke-Checked 'node' @('scripts/build.cjs')
     Invoke-Checked 'node' @('test-bundle.cjs')
+    Invoke-Checked 'node' @('test-lighting.cjs')
     Invoke-Checked 'git' @('diff', '--exit-code')
     $dirty = & git status --porcelain
     if ($LASTEXITCODE -ne 0 -or $dirty) { throw 'Commit or move untracked/modified files before publishing.' }
@@ -34,7 +35,7 @@ try {
     }
     if (-not $run) { throw 'No validation run found. Check GitHub Actions before retrying.' }
     Invoke-Checked 'gh' @('run','watch',"$run",'--repo',$repoName,'--exit-status')
-    Invoke-Checked 'gh' @('release','create','v0.5.0','dist/braumeister-display-card.js','--repo',$repoName,'--target',$sha,'--title','Braumeister Display Card 0.5.0','--notes-file','RELEASE-NOTES.md','--latest')
-    Invoke-Checked 'gh' @('release','view','v0.5.0','--repo',$repoName,'--json','url,tagName,assets')
+    Invoke-Checked 'gh' @('release','create','v0.6.0','dist/braumeister-display-card.js','--repo',$repoName,'--target',$sha,'--title','Braumeister Display Card 0.6.0','--notes-file','RELEASE-NOTES.md','--latest')
+    Invoke-Checked 'gh' @('release','view','v0.6.0','--repo',$repoName,'--json','url,tagName,assets')
 }
 finally { Pop-Location }

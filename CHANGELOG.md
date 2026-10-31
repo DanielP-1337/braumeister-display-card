@@ -1,3 +1,9 @@
+# 0.6.0
+
+- Add a translated visual editor with eight ring-color presets, native color picker, HEX entry, Default and Lights off.
+- Save the shared ring color per card; underline the active tab independently of color.
+- Keep LCD appearance, backend data and device commands unchanged.
+
 # Changelog
 
 ## 0.5.0

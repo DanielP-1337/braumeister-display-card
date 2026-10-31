@@ -1,4 +1,4 @@
-# Braumeister Display 0.5.0
+# Braumeister Display 0.6.0
 
 ![Recipe editing in English](images/recipe-edit-en.png)
 
@@ -26,6 +26,28 @@ The source file in the repository root remains suitable for manual installation
 with JSON files as described below. The self-contained HACS file is in `dist/`.
 A GitHub release alone does not add a repository to the HACS default catalog.
 
+## Button ring colors
+
+Open the card editor: **Appearance → Button lighting**. Choose a preset,
+**Lights off**, or a custom color using the native picker / six-digit HEX field.
+The HA preview updates immediately; use **Save** to persist the card configuration.
+The editor preserves existing entity mappings and other YAML settings. Edit those
+in the YAML editor as before. Labels follow the card's language setting.
+
+All four lower navigation rings share the selected color. The active tab is
+underlined, including with the lighting off. **Default** preserves the previous
+white/yellow ring colors. LCD colors and brightness stay unchanged. These are
+local card preferences; no device command or hardware color synchronization is
+performed. Preset colors are visual approximations, not official Speidel values.
+
+Optional YAML (omit `button_color` for Default):
+
+```yaml
+button_color: '#00cfff'  # #RRGGBB, 'off', or 'default'
+```
+
+Quote HEX colors and `'off'` in YAML. Invalid values fall back to Default.
+
 ## Manual installation and compatibility
 
 Standalone Home Assistant frontend card. Companion integration:
@@ -38,7 +60,7 @@ no integration, bridge, firmware or cloud credentials.
 Copy `braumeister-display-card.js` to `/config/www/braumeister-display-card.js`
 and `i18n/*.json` to `/config/www/braumeister-i18n/` (see localization below).
 Register the dashboard JavaScript module resource as
-`/local/braumeister-display-card.js?v=0.5.0` (update the existing resource).
+`/local/braumeister-display-card.js?v=0.6.0` (update the existing resource).
 Reload the browser. Keep your existing card YAML and entity IDs; see example.yaml.
 HACS integration updates do not copy this dashboard file to www.
 
@@ -85,7 +107,7 @@ This validates the observed automatic-brew scenario on that device; it is not a
 claim that manual-mode actuators restart automatically or that the bridge
 implements process persistence. The device owns the brewing process and timer.
 
-## Display-only localization (card 0.5.0)
+## Display-only localization (card 0.6.0)
 
 This update only changes the custom card. The Python integration, original
 MySpeidel strings, entity IDs, states, attributes and service payloads remain
@@ -104,7 +126,7 @@ Copy-Item -Path "$repoPath\i18n\*.json" -Destination "$wwwPath\braumeister-i18n"
 ```
 
 Change the EXISTING dashboard resource URL to
-`/local/braumeister-display-card.js?v=0.5.0` (JavaScript module), then reload the
+`/local/braumeister-display-card.js?v=0.6.0` (JavaScript module), then reload the
 browser with Ctrl+F5. Do not add a second resource for the same custom card.
 No integration copy or HA restart is needed for this frontend-only update.
 Back up any locally customized language files before copying over them.
@@ -194,6 +216,7 @@ node test.cjs
 node test-i18n.cjs
 node scripts/build.cjs
 node test-bundle.cjs
+node test-lighting.cjs
 ```
 
 Automated checks cover offline masking, escaping, command routing, eight language

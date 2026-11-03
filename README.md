@@ -249,3 +249,7 @@ then creates the public `DanielP-1337/braumeister-display-card` repository and
 pushes a new `main` branch. Requires Git, Node.js, GitHub CLI and configured Git
 author identity. It stops on errors and never force-pushes or overwrites an
 existing repository. No Home Assistant files are changed.
+
+## Local menu control
+
+Display Card v0.7.0-beta.1 adds optional local menu navigation. Install the [Braumeister Local Menu companion](https://github.com/DanielP-1337/braumeister-menu-companion) separately in HACS as an Integration. It connects the card to a build of the [upstream Braumeister Bridge](https://github.com/omphteliba/ha-speidel-braumeister/tree/main/braumeister_bridge) with the local control API from [Bridge PR #20](https://github.com/omphteliba/ha-speidel-braumeister/pull/20).

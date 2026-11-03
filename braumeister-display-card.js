@@ -1,11 +1,33 @@
-/* Braumeister Display 0.6.1 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.1 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
+  const menuKeys = {
+    101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
+      ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
+    8101: [['✕','Abbruch','close_settings']],
+    4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur']],
+    6010: [['✕','Abbruch','close_recipe_list']],
+    2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up']],
+  };
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Only presentation is localized. Backend values, attributes and commands stay intact.
+  const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
+    6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Einstellungen": "Settings",
+  "Manuell": "Manual",
+  "Braustart": "Brew start",
+  "Rezept auswählen": "Select recipe",
+  "Ab": "Down",
+  "Hoch": "Up",
+  "Lokale Menünavigation": "Local menu navigation",
+  "Menüaktion läuft …": "Menu action pending…",
+  "Menüaktion bestätigt": "Menu action confirmed",
+  "Menüaktion abgelaufen": "Menu action expired",
+  "Menüaktion unbestätigt": "Menu action unconfirmed",
+  "Gerätebildschirm hat gewechselt": "Device screen changed",
   "Zeit": "Time",
   "Soll / Ist": "Target / Actual",
   "Soll / Ist · verstrichen": "Target / Actual · elapsed",
@@ -126,6 +148,7 @@
         if(b.dataset.page) { this.page=b.dataset.page; this.render(); }
         if(b.dataset.info) this.dispatchEvent(new CustomEvent('hass-more-info', {detail:{entityId:this.ids[b.dataset.info]},bubbles:true,composed:true}));
         if(b.dataset.power) this.command('switch', b.dataset.power, {entity_id:this.ids.plug});
+        if(b.dataset.menu) this.navigate(b.dataset.menu);
       });
       this.shadowRoot.addEventListener('change',e=>{
         if(e.target.id==='behavior') this.command('select','select_option',{entity_id:this.ids.behavior,option:e.target.value});
@@ -135,7 +158,12 @@
     set hass(value) {
       const previous=this._hass; this._hass=value;
       this.refreshLanguage();
-      if(!this.ids || !previous || Object.values(this.ids).some(id=>previous.states[id]!==value.states[id])) this.render();
+      const previousCode = previous?.states[this.ids?.step]?.attributes.display_state_code;
+      const code = value.states[this.ids?.step]?.attributes.display_state_code;
+      if (previousCode === 2015 && code !== 2015) this.picker = null;
+      if(!this.ids || !previous || previous.user !== value.user
+        || previous.services?.braumeister_menu !== value.services?.braumeister_menu
+        || Object.values(this.ids).some(id=>previous.states[id]!==value.states[id])) this.render();
     }
     refreshLanguage() {
       if (!this.config) return;
@@ -151,7 +179,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.6.1`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.1`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -201,6 +229,47 @@
       catch(e){this.error=e.message || 'Aktion fehlgeschlagen';}
       finally{this.pending=false;this.render();}
     }
+    menuAvailable() {
+      return this.config.menu_control === true && this._hass.user?.is_admin
+        && this._hass.services?.braumeister_menu?.navigate
+        && this.state('connection') === 'online' && this.state('plug') !== 'off';
+    }
+    async navigate(action) {
+      const code = this._hass.states[this.ids.step]?.attributes.display_state_code;
+      if (this.pending || !this.menuAvailable() || !menuKeys[code]?.some(key => key[2] === action)) return;
+      this.pending = true;
+      this.menuResult = 'pending';
+      this.render();
+      try {
+        const reply = await this._hass.callWS({
+          type: 'call_service', domain: 'braumeister_menu', service: 'navigate',
+          service_data: {action}, return_response: true,
+        });
+        this.menuResult = reply?.response?.result || 'unconfirmed';
+        this.picker = reply?.response?.picker ?? null;
+      } catch (err) {
+        this.menuResult = err.message || 'unconfirmed';
+      } finally {
+        this.pending = false;
+        this.render();
+      }
+    }
+    renderMenu(code) {
+      const available = this.menuAvailable();
+      const keys = menuKeys[code] || [];
+      const result = {
+        pending: 'Menüaktion läuft …', confirmed: 'Menüaktion bestätigt',
+        expired: 'Menüaktion abgelaufen', unconfirmed: 'Menüaktion unbestätigt',
+        state_changed: 'Gerätebildschirm hat gewechselt',
+      };
+      const hint = result[this.menuResult] || this.menuResult
+        || (available ? 'Lokale Menünavigation' : 'Braumeister-Steuerung noch nicht verfügbar');
+      const picker = code === 2015 && this.picker
+        ? `<ol>${Object.entries(this.picker.recipes).map(([slot,name]) =>
+          `<li>${Number(slot) === this.picker.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
+      return `${picker}<div class="keys">${keys.map(([icon,label,action]) =>
+        `<div><button type="button" aria-label="${esc(this.translate(label))}" data-menu="${action || ''}" ${available && action && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`).join('')}</div><p class="hint" role="status">${esc(this.translate(hint))}</p>`;
+    }
     render(){
       if(!this.config || !this._hass) return;
       const E=esc, T=key=>E(this.translate(key)), off=this.state('plug')==='off', online=this.state('connection')==='online'&&!off;
@@ -219,9 +288,13 @@
       const heading=live&&attrs.display_phase?[this.text('recipe'),this.translate(attrs.display_phase)].filter(v=>v!=='—').join(' – '):this.label('step');
       const badge=(k,label)=>`<button data-info="${k}" class="badge ${badgeClass(k)}" title="${label}: ${E(['q','i'].includes(flag(k))?this.translate('Inaktiv (Zwischenzustand)'):this.label(k))} (${T('Integrationsmeldung')})">${label}</button>`;
       const row=(label,key,unit)=>`<div class="row"><span>${T(label)}</span><button class="value" data-info="${key}">${E(unit?this.number(key,unit):this.label(key))}</button></div>`;
-      const title={display:heading,recipe:'Aktuelles Rezept',power:'Stromversorgung',details:'Gerätedaten'}[this.page];
+      const menuCode = this.config.menu_control === true && live ? attrs.display_state_code : null;
+      const title={display:menuTitles[menuCode] ? this.translate(menuTitles[menuCode]) : heading,recipe:'Aktuelles Rezept',power:'Stromversorgung',details:'Gerätedaten'}[this.page];
       let body='';
-      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div><div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${icon}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`;
+      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div>${this.config.menu_control === true ? this.renderMenu(live ? attrs.display_state_code : null) : `<div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${icon}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`}`;
+      if (this.page === 'display' && [8101, 6010, 2015].includes(menuCode)) {
+        body = `<h2>${T(menuTitles[menuCode])}</h2>${recipeEditHint}${this.renderMenu(menuCode)}`;
+      }
       if(this.page==='recipe') body=`<h2>${E(this.text('recipe'))}</h2>${row('Aktueller Schritt','step')}${row('Gemeldeter Fortschritt','progress','%')}${row('Gemeldete Zeit¹','time','min')}<p class="hint">${T('¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.')}</p>`;
       if(this.page==='details') body=`<h2>Braumeister 20L Plus</h2>${row('Verbindung','connection')}${row('Modus','mode')}${row('Pumpe · gemeldet','pump')}${row('Heizung · gemeldet','heater')}<p class="hint">${T('P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.')}</p>`;
       if(this.page==='power') {
@@ -313,5 +386,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.6.1'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.1'});
 })();

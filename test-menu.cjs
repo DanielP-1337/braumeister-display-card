@@ -1,0 +1,60 @@
+const assert = require('node:assert/strict');
+const registry = {};
+global.HTMLElement = class {
+  attachShadow() { this.shadowRoot = {innerHTML: '', addEventListener() {}}; }
+};
+global.customElements = {get: key => registry[key], define: (key, value) => { registry[key] = value; }};
+global.fetch = async () => ({ok: false});
+global.window = {};
+require('./braumeister-display-card.js');
+
+async function test() {
+  const card = new registry['braumeister-display-card']();
+  const entities = {step: 'sensor.step', connection: 'sensor.connection'};
+  const states = {
+    'sensor.step': {state: 'Hauptmenü', attributes: {display_state_code: 101}},
+    'sensor.connection': {state: 'online', attributes: {}},
+  };
+  let resolve;
+  const calls = [];
+  const hass = {
+    states, user: {is_admin: true}, services: {braumeister_menu: {navigate: {}}},
+    callWS(message) {
+      calls.push(message);
+      return new Promise(done => { resolve = done; });
+    },
+  };
+  card.setConfig({entities});
+  card.hass = hass;
+  await card.navigate('open_recipe_selection');
+  assert.equal(calls.length, 0);
+  card.setConfig({entities, menu_control: true});
+  const opening = card.navigate('open_recipe_selection');
+  await card.navigate('open_settings');
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0], {
+    type: 'call_service', domain: 'braumeister_menu', service: 'navigate',
+    service_data: {action: 'open_recipe_selection'}, return_response: true,
+  });
+  assert.match(card.shadowRoot.innerHTML, /data-menu="open_settings" disabled/);
+  resolve({response: {result: 'confirmed', picker: {slot: 1, recipes: {0: 'First', 1: '<Second>'}}}});
+  await opening;
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /<mark>/);
+  card.hass = {...hass, states: {...states,
+    'sensor.step': {state: 'Rezept auswählen', attributes: {display_state_code: 2015}},
+  }};
+  assert.match(card.shadowRoot.innerHTML, /<mark>&lt;Second&gt;<\/mark>/);
+  await card.navigate('select_recipe');
+  assert.equal(calls.length, 1);
+  const canceling = card.navigate('cancel_recipe_selection');
+  resolve({response: {result: 'expired'}});
+  await canceling;
+  assert.equal(card.menuResult, 'expired');
+  assert.equal(calls.length, 2);
+  card.hass = {...card._hass, user: {is_admin: false}};
+  await card.navigate('recipe_down');
+  assert.equal(calls.length, 2);
+  console.log('PASS: opt-in menu routing, pending lock, telemetry, escaping, expiry, and admin gate');
+}
+
+test().catch(error => { console.error(error); process.exitCode = 1; });

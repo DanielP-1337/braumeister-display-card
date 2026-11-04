@@ -113,6 +113,15 @@ This validates the observed automatic-brew scenario on that device; it is not a
 claim that manual-mode actuators restart automatically or that the bridge
 implements process persistence. The device owns the brewing process and timer.
 
+## Live test coverage for locales and units
+
+Live testing with MySpeidel and a physical Braumeister has so far used a German MySpeidel account, Celsius (°C), Plato (°P), and German date and time formats.
+
+- **MySpeidel account settings:** English, Fahrenheit (°F), and Specific Gravity (SG) have not been tested against the live API. Whether these settings change API values, units, field formats, or only the portal display is unknown. Test each setting separately against the German / °C / °P baseline, then test them together.
+- **System and browser locale:** Live tests with non-German system or browser languages and date/time formats, such as en-US, are pending. Test language and formatting separately while keeping the time zone fixed. Include 12-hour and 24-hour display, date rollover, and RTC monitoring where applicable.
+
+The Card's existing translation tests cover UI labels. Live validation of temperature units, recipe gravity, and clock rendering under alternate account settings and locales is still pending.
+
 ## Display-only localization (card 0.6.1)
 
 This update only changes the custom card. The Python integration, original

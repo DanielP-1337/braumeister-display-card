@@ -1,4 +1,6 @@
-# Braumeister Display 0.6.1
+# Braumeister Display 0.7.0-beta.5
+
+**Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 
 ![Recipe editing in English](images/recipe-edit-en.png)
 

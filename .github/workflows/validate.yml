@@ -21,6 +21,7 @@ jobs:
       - run: node --check dist/braumeister-display-card.js
       - run: node test-bundle.cjs
       - run: node test-lighting.cjs
+      - run: node test-menu.cjs
   hacs:
     runs-on: ubuntu-latest
     steps:

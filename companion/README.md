@@ -25,6 +25,8 @@ Use the Bridge build from PR #20 or a compatible build with the same control API
    result with the device display. Start with opening and closing settings.
    For recipe navigation, open the picker from the card to populate the
    recipe names and highlighted position. Compare each move on the device.
+   Set `menu_pending_animation: false` in the card YAML to hide the ring
+   on the pressed display button while the menu action is pending.
 5. To return to display-only mode, remove `menu_control` and disable
    `control_enabled` in the Bridge. Remove the companion configuration and
    component at the next HA restart if you no longer need them.

@@ -37,8 +37,11 @@ async function test() {
     service_data: {action: 'open_recipe_selection'}, return_response: true,
   });
   assert.match(card.shadowRoot.innerHTML, /data-menu="open_settings" disabled/);
+  assert.match(card.shadowRoot.innerHTML, /class="menu-pending"[^>]*data-menu="open_recipe_selection"/);
+  assert.equal((card.shadowRoot.innerHTML.match(/class="menu-pending"/g) || []).length, 1);
   resolve({response: {result: 'confirmed', picker: {slot: 1, recipes: {0: 'First', 1: '<Second>'}}}});
   await opening;
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /class="menu-pending"/);
   assert.doesNotMatch(card.shadowRoot.innerHTML, /<mark>/);
   card.hass = {...hass, states: {...states,
     'sensor.step': {state: 'Rezept auswählen', attributes: {display_state_code: 2015}},
@@ -46,7 +49,10 @@ async function test() {
   assert.match(card.shadowRoot.innerHTML, /<mark>&lt;Second&gt;<\/mark>/);
   await card.navigate('select_recipe');
   assert.equal(calls.length, 1);
+  card.setConfig({entities, menu_control: true, menu_pending_animation: false});
   const canceling = card.navigate('cancel_recipe_selection');
+  assert.doesNotMatch(card.shadowRoot.innerHTML, /class="menu-pending"/);
+  assert.match(card.shadowRoot.innerHTML, /data-menu="cancel_recipe_selection" disabled/);
   resolve({response: {result: 'expired'}});
   await canceling;
   assert.equal(card.menuResult, 'expired');

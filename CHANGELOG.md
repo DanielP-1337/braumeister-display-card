@@ -1,3 +1,9 @@
+# 0.7.0-beta.2
+
+- Animate the selected on-screen menu button while the bridge command is pending.
+- Allow disabling the animation with `menu_pending_animation: false` and honor reduced motion preferences.
+- Translate menu feedback and the settings and recipe notices.
+
 # 0.6.1
 
 - Darken all four rings when the configured smart plug reports off, preserving the saved color.

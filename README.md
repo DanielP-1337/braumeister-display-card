@@ -210,6 +210,10 @@ The recipe-editing display also explains that recipes can only be edited on
 myspeidel.com or directly on the Braumeister. This localized hint is hidden
 when the device is offline, powered off, or in another state.
 
+The on-screen menu button animates while its action is pending. Set
+`menu_pending_animation: false` in the card YAML to disable the animation.
+The card also respects the system's reduced motion setting.
+
 ## Development
 
 No npm dependencies are required. The deterministic build embeds the editable JSON catalogs into the HACS distribution. With Node.js installed:

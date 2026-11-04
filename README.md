@@ -214,6 +214,24 @@ The on-screen menu button animates while its action is pending. Set
 `menu_pending_animation: false` in the card YAML to disable the animation.
 The card also respects the system's reduced motion setting.
 
+### Manual controls
+
+The manual screen supports pump and heater actions with an updated
+Braumeister Local Menu companion that exposes `braumeister_menu.set_actuator`
+and Bridge `0.3.2-control.3-beta.2`.
+
+```yaml
+menu_control: true
+manual_pump_control: true
+manual_heater_control: true
+```
+
+Both controls default to off. Enable `manual_pump_enabled` or
+`allow_remote_heating` on the Bridge for the corresponding control.
+The card uses the step entity's reported actuator flags and asks for
+confirmation before sending a heater-on request. Temperature opens a
+read-only view of the current and target temperatures.
+
 ## Development
 
 No npm dependencies are required. The deterministic build embeds the editable JSON catalogs into the HACS distribution. With Node.js installed:

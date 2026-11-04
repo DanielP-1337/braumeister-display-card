@@ -60,6 +60,29 @@ async function test() {
   card.hass = {...card._hass, user: {is_admin: false}};
   await card.navigate('recipe_down');
   assert.equal(calls.length, 2);
+  const manual = (pump, heater) => ({
+    ...hass, services: {braumeister_menu: {navigate: {}, set_actuator: {}}},
+    states: {...states, 'sensor.step': {state: 'Manueller Betrieb', attributes: {
+      display_state_code: 4006, display_pump_flag: pump, display_heater_flag: heater,
+    }}},
+  });
+  card.hass = manual('p', 'h');
+  await card.navigate('pump_on');
+  assert.equal(calls.length, 2);
+  card.setConfig({entities, menu_control: true, manual_pump_control: true, manual_heater_control: true});
+  window.confirm = () => false;
+  await card.navigate('heater_on');
+  await card.navigate('temperature_readings');
+  assert.equal(calls.length, 2);
+  assert.equal(card.showTemperatureReadings, true);
+  card.hass = manual('P', 'i');
+  await card.navigate('pump_off');
+  assert.equal(calls.length, 2);
+  const stopping = card.navigate('heater_off');
+  assert.equal(calls[2].service, 'set_actuator');
+  assert.equal(calls[2].service_data.action, 'heater_off');
+  resolve({response: {result: 'confirmed'}});
+  await stopping;
   console.log('PASS: opt-in menu routing, pending lock, telemetry, escaping, expiry, and admin gate');
 }
 

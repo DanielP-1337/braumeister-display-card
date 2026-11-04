@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.2 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.3 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -6,7 +6,7 @@
     101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
       ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
     8101: [['✕','Abbruch','close_settings']],
-    4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur']],
+    4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur','temperature_readings']],
     6010: [['✕','Abbruch','close_recipe_list']],
     2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up']],
   };
@@ -16,6 +16,7 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Heizung am Braumeister einschalten?": "Turn on the Braumeister heater?",
   "Einstellungen können nur direkt am Braumeister geändert werden.": "Settings can only be changed directly on the Braumeister.",
   "Manuell": "Manual",
   "Braustart": "Brew start",
@@ -179,7 +180,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.2`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.3`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -234,16 +235,37 @@
         && this._hass.services?.braumeister_menu?.navigate
         && this.state('connection') === 'online' && this.state('plug') !== 'off';
     }
+    actuatorActions() {
+      const attrs = this._hass.states[this.ids.step]?.attributes;
+      if (attrs?.display_state_code !== 4006 || !this.menuAvailable()
+          || !this._hass.services?.braumeister_menu?.set_actuator) return {};
+      const flags = `${attrs.display_pump_flag}${attrs.display_heater_flag}`;
+      return {
+        Pumpe: this.config.manual_pump_control === true
+          ? {ph: 'pump_on', Ph: 'pump_off'}[flags] : undefined,
+        Heizung: this.config.manual_heater_control === true
+          ? {ph: 'heater_on', pH: 'heater_off', Pi: 'heater_off', pi: 'heater_off'}[flags] : undefined,
+      };
+    }
     async navigate(action) {
       const code = this._hass.states[this.ids.step]?.attributes.display_state_code;
-      if (this.pending || !this.menuAvailable() || !menuKeys[code]?.some(key => key[2] === action)) return;
+      if (this.pending) return;
+      if (action === 'temperature_readings') {
+        if (code !== 4006 || this.state('connection') !== 'online' || this.state('plug') === 'off') return;
+        this.showTemperatureReadings = !this.showTemperatureReadings;
+        this.render();
+        return;
+      }
+      const actuator = Object.values(this.actuatorActions()).includes(action);
+      if (!actuator && (!this.menuAvailable() || !menuKeys[code]?.some(key => key[2] === action))) return;
+      if (action === 'heater_on' && !window.confirm(this.translate('Heizung am Braumeister einschalten?'))) return;
       this.pending = true;
       this.menuResult = 'pending';
       this.pendingMenuAction = action;
       this.render();
       try {
         const reply = await this._hass.callWS({
-          type: 'call_service', domain: 'braumeister_menu', service: 'navigate',
+          type: 'call_service', domain: 'braumeister_menu', service: actuator ? 'set_actuator' : 'navigate',
           service_data: {action}, return_response: true,
         });
         this.menuResult = reply?.response?.result || 'unconfirmed';
@@ -269,10 +291,15 @@
       const picker = code === 2015 && this.picker
         ? `<ol>${Object.entries(this.picker.recipes).map(([slot,name]) =>
           `<li>${Number(slot) === this.picker.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
-      return `${picker}<div class="keys">${keys.map(([icon,label,action]) => {
+      const actuators = this.actuatorActions();
+      const temperatures = code === 4006 && this.showTemperatureReadings
+        ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
+      return `${picker}${temperatures}<div class="keys">${keys.map(([icon,label,menuAction]) => {
+        const action = actuators[label] || menuAction;
+        const enabled = action === 'temperature_readings' || (available && action);
         const animate = this.config.menu_pending_animation !== false
           && action && action === this.pendingMenuAction && this.menuResult === 'pending';
-        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" data-menu="${action || ''}" ${available && action && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`;
+        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`;
       }).join('')}</div><p class="hint" role="status">${esc(this.translate(hint))}</p>`;
     }
     render(){
@@ -404,5 +431,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.2'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.3'});
 })();

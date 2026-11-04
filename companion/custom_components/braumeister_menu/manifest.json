@@ -1,7 +1,7 @@
 {
   "domain": "braumeister_menu",
   "name": "Braumeister Local Menu",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.3",
   "documentation": "https://github.com/DanielP-1337/braumeister-display-card",
   "codeowners": [],
   "iot_class": "local_polling"

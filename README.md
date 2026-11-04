@@ -218,7 +218,7 @@ The card also respects the system's reduced motion setting.
 
 The manual screen supports pump and heater actions with an updated
 Braumeister Local Menu companion that exposes `braumeister_menu.set_actuator`
-and Bridge `0.3.2-control.3-beta.2`.
+and Bridge `0.3.2-control.3-beta.3` for independent pump and heater control.
 
 ```yaml
 menu_control: true

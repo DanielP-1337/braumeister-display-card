@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.3 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.4 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -180,7 +180,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.3`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.4`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -242,9 +242,11 @@
       const flags = `${attrs.display_pump_flag}${attrs.display_heater_flag}`;
       return {
         Pumpe: this.config.manual_pump_control === true
-          ? {ph: 'pump_on', Ph: 'pump_off'}[flags] : undefined,
+          ? {ph: 'pump_on', pH: 'pump_on', pi: 'pump_on',
+            Ph: 'pump_off', PH: 'pump_off', Pi: 'pump_off'}[flags] : undefined,
         Heizung: this.config.manual_heater_control === true
-          ? {ph: 'heater_on', pH: 'heater_off', Pi: 'heater_off', pi: 'heater_off'}[flags] : undefined,
+          ? {ph: 'heater_on', Ph: 'heater_on', pH: 'heater_off',
+            PH: 'heater_off', Pi: 'heater_off', pi: 'heater_off'}[flags] : undefined,
       };
     }
     async navigate(action) {
@@ -431,5 +433,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.3'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.4'});
 })();

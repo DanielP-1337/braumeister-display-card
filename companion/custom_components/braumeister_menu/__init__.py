@@ -24,10 +24,10 @@ SCREENS = {
     "recipe_up": "2015",
 }
 ACTUATOR_FLAGS = {
-    "pump_on": {"ph"},
-    "pump_off": {"Ph"},
-    "heater_on": {"ph"},
-    "heater_off": {"pH", "Pi", "pi"},
+    "pump_on": {"ph", "pH", "pi"},
+    "pump_off": {"Ph", "PH", "Pi"},
+    "heater_on": {"ph", "Ph"},
+    "heater_off": {"pH", "PH", "Pi", "pi"},
 }
 CONFIG_SCHEMA = vol.Schema(
     {vol.Required(DOMAIN): {vol.Required("device_id"): cv.string}},

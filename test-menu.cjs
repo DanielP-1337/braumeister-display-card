@@ -76,8 +76,8 @@ async function test() {
   assert.equal(calls.length, 2);
   assert.equal(card.showTemperatureReadings, true);
   card.hass = manual('P', 'i');
-  await card.navigate('pump_off');
-  assert.equal(calls.length, 2);
+  assert.equal(card.actuatorActions().Pumpe, 'pump_off');
+  assert.equal(card.actuatorActions().Heizung, 'heater_off');
   const stopping = card.navigate('heater_off');
   assert.equal(calls[2].service, 'set_actuator');
   assert.equal(calls[2].service_data.action, 'heater_off');

@@ -1,7 +1,7 @@
 {
   "Manuell": "Handmatig",
   "Braustart": "Brouwen starten",
-  "Rezept auswählen": "Recept selecteren",
+  "Rezept auswählen": "Recept kiezen",
   "Ab": "Omlaag",
   "Hoch": "Omhoog",
   "Lokale Menünavigation": "Lokale menunavigatie",
@@ -56,7 +56,6 @@
   "Strom": "Stroom",
   "Status": "Status",
   "Hauptmenü": "Hoofdmenu",
-  "Rezept auswählen": "Recept kiezen",
   "Einmaischen": "Inmaischen",
   "Wasser eingefüllt?": "Water toegevoegd?",
   "Pumpe wird entlüftet": "Pomp ontluchten",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Wit",
   "Nur die Tastenringe dieser Karte ändern sich.": "Alleen de knopringen op deze kaart veranderen.",
-  "Bitte #RRGGBB eingeben.": "Voer #RRGGBB in."
+  "Bitte #RRGGBB eingeben.": "Voer #RRGGBB in.",
+  "Verbindung zum Braumeister verloren": "Verbinding met de Braumeister verloren",
+  "Geräteverbindung noch nicht bestätigt": "Apparaatverbinding nog niet bevestigd",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Bij de laatst bekende toestand was het brouwen of de verwarming vrijgegeven. Huidige toestand onbekend. Controleer het apparaat ter plaatse."
 }

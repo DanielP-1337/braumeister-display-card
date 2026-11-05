@@ -56,7 +56,6 @@
   "Strom": "Power",
   "Status": "Status",
   "Hauptmenü": "Main menu",
-  "Rezept auswählen": "Select recipe",
   "Einmaischen": "Mash-in",
   "Wasser eingefüllt?": "Water added?",
   "Pumpe wird entlüftet": "Purging air from pump",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "White",
   "Nur die Tastenringe dieser Karte ändern sich.": "Only the button rings on this card change.",
-  "Bitte #RRGGBB eingeben.": "Enter #RRGGBB."
+  "Bitte #RRGGBB eingeben.": "Enter #RRGGBB.",
+  "Verbindung zum Braumeister verloren": "Connection to Braumeister lost",
+  "Geräteverbindung noch nicht bestätigt": "Device connection not yet verified",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Brewing or heater permission was last known active. Current device state is unknown. Check the device in person."
 }

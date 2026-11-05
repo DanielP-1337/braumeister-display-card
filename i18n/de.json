@@ -56,7 +56,6 @@
   "Strom": "Strom",
   "Status": "Status",
   "Hauptmenü": "Hauptmenü",
-  "Rezept auswählen": "Rezept auswählen",
   "Einmaischen": "Einmaischen",
   "Wasser eingefüllt?": "Wasser eingefüllt?",
   "Pumpe wird entlüftet": "Pumpe wird entlüftet",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Weiß",
   "Nur die Tastenringe dieser Karte ändern sich.": "Nur die Tastenringe dieser Karte ändern sich.",
-  "Bitte #RRGGBB eingeben.": "Bitte #RRGGBB eingeben."
+  "Bitte #RRGGBB eingeben.": "Bitte #RRGGBB eingeben.",
+  "Verbindung zum Braumeister verloren": "Verbindung zum Braumeister verloren",
+  "Geräteverbindung noch nicht bestätigt": "Geräteverbindung noch nicht bestätigt",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen."
 }

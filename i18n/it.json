@@ -56,7 +56,6 @@
   "Strom": "Alimentazione",
   "Status": "Stato",
   "Hauptmenü": "Menu principale",
-  "Rezept auswählen": "Seleziona ricetta",
   "Einmaischen": "Ammostamento iniziale",
   "Wasser eingefüllt?": "Acqua aggiunta?",
   "Pumpe wird entlüftet": "Spurgo della pompa",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Bianco",
   "Nur die Tastenringe dieser Karte ändern sich.": "Cambiano solo gli anelli dei pulsanti di questa scheda.",
-  "Bitte #RRGGBB eingeben.": "Inserisci #RRGGBB."
+  "Bitte #RRGGBB eingeben.": "Inserisci #RRGGBB.",
+  "Verbindung zum Braumeister verloren": "Connessione al Braumeister persa",
+  "Geräteverbindung noch nicht bestätigt": "Connessione al dispositivo non ancora verificata",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Nell’ultimo stato noto erano attivi la produzione o il consenso al riscaldamento. Stato attuale sconosciuto. Controllare il dispositivo sul posto."
 }

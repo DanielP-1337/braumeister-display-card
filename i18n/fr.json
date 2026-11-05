@@ -56,7 +56,6 @@
   "Strom": "Alimentation",
   "Status": "État",
   "Hauptmenü": "Menu principal",
-  "Rezept auswählen": "Choisir une recette",
   "Einmaischen": "Empâtage",
   "Wasser eingefüllt?": "Eau ajoutée ?",
   "Pumpe wird entlüftet": "Purge de la pompe",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Blanc",
   "Nur die Tastenringe dieser Karte ändern sich.": "Seuls les anneaux des boutons de cette carte changent.",
-  "Bitte #RRGGBB eingeben.": "Saisissez #RRGGBB."
+  "Bitte #RRGGBB eingeben.": "Saisissez #RRGGBB.",
+  "Verbindung zum Braumeister verloren": "Connexion au Braumeister perdue",
+  "Geräteverbindung noch nicht bestätigt": "Connexion à l’appareil pas encore vérifiée",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Le brassage ou l’autorisation de chauffe était actif au dernier état connu. État actuel inconnu. Vérifiez l’appareil sur place."
 }

@@ -1,7 +1,7 @@
 {
   "Manuell": "Tryb ręczny",
   "Braustart": "Rozpocznij warzenie",
-  "Rezept auswählen": "Wybierz przepis",
+  "Rezept auswählen": "Wybierz recepturę",
   "Ab": "W dół",
   "Hoch": "W górę",
   "Lokale Menünavigation": "Lokalna nawigacja w menu",
@@ -56,7 +56,6 @@
   "Strom": "Zasilanie",
   "Status": "Stan",
   "Hauptmenü": "Menu główne",
-  "Rezept auswählen": "Wybierz recepturę",
   "Einmaischen": "Zacieranie wstępne",
   "Wasser eingefüllt?": "Czy dodano wodę?",
   "Pumpe wird entlüftet": "Odpowietrzanie pompy",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Biały",
   "Nur die Tastenringe dieser Karte ändern sich.": "Zmieniają się tylko pierścienie przycisków tej karty.",
-  "Bitte #RRGGBB eingeben.": "Wpisz #RRGGBB."
+  "Bitte #RRGGBB eingeben.": "Wpisz #RRGGBB.",
+  "Verbindung zum Braumeister verloren": "Utracono połączenie z Braumeisterem",
+  "Geräteverbindung noch nicht bestätigt": "Połączenie z urządzeniem nie jest jeszcze potwierdzone",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "W ostatnim znanym stanie warzenie lub zezwolenie na grzanie było aktywne. Bieżący stan nieznany. Sprawdź urządzenie na miejscu."
 }

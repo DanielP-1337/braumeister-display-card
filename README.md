@@ -1,4 +1,4 @@
-# Braumeister Display 0.7.0-beta.6
+# Braumeister Display 0.7.0-beta.7
 
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 
@@ -27,6 +27,37 @@ files if you want the bundled translations to take effect.
 The source file in the repository root remains suitable for manual installation
 with JSON files as described below. The self-contained HACS file is in `dist/`.
 A GitHub release alone does not add a repository to the HACS default catalog.
+
+## Device connection warning (beta)
+
+The integration watchdog development adds a **Check device connection** problem
+binary sensor. Map the entity ID from your device in the card YAML:
+
+```yaml
+entities:
+  # Keep your other entity mappings here.
+  connection_warning: binary_sensor.YOUR_ACTUAL_CONNECTION_WARNING_ENTITY
+```
+
+This optional mapping requires fork integration **3.1.1-beta.1**; it is not supplied
+by upstream v3.1.0 or the companion. It does not
+require changing the bridge or adding credentials. Existing cards without the
+mapping keep their previous behavior.
+
+When the sensor is on, a connection warning appears on **every card tab**.
+It turns red if brewing or heater permission was last known active, including
+a heater regulation pause. The text explicitly labels that activity as last
+known and the current physical state as unknown. Live telemetry is masked and
+bridge navigation/actuator controls are blocked. A configured sensor that is
+unknown, unavailable or missing also blocks those controls and displays an
+unverified-connection message. Smart-plug controls keep their existing behavior.
+Fresh verified recovery restores the normal display; the card itself does not
+probe or send shutdown commands. All eight bundled languages include the warning.
+
+The watchdog expires after 120 seconds without advancing device evidence, with
+a five-second local check interval. It cannot warn while HA is stopped or the
+browser is disconnected from HA. HA restart/reload resets its last-known activity.
+Local tests use synthetic states; real disconnect/reconnect testing is pending.
 
 ## Button ring colors
 

@@ -56,7 +56,6 @@
   "Strom": "Alimentación",
   "Status": "Estado",
   "Hauptmenü": "Menú principal",
-  "Rezept auswählen": "Seleccionar receta",
   "Einmaischen": "Empaste",
   "Wasser eingefüllt?": "¿Agua añadida?",
   "Pumpe wird entlüftet": "Purgando la bomba",
@@ -118,5 +117,8 @@
   "Magenta": "Magenta",
   "Weiß": "Blanco",
   "Nur die Tastenringe dieser Karte ändern sich.": "Solo cambian los anillos de los botones de esta tarjeta.",
-  "Bitte #RRGGBB eingeben.": "Introduce #RRGGBB."
+  "Bitte #RRGGBB eingeben.": "Introduce #RRGGBB.",
+  "Verbindung zum Braumeister verloren": "Conexión con el Braumeister perdida",
+  "Geräteverbindung noch nicht bestätigt": "Conexión del dispositivo aún sin verificar",
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "La elaboración o la autorización de calentamiento estaba activa en el último estado conocido. Estado actual desconocido. Compruebe el equipo en persona."
 }

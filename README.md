@@ -57,7 +57,10 @@ probe or send shutdown commands. All eight bundled languages include the warning
 The watchdog expires after 120 seconds without advancing device evidence, with
 a five-second local check interval. It cannot warn while HA is stopped or the
 browser is disconnected from HA. HA restart/reload resets its last-known activity.
-Local tests use synthetic states; real disconnect/reconnect testing is pending.
+Local tests use synthetic states. The tester has confirmed the yellow warning
+after powering off an idle appliance and the red warning after powering off with
+the heater last known active. Recovery/reconnection, an automatic-brew outage,
+and a network-only outage with the appliance still powered remain untested.
 
 ## Button ring colors
 

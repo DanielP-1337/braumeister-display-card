@@ -93,3 +93,47 @@ screen-key rendering, `120` interrupt handling, disabled legacy-backend behavior
 capability metadata, opt-ins/confirmations, stale telemetry, errors, translations,
 pending locking and the existing controls. No device command, HA restart or
 installation was performed for this preparation.
+
+## User-reported hardware validation — 2026-11-06
+
+The user confirmed Supervisor Bridge 0.3.2-control.4-beta.1 is started,
+update_available is false and /api/health returns ok=true with one device.
+Through the HA Display Card, Cancel while heating opened the automatic-program
+pause dialog. A second Cancel displayed the final-abort confirmation. After
+confirmation, HA, the physical appliance and MySpeidel all returned to the main
+menu. This validates the reported heating pause/final-abort path; it does not
+validate every program state or resume.
+
+During pump purging, Cancel was still disabled. The user subsequently confirmed
+the exact device status: state `2300`, flags `Ph`, indicator `000`. This tuple is
+already permitted by both Companion `PROGRAM_RULES` and Bridge
+`program_transition`; extending either allowlist is not justified by this report.
+HA's display decoder converts the state to integer `2300` and the interrupt to
+integer `0`. Card source and distribution both allow `request_program_pause`
+at integer `2300`, independently of the start/resume opt-in.
+
+The added local Card regression uses that decoded purge status and verifies an
+enabled Cancel button plus dispatch to `program_control/request_program_pause`.
+It passes against the distribution bundle. This establishes local behavior,
+not the identity or runtime state of the installed Card. Existing Companion and
+Bridge tests already cover `2300 / Ph / 000`; rerunning those Python tests in
+this session was blocked by missing `pytest` in the available Python 3.11.
+
+The installed UI cause remains unresolved. The next passive investigation should
+inspect the loaded Card asset/version, the step entity's actual decoded attribute
+types, advertised HA `program_control` action metadata, and Card gates (admin,
+online, heartbeat, pending action). No additional appliance-status sample is
+needed. State `2310` is not an explanation for the supplied `2300` report.
+No device commands, installation, release, or runtime permission changes were
+performed in this investigation.
+
+All four water-question keys remain deliberately disabled, including water
+confirmation and delayed-start adjustment. The user confirmed this expected UI.
+
+## User-reported hardware test — 2026-11-06
+
+The user reports a successful test on the real Braumeister after the HACS test releases Display Card 0.7.0-beta.9 and Companion 0.1.0-beta.7 were provided. The reported problem was the disabled Cancel button during pump purging; the confirmed input status was state 2300, flags Ph, indicator 000. Installed baseline: Bridge 0.3.2-control.4-beta.1 and HA integration 3.1.1-beta.2.
+
+This validates the reported pump-purge Cancel use case. The user had previously confirmed heating Cancel, the final-abort confirmation dialog and return to the main menu. This report does not establish validation of resume, water confirmation, delayed start, or every program stage. It also does not prove that the original installed UI failure was caused by a string-valued screen code.
+
+Card beta.9 accepts numeric and numeric-string screen codes at the menu lookup/dispatch boundary; all seven local Node test scripts passed. Companion beta.7 retains beta.6 control rules. Python tests were not rerun in this follow-up because the available interpreter lacks pytest; earlier suite results remain historical. The assistant issued no appliance commands.

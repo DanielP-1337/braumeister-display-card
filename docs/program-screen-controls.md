@@ -1,9 +1,8 @@
-# Program-screen controls — local, unreleased preparation
+# Program-screen controls — 0.7.0-beta.8
 
 This branch adds the missing visual keys while preserving the four lower tabs
 and the existing menu/actuator controls. It is not yet a published end-to-end brew
-control release: the published Companion and Bridge do not implement these new
-program actions. Local Bridge/Companion branches now prepare recipe confirmation,
+control release: matching betas Bridge 0.3.2-control.4-beta.1 and Companion 0.1.0-beta.6 add recipe confirmation,
 pause/final abort at 2300/2410, and resume at 2300 only. Unsupported actions are visible but disabled, with an explicit
 explanation, rather than being silently sent to a legacy backend.
 
@@ -47,13 +46,13 @@ An unavailable/offline/stale device does not show a live pause animation.
 
 ## Capability and dispatch boundary
 
-Local adapter contract (not installed or released):
+Matching beta adapter contract:
 
 - Recipe Select uses `braumeister_menu.navigate`, **only** when its HA action
   selector explicitly advertises `select_recipe`.
 - The other new buttons require a separate `braumeister_menu.program_control`
   service whose action selector explicitly advertises the requested action.
-  The published Companion has no such service; the new local Companion advertises
+  Earlier Companion versions have no such service; Companion 0.1.0-beta.6 advertises
   only request pause, final abort and resume. The Card never falls back to
   raw key presses or the old navigation service for program actions.
 - Prepared actions: `select_recipe` through navigation; `request_program_pause`,
@@ -71,16 +70,14 @@ Local adapter contract (not installed or released):
   freshness, collision avoidance and subsequent device evidence. Frontend gates
   are not a substitute for that validation.
 
-The new Bridge/Companion service exists only in local preparation branches and
-has not been hardware tested. The local Node tests use synthetic service metadata to verify
+The matching beta Bridge/Companion service has not been hardware tested. The local Node tests use synthetic service metadata to verify
 routing and refusal behavior, not a real HA service or device.
 
 ## Remaining work before an operational release
 
 1. Validate the prepared Bridge and Companion on hardware with individual actions.
    The earlier local safety prototype already documents recipe selection
-   `2015 -> 2030` using `$k=4`; the currently installed/published control path
-   still excludes it. Pausing needs indicator-aware confirmation, not a screen
+   `2015 -> 2030` using `$k=4`; earlier versions excluded it. Pausing needs indicator-aware confirmation, not a screen
    code match alone.
 2. The final-abort and purge-resume outcomes above were reported through the
    cloud path. Do not label the first pause request as a completed abort. Confirm command delivery and telemetry

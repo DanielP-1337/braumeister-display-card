@@ -1,4 +1,4 @@
-# Braumeister Display 0.7.0-beta.7
+# Braumeister Display 0.7.0-beta.8
 
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 
@@ -30,10 +30,11 @@ A GitHub release alone does not add a repository to the HACS default catalog.
 
 ## Device connection warning (beta)
 
-Unreleased program-screen work (recipe confirmation, water prompt and the
-pause/abort dialog) is documented in
-[program-screen controls](docs/program-screen-controls.md). Its new keys require
-backend extensions; this local branch does not claim working brew control.
+Program-screen beta work (recipe confirmation, water prompt and the pause/abort
+dialog) is documented in [program-screen controls](docs/program-screen-controls.md).
+New enabled actions require Companion 0.1.0-beta.6 and experimental Bridge
+0.3.2-control.4-beta.1. Water confirmation/delayed start and heating-stage resume
+remain disabled; local command delivery on hardware is still awaiting validation.
 
 The integration watchdog development adds a **Check device connection** problem
 binary sensor. Map the entity ID from your device in the card YAML:

@@ -1,4 +1,6 @@
 # Braumeister tablet dashboard — copy-and-paste template
+# Reported dashboard tests: Amazon Fire HD TG425K (Fully Kiosk / Fire OS)
+# and Samsung SM-X210 (browser/kiosk app unspecified). See README for scope.
 #
 # 1. Install the Braumeister Display Card and add its dashboard resource.
 # 2. Create an empty HA dashboard and open its raw configuration editor.

@@ -136,7 +136,7 @@ select by attributes in Developer Tools > States, not by the name or suffix.
 The current-phase sensor can show the correct text while providing none of the
 attributes required for the clock, rest timer, or diagonal actuator indicators.
 
-### Amazon Fire HD / Fully Kiosk dashboard example
+### Tablet dashboard example — Fire HD and Samsung
 
 Start with the [copy-and-paste dashboard template](examples/fire-hd-fully-kiosk-dashboard-template.yaml)
 to create your own dashboard. It includes neutral example entity IDs and inline
@@ -144,9 +144,16 @@ setup instructions. Replace the IDs before use; they are placeholders, not
 automatically discovered entities. Optional smart-plug mappings are marked.
 
 [Complete dashboard YAML](examples/fire-hd-fully-kiosk-dashboard.yaml) reproduces
-a user-reported successful HA dashboard test on an Amazon Fire HD tablet in kiosk
-mode with the [Fully Kiosk APK for Android / Fire OS](https://www.fully-kiosk.com/)
-(reported 2026-11-06). The exact tablet model and OS/app versions were not recorded.
+the tested HA dashboard configuration. User-reported successful tablet tests
+(2026-11-06):
+
+| Tablet | Reported test |
+| --- | --- |
+| Amazon Fire HD, model **TG425K** | Dashboard in kiosk mode with the [Fully Kiosk APK for Android / Fire OS](https://www.fully-kiosk.com/) |
+| Samsung tablet, model **SM-X210** | Display Card dashboard successfully tested; browser/kiosk app not specified |
+
+OS and app versions were not recorded. The filenames retain `fire-hd` for
+existing links; the reusable template can also be adapted for other tablets.
 
 Paste the example into the dashboard's raw configuration editor: it contains a
 complete `views:` configuration, rather than just a single card. It uses a panel
@@ -158,7 +165,7 @@ choose the current-step sensor by its attributes as described above. The
 The `kiosk_mode` block is preserved from the tested dashboard's separate kiosk
 setup; it is not a Display Card option. The control options require the matching
 Companion/Bridge configuration described in this README. This report covers the
-dashboard on that tablet setup, not every control action or every Fire HD model.
+dashboard on the reported tablet setups, not every control action or tablet model.
 
 ## Hardware validation (2026-10-31)
 

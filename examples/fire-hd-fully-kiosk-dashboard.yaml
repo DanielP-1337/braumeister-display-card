@@ -1,7 +1,8 @@
 # Complete dashboard YAML: paste into Home Assistant's dashboard raw editor.
-# User-reported successful test on an Amazon Fire HD tablet in kiosk mode
+# User-reported successful test on an Amazon Fire HD TG425K in kiosk mode
 # with the Fully Kiosk APK for Android / Fire OS: https://www.fully-kiosk.com/
-# Reported 2026-11-06; tablet model and Fire OS / Fully versions not recorded.
+# Also successfully tested: Samsung tablet SM-X210 (browser/kiosk app unspecified).
+# Reported 2026-11-06; OS / app versions not recorded.
 # Replace EVERY entity ID below with the corresponding entity in your HA setup.
 # These are the original IDs from the tested installation, including suffixes.
 # The kiosk_mode settings belong to the dashboard's separate kiosk-mode setup;

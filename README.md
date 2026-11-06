@@ -136,6 +136,25 @@ select by attributes in Developer Tools > States, not by the name or suffix.
 The current-phase sensor can show the correct text while providing none of the
 attributes required for the clock, rest timer, or diagonal actuator indicators.
 
+### Amazon Fire HD / Fully Kiosk dashboard example
+
+[Complete dashboard YAML](examples/fire-hd-fully-kiosk-dashboard.yaml) reproduces
+a user-reported successful HA dashboard test on an Amazon Fire HD tablet in kiosk
+mode with the [Fully Kiosk APK for Android / Fire OS](https://www.fully-kiosk.com/)
+(reported 2026-11-06). The exact tablet model and OS/app versions were not recorded.
+
+Paste the example into the dashboard's raw configuration editor: it contains a
+complete `views:` configuration, rather than just a single card. It uses a panel
+view, automatic language selection, cyan buttons and manual menu/pump/heater
+controls. Replace all entity IDs, including their numeric suffixes, with your own;
+choose the current-step sensor by its attributes as described above. The
+`connection_warning` mapping is included.
+
+The `kiosk_mode` block is preserved from the tested dashboard's separate kiosk
+setup; it is not a Display Card option. The control options require the matching
+Companion/Bridge configuration described in this README. This report covers the
+dashboard on that tablet setup, not every control action or every Fire HD model.
+
 ## Hardware validation (2026-10-31)
 
 User-reported test on a pre-2020 Braumeister 20 L Plus with external WLAN module,

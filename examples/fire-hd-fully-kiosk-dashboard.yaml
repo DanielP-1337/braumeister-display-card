@@ -1,0 +1,40 @@
+# Complete dashboard YAML: paste into Home Assistant's dashboard raw editor.
+# User-reported successful test on an Amazon Fire HD tablet in kiosk mode
+# with the Fully Kiosk APK for Android / Fire OS: https://www.fully-kiosk.com/
+# Reported 2026-11-06; tablet model and Fire OS / Fully versions not recorded.
+# Replace EVERY entity ID below with the corresponding entity in your HA setup.
+# These are the original IDs from the tested installation, including suffixes.
+# The kiosk_mode settings belong to the dashboard's separate kiosk-mode setup;
+# they are not options implemented by braumeister-display-card.
+# Menu controls also need the matching Companion/Bridge setup described in README.
+views:
+  - title: Braumeister Display
+    path: braumeister_tablet
+    type: panel
+    kiosk_mode:
+      hide_header: true
+      hide_sidebar: true
+    cards:
+      - type: custom:braumeister-display-card
+        title: Speidels Braumeister
+        language: auto
+        menu_control: true
+        manual_pump_control: true
+        manual_heater_control: true
+        button_color: '#00cfff'
+        entities:
+          temperature: sensor.badezimmer_braumeister_20l_plus_temperatur_2
+          target: sensor.badezimmer_braumeister_20l_plus_zieltemperatur_2
+          step: sensor.badezimmer_braumeister_20l_plus_aktueller_schritt_4
+          recipe: sensor.badezimmer_braumeister_20l_plus_rezeptname_2
+          mode: sensor.badezimmer_braumeister_20l_plus_geratemodus_2
+          connection: sensor.badezimmer_braumeister_20l_plus_verbindungsstatus_2
+          pump: sensor.badezimmer_braumeister_20l_plus_pumpenstatus_2
+          heater: sensor.badezimmer_braumeister_20l_plus_heizungsstatus_2
+          progress: sensor.badezimmer_braumeister_20l_plus_braufortschritt_2
+          time: sensor.badezimmer_braumeister_20l_plus_restzeit_2
+          alarm: binary_sensor.badezimmer_braumeister_20l_plus_alarm_2
+          plug: switch.braumeister_20l_r_s60_3
+          power: sensor.braumeister_20l_r_s60_3_power
+          behavior: select.braumeister_20l_r_s60_3_power_on_behavior
+          connection_warning: binary_sensor.badezimmer_braumeister_20l_plus_gerateverbindung_prufen

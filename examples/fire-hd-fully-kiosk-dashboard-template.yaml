@@ -1,0 +1,50 @@
+# Braumeister tablet dashboard — copy-and-paste template
+#
+# 1. Install the Braumeister Display Card and add its dashboard resource.
+# 2. Create an empty HA dashboard and open its raw configuration editor.
+# 3. Paste this entire file, replace the illustrative entity IDs below, and save.
+#    Find your actual IDs in Developer Tools > States; do not guess suffixes.
+#    For an existing dashboard, append only the view under its existing views:.
+# 4. Open the dashboard on your tablet (e.g. Fully Kiosk on Fire HD / Fire OS).
+#
+# Controls require the matching Companion/Bridge configuration (see README).
+# Set the three control options to false if you only want a display.
+# The optional kiosk_mode block needs a separate dashboard kiosk-mode setup;
+# Fully Kiosk and this card do not themselves implement these YAML settings.
+# Remove that block if you do not use the dashboard kiosk-mode setup.
+views:
+  - title: Braumeister Display
+    path: braumeister_tablet
+    type: panel
+    kiosk_mode:
+      hide_header: true
+      hide_sidebar: true
+    cards:
+      - type: custom:braumeister-display-card
+        title: Speidels Braumeister
+        language: auto
+        menu_control: true
+        manual_pump_control: true
+        manual_heater_control: true
+        button_color: '#00cfff'
+        entities:
+          # Replace these illustrative IDs with your own sensor entities.
+          temperature: sensor.braumeister_temperature
+          target: sensor.braumeister_target
+          # Use the current-step sensor with display_state_code attributes,
+          # not the similarly named current-phase sensor.
+          step: sensor.braumeister_step
+          recipe: sensor.braumeister_recipe
+          mode: sensor.braumeister_mode
+          connection: sensor.braumeister_connection
+          pump: sensor.braumeister_pump
+          heater: sensor.braumeister_heater
+          progress: sensor.braumeister_progress
+          time: sensor.braumeister_time
+          alarm: binary_sensor.braumeister_alarm
+          # Map the integration's device-connection warning binary sensor.
+          connection_warning: binary_sensor.braumeister_connection_warning
+          # Optional smart plug: replace all three, or remove these three lines.
+          plug: switch.braumeister_plug
+          power: sensor.braumeister_power
+          behavior: select.braumeister_behavior

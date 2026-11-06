@@ -138,6 +138,11 @@ attributes required for the clock, rest timer, or diagonal actuator indicators.
 
 ### Amazon Fire HD / Fully Kiosk dashboard example
 
+Start with the [copy-and-paste dashboard template](examples/fire-hd-fully-kiosk-dashboard-template.yaml)
+to create your own dashboard. It includes neutral example entity IDs and inline
+setup instructions. Replace the IDs before use; they are placeholders, not
+automatically discovered entities. Optional smart-plug mappings are marked.
+
 [Complete dashboard YAML](examples/fire-hd-fully-kiosk-dashboard.yaml) reproduces
 a user-reported successful HA dashboard test on an Amazon Fire HD tablet in kiosk
 mode with the [Fully Kiosk APK for Android / Fire OS](https://www.fully-kiosk.com/)

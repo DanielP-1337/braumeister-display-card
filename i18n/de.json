@@ -120,5 +120,13 @@
   "Bitte #RRGGBB eingeben.": "Bitte #RRGGBB eingeben.",
   "Verbindung zum Braumeister verloren": "Verbindung zum Braumeister verloren",
   "Geräteverbindung noch nicht bestätigt": "Geräteverbindung noch nicht bestätigt",
-  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen."
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.",
+  "Auswahl": "Auswahl",
+  "Fortsetzen": "Fortsetzen",
+  "Brauvorgang endgültig abbrechen?": "Brauvorgang endgültig abbrechen?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.",
+  "Startzeitvorwahl noch nicht verifiziert.": "Startzeitvorwahl noch nicht verifiziert."
 }

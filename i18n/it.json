@@ -120,5 +120,13 @@
   "Bitte #RRGGBB eingeben.": "Inserisci #RRGGBB.",
   "Verbindung zum Braumeister verloren": "Connessione al Braumeister persa",
   "Geräteverbindung noch nicht bestätigt": "Connessione al dispositivo non ancora verificata",
-  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Nell’ultimo stato noto erano attivi la produzione o il consenso al riscaldamento. Stato attuale sconosciuto. Controllare il dispositivo sul posto."
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Nell’ultimo stato noto erano attivi la produzione o il consenso al riscaldamento. Stato attuale sconosciuto. Controllare il dispositivo sul posto.",
+  "Auswahl": "Seleziona",
+  "Fortsetzen": "Riprendi",
+  "Brauvorgang endgültig abbrechen?": "Interrompere definitivamente il programma di birrificazione?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Acqua aggiunta? La conferma può avviare pompa e riscaldamento.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Riprendere il programma? Pompa e riscaldamento possono riattivarsi.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Questo pulsante richiede un’azione Bridge/Companion supportata e abilitata.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Seleziona per riprendere; Annulla per interrompere definitivamente.",
+  "Startzeitvorwahl noch nicht verifiziert.": "L’avvio ritardato non è ancora stato verificato."
 }

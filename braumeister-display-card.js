@@ -8,14 +8,30 @@
     8101: [['✕','Abbruch','close_settings']],
     4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur','temperature_readings']],
     6010: [['✕','Abbruch','close_recipe_list']],
-    2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up']],
+    2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up'], ['✓','Auswahl','select_recipe']],
+    2030: [['✕','Abbruch','cancel_water_prompt'], ['⌄','Ab','start_delay_down'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_water_filled']],
+    2300: [['✕','Abbruch','request_program_pause']],
+    2310: [['✕','Abbruch','request_program_pause']],
+    2410: [['✕','Abbruch','request_program_pause']],
   };
+  // Future backend contract. Never dispatch through the legacy menu service.
+  const programActions = new Set(['cancel_water_prompt', 'start_delay_down', 'start_delay_up',
+    'confirm_water_filled', 'request_program_pause', 'abort_program', 'resume_program']);
+  const energizingActions = new Set(['confirm_water_filled', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Only presentation is localized. Backend values, attributes and commands stay intact.
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Auswahl": "Select",
+  "Fortsetzen": "Resume",
+  "Brauvorgang endgültig abbrechen?": "Abort the brewing program permanently?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Water added? Confirming may start the pump and heater.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Resume the brewing program? The pump and heater may restart.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "This button requires a supported and enabled Bridge/Companion action.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Select to resume; Cancel to abort permanently.",
+  "Startzeitvorwahl noch nicht verifiziert.": "Delayed-start behavior has not yet been verified.",
   "Verbindung zum Braumeister verloren": "Connection to Braumeister lost",
   "Geräteverbindung noch nicht bestätigt": "Device connection not yet verified",
   "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Brewing or heater permission was last known active. Current device state is unknown. Check the device in person.",
@@ -253,6 +269,28 @@
             PH: 'heater_off', Pi: 'heater_off', pi: 'heater_off'}[flags] : undefined,
       };
     }
+    menuKeysFor(code) {
+      const interrupt = this._hass?.states[this.ids.step]?.attributes.display_interrupt;
+      if (Number.isInteger(code) && code >= 2000 && code < 4000 && interrupt === 1) {
+        return [['✕','Abbruch','abort_program'], ['✓','Auswahl','resume_program']];
+      }
+      if (Number.isInteger(interrupt) && interrupt > 0) return [];
+      return menuKeys[code] || [];
+    }
+    serviceSupports(service, action) {
+      const options = this._hass?.services?.braumeister_menu?.[service]?.fields?.action?.selector?.select?.options;
+      return Array.isArray(options) && options.some(option =>
+        option === action || (option && typeof option === 'object' && option.value === action));
+    }
+    actionService(action) {
+      if (programActions.has(action)) {
+        const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt'].includes(action);
+        return this.serviceSupports('program_control', action)
+          && (stopping || this.config.program_control === true) ? 'program_control' : null;
+      }
+      if (action === 'select_recipe') return this.serviceSupports('navigate', action) ? 'navigate' : null;
+      return 'navigate';
+    }
     async navigate(action) {
       const code = this._hass.states[this.ids.step]?.attributes.display_state_code;
       if (this.pending) return;
@@ -263,15 +301,21 @@
         return;
       }
       const actuator = Object.values(this.actuatorActions()).includes(action);
-      if (!actuator && (!this.menuAvailable() || !menuKeys[code]?.some(key => key[2] === action))) return;
+      if (!actuator && (!this.menuAvailable() || !this.menuKeysFor(code).some(key => key[2] === action))) return;
+      const service = actuator ? 'set_actuator' : this.actionService(action);
+      if (!service) return;
       if (action === 'heater_on' && !window.confirm(this.translate('Heizung am Braumeister einschalten?'))) return;
+      if (energizingActions.has(action) && !window.confirm(this.translate(action === 'confirm_water_filled'
+        ? 'Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.'
+        : 'Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.'))) return;
+      if (action === 'abort_program' && !window.confirm(this.translate('Brauvorgang endgültig abbrechen?'))) return;
       this.pending = true;
       this.menuResult = 'pending';
       this.pendingMenuAction = action;
       this.render();
       try {
         const reply = await this._hass.callWS({
-          type: 'call_service', domain: 'braumeister_menu', service: actuator ? 'set_actuator' : 'navigate',
+          type: 'call_service', domain: 'braumeister_menu', service,
           service_data: {action}, return_response: true,
         });
         this.menuResult = reply?.response?.result || 'unconfirmed';
@@ -286,7 +330,7 @@
     }
     renderMenu(code) {
       const available = this.menuAvailable();
-      const keys = menuKeys[code] || [];
+      const keys = this.menuKeysFor(code);
       const result = {
         pending: 'Menüaktion läuft …', confirmed: 'Menüaktion bestätigt',
         expired: 'Menüaktion abgelaufen', unconfirmed: 'Menüaktion unbestätigt',
@@ -300,13 +344,18 @@
       const actuators = this.actuatorActions();
       const temperatures = code === 4006 && this.showTemperatureReadings
         ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
-      return `${picker}${temperatures}<div class="keys">${keys.map(([icon,label,menuAction]) => {
+      const paused = keys.some(key => key[2] === 'resume_program');
+      const programNote = paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
+        : code === 2030 ? 'Startzeitvorwahl noch nicht verifiziert.' : '';
+      const unsupportedKeys = keys.some(key => key[2] && key[2] !== 'temperature_readings' && !this.actionService(key[2]));
+      return `${picker}${temperatures}${programNote?`<p class="hint">${esc(this.translate(programNote))}</p>`:''}<div class="keys">${keys.map(([icon,label,menuAction]) => {
         const action = actuators[label] || menuAction;
-        const enabled = action === 'temperature_readings' || (available && action);
+        const enabled = action === 'temperature_readings' || (available && action && this.actionService(action));
         const animate = this.config.menu_pending_animation !== false
           && action && action === this.pendingMenuAction && this.menuResult === 'pending';
-        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`;
-      }).join('')}</div><p class="hint" role="status">${esc(this.translate(hint))}</p>`;
+        const unsupported = action && !this.actionService(action);
+        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" ${unsupported ? `title="${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}"` : ''} data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`;
+      }).join('')}</div>${unsupportedKeys?`<p class="hint">${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}</p>`:''}<p class="hint" role="status">${esc(this.translate(hint))}</p>`;
     }
     render(){
       if(!this.config || !this._hass) return;
@@ -319,6 +368,8 @@
       const reading=k=>online?this.number(k,this._hass.states[this.ids[k]]?.attributes?.unit_of_measurement || '°C'):'—';
       const attrs=this._hass.states[this.ids.step]?.attributes||{};
       const live=online && !['unknown','unavailable',undefined].includes(this.state('step'));
+      const programPaused = live && attrs.display_interrupt === 1
+        && Number.isInteger(attrs.display_state_code) && attrs.display_state_code >= 2000 && attrs.display_state_code < 4000;
       const flag=k=>live?attrs[k==='pump'?'display_pump_flag':'display_heater_flag']:null;
       const brandIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="brand-icon" width="20" height="20" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
   <path fill="#15393B" d="M64 0 H192 Q256 0 256 64 V192 Q256 256 192 256 H64 Q0 256 0 192 V64 Q0 0 64 0 Z"/>
@@ -373,6 +424,10 @@
       :host{display:block;color:#080808;font-family:Arial,sans-serif;container-type:inline-size}*{box-sizing:border-box}
       ha-card{display:block;background:linear-gradient(135deg,#505050,#060606);padding:clamp(14px,5cqw,34px);border-radius:16px;color:#080808;overflow:hidden}
       .screen{background:#f4f4f4;box-shadow:inset 0 0 15px #999;min-height:360px}
+      .screen.program-paused{outline:3px solid #b00020;box-shadow:inset 0 0 18px #e66868}
+      .screen.program-paused.pulse{animation:program-pause-pulse 1.4s ease-in-out infinite}
+      @keyframes program-pause-pulse{50%{box-shadow:inset 0 0 30px #cf3030;outline-color:#ff6565}}
+      @media(prefers-reduced-motion:reduce){.screen.program-paused.pulse{animation:none}}
       header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:6px solid black;font-size:13px;min-height:49px}header .brand-icon{flex:none}header .title{flex:1;overflow-wrap:anywhere}
       button,select{font:inherit}button{cursor:pointer;border:0}button:focus-visible,select:focus-visible{outline:3px solid #008bd2;outline-offset:3px}
       .badge{border:2px solid black;background:transparent;padding:2px 5px;color:black}.badge.active{background:#ffda16}.badge.inactive{background:linear-gradient(45deg,#f4f4f4 50%,#ffda16 50%)}.timer{margin-top:24px}
@@ -383,7 +438,7 @@
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
-      </style><ha-card><div class="screen"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${connectionNotice}${this.state('alarm')==='on'?`<div class="notice">${T('Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${i}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
+      </style><ha-card><div class="screen${programPaused?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${connectionNotice}${this.state('alarm')==='on'?`<div class="notice">${T('Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${i}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
   class BraumeisterDisplayEditor extends HTMLElement {

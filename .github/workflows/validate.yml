@@ -23,6 +23,7 @@ jobs:
       - run: node test-lighting.cjs
       - run: node test-menu.cjs
       - run: node test-connection.cjs
+      - run: node test-program.cjs
   hacs:
     runs-on: ubuntu-latest
     steps:

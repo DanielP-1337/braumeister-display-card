@@ -30,6 +30,11 @@ A GitHub release alone does not add a repository to the HACS default catalog.
 
 ## Device connection warning (beta)
 
+Unreleased program-screen work (recipe confirmation, water prompt and the
+pause/abort dialog) is documented in
+[program-screen controls](docs/program-screen-controls.md). Its new keys require
+backend extensions; this local branch does not claim working brew control.
+
 The integration watchdog development adds a **Check device connection** problem
 binary sensor. Map the entity ID from your device in the card YAML:
 

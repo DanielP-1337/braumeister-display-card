@@ -120,5 +120,13 @@
   "Bitte #RRGGBB eingeben.": "Wpisz #RRGGBB.",
   "Verbindung zum Braumeister verloren": "Utracono połączenie z Braumeisterem",
   "Geräteverbindung noch nicht bestätigt": "Połączenie z urządzeniem nie jest jeszcze potwierdzone",
-  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "W ostatnim znanym stanie warzenie lub zezwolenie na grzanie było aktywne. Bieżący stan nieznany. Sprawdź urządzenie na miejscu."
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "W ostatnim znanym stanie warzenie lub zezwolenie na grzanie było aktywne. Bieżący stan nieznany. Sprawdź urządzenie na miejscu.",
+  "Auswahl": "Wybierz",
+  "Fortsetzen": "Wznów",
+  "Brauvorgang endgültig abbrechen?": "Trwale przerwać program warzenia?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Czy dodano wodę? Potwierdzenie może uruchomić pompę i grzałkę.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Wznowić warzenie? Pompa i grzałka mogą ponownie się uruchomić.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Ten przycisk wymaga obsługiwanej i włączonej akcji Bridge/Companion.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Wybierz, aby wznowić; Anuluj, aby trwale przerwać.",
+  "Startzeitvorwahl noch nicht verifiziert.": "Opóźniony start nie został jeszcze zweryfikowany."
 }

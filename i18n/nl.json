@@ -120,5 +120,13 @@
   "Bitte #RRGGBB eingeben.": "Voer #RRGGBB in.",
   "Verbindung zum Braumeister verloren": "Verbinding met de Braumeister verloren",
   "Geräteverbindung noch nicht bestätigt": "Apparaatverbinding nog niet bevestigd",
-  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Bij de laatst bekende toestand was het brouwen of de verwarming vrijgegeven. Huidige toestand onbekend. Controleer het apparaat ter plaatse."
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Bij de laatst bekende toestand was het brouwen of de verwarming vrijgegeven. Huidige toestand onbekend. Controleer het apparaat ter plaatse.",
+  "Auswahl": "Selecteren",
+  "Fortsetzen": "Hervatten",
+  "Brauvorgang endgültig abbrechen?": "Het brouwprogramma definitief afbreken?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Water toegevoegd? Bevestigen kan de pomp en verwarming starten.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Brouwprogramma hervatten? Pomp en verwarming kunnen opnieuw starten.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Deze knop vereist een ondersteunde en ingeschakelde Bridge/Companion-actie.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Selecteren om te hervatten; Annuleren om definitief af te breken.",
+  "Startzeitvorwahl noch nicht verifiziert.": "Uitgesteld starten is nog niet geverifieerd."
 }

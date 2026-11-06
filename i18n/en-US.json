@@ -120,5 +120,13 @@
   "Bitte #RRGGBB eingeben.": "Enter #RRGGBB.",
   "Verbindung zum Braumeister verloren": "Connection to Braumeister lost",
   "Geräteverbindung noch nicht bestätigt": "Device connection not yet verified",
-  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Brewing or heater permission was last known active. Current device state is unknown. Check the device in person."
+  "Zuletzt waren Brauprozess oder Heizfreigabe aktiv. Aktueller Gerätezustand unbekannt. Gerät vor Ort prüfen.": "Brewing or heater permission was last known active. Current device state is unknown. Check the device in person.",
+  "Auswahl": "Select",
+  "Fortsetzen": "Resume",
+  "Brauvorgang endgültig abbrechen?": "Abort the brewing program permanently?",
+  "Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.": "Water added? Confirming may start the pump and heater.",
+  "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Resume the brewing program? The pump and heater may restart.",
+  "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "This button requires a supported and enabled Bridge/Companion action.",
+  "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Select to resume; Cancel to abort permanently.",
+  "Startzeitvorwahl noch nicht verifiziert.": "Delayed-start behavior has not yet been verified."
 }

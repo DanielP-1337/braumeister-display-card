@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.9 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.10 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -199,7 +199,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.9`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.10`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -346,7 +346,7 @@
       const hint = result[this.menuResult] || this.menuResult
         || (available ? 'Lokale Menünavigation' : 'Braumeister-Steuerung noch nicht verfügbar');
       const picker = code === 2015 && this.picker
-        ? `<ol>${Object.entries(this.picker.recipes).map(([slot,name]) =>
+        ? `<ol class="recipe-picker">${Object.entries(this.picker.recipes).sort(([a],[b]) => Number(a)-Number(b)).map(([slot,name]) =>
           `<li>${Number(slot) === this.picker.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
       const actuators = this.actuatorActions();
       const temperatures = code === 4006 && this.showTemperatureReadings
@@ -441,6 +441,7 @@
       main{padding:22px clamp(14px,4cqw,28px);min-height:290px}h2{font-size:clamp(20px,5cqw,34px);margin:4px 0 26px;overflow-wrap:anywhere}
       .temp{display:flex;justify-content:space-between;gap:12px;font-size:clamp(19px,4.6cqw,32px);font-weight:bold}.temp strong{text-align:right}.temp small{font-size:12px;display:block;font-weight:normal;margin-top:6px}
       .phase{font-size:clamp(19px,4cqw,28px);font-weight:bold;margin:24px 0 8px;overflow-wrap:anywhere}.sub{font-size:14px}
+      .recipe-picker{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);grid-auto-columns:minmax(0,1fr);gap:6px 24px;padding-left:24px;text-align:left}.recipe-picker li{min-width:0;overflow-wrap:anywhere}.recipe-picker mark{background:#ffda16;color:#000}
       .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys button{background:#ffda16;border-radius:10px;font-size:36px;font-weight:bold;width:56px;height:56px;color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}small{display:block;font-size:11px;margin-top:7px}
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
@@ -511,5 +512,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.9'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.10'});
 })();

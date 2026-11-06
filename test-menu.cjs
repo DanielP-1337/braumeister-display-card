@@ -47,6 +47,11 @@ async function test() {
     'sensor.step': {state: 'Rezept auswählen', attributes: {display_state_code: 2015}},
   }};
   assert.match(card.shadowRoot.innerHTML, /<mark>&lt;Second&gt;<\/mark>/);
+  card.picker = {slot:8, recipes:Object.fromEntries(Array.from({length:9}, (_,i)=>[i,`Recipe ${i+1}`]))};
+  card.render();
+  assert.equal((card.shadowRoot.innerHTML.match(/<li>/g)||[]).length,9);
+  assert.match(card.shadowRoot.innerHTML, /<mark>Recipe 9<\/mark>/);
+  assert.ok(card.shadowRoot.innerHTML.indexOf('Recipe 5') < card.shadowRoot.innerHTML.indexOf('Recipe 6'));
   await card.navigate('select_recipe');
   assert.equal(calls.length, 1);
   card.setConfig({entities, menu_control: true, menu_pending_animation: false});

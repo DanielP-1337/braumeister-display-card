@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.10 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.11 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -184,6 +184,31 @@
       if(!this.ids || !previous || previous.user !== value.user
         || previous.services?.braumeister_menu !== value.services?.braumeister_menu
         || Object.values(this.ids).some(id=>previous.states[id]!==value.states[id])) this.render();
+      this.refreshRecipePicker();
+    }
+    async refreshRecipePicker() {
+      const code = this.menuStateCode(this._hass?.states[this.ids?.step]?.attributes.display_state_code);
+      if (code !== 2015 || !this.menuAvailable()) {
+        this.pickerReadEpoch = (this.pickerReadEpoch || 0) + 1;
+        this.pickerReadAt = 0;
+        return;
+      }
+      if (!this._hass.services?.braumeister_menu?.get_recipe_picker || this.pickerReading || this.pending
+          || Date.now() - (this.pickerReadAt || 0) < 5000) return;
+      const epoch = this.pickerReadEpoch || 0;
+      this.pickerReading = true;
+      this.pickerReadAt = Date.now();
+      try {
+        const reply = await this._hass.callWS({type:'call_service', domain:'braumeister_menu',
+          service:'get_recipe_picker', service_data:{}, return_response:true});
+        if (epoch === (this.pickerReadEpoch || 0) && !this.pending
+            && this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code) === 2015) {
+          this.picker = reply?.response?.picker ?? null;
+          this.render();
+        }
+      } catch (_) {
+        // Retry on a later HA update; never issue a navigation action to load names.
+      } finally { this.pickerReading = false; }
     }
     refreshLanguage() {
       if (!this.config) return;
@@ -199,7 +224,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.10`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.11`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -317,6 +342,7 @@
         : 'Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.'))) return;
       if (action === 'abort_program' && !window.confirm(this.translate('Brauvorgang endgültig abbrechen?'))) return;
       this.pending = true;
+      this.pickerReadEpoch = (this.pickerReadEpoch || 0) + 1;
       this.menuResult = 'pending';
       this.pendingMenuAction = action;
       this.render();
@@ -326,7 +352,7 @@
           service_data: {action}, return_response: true,
         });
         this.menuResult = reply?.response?.result || 'unconfirmed';
-        this.picker = reply?.response?.picker ?? null;
+        if (reply?.response?.picker) this.picker = reply.response.picker;
       } catch (err) {
         this.menuResult = err.message || 'unconfirmed';
       } finally {
@@ -512,5 +538,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.10'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.11'});
 })();

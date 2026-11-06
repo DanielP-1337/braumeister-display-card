@@ -24,6 +24,7 @@ jobs:
       - run: node test-menu.cjs
       - run: node test-connection.cjs
       - run: node test-program.cjs
+      - run: node test-recipe-refresh.cjs
   hacs:
     runs-on: ubuntu-latest
     steps:

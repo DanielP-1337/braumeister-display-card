@@ -65,13 +65,20 @@ require('./dist/braumeister-display-card.js');
   window.confirm=()=>true;
   await card.navigate('abort_program');
   assert.equal(calls.at(-1).service_data.action,'abort_program');
+  await card.navigate('resume_program'); // Heating-stage resume is not evidenced.
+  assert.equal(calls.length,before+1);
+  screen(2300,1);
+  await card.navigate('resume_program');
+  assert.equal(calls.length,before+2);
+  assert.equal(calls.at(-1).service,'program_control');
+  assert.equal(calls.at(-1).service_data.action,'resume_program');
   screen(2410,2);
   assert.equal(card.menuKeysFor(2410).length,0); // Error is not a resumable pause.
   screen(2410,1);
   states['binary_sensor.heartbeat']={state:'on'};
   card.render();
   await card.navigate('resume_program');
-  assert.equal(calls.length,before+1);
+  assert.equal(calls.length,before+2);
   assert.doesNotMatch(card.shadowRoot.innerHTML,/class="screen program-paused/);
   states['binary_sensor.heartbeat']={state:'off'};
   card.setConfig({language:'en-US',menu_control:true,program_alarm_animation:false,entities});

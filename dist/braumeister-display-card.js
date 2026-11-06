@@ -284,6 +284,9 @@
     }
     actionService(action) {
       if (programActions.has(action)) {
+        const code = this._hass?.states[this.ids.step]?.attributes.display_state_code;
+        if (action === 'resume_program' && code !== 2300) return null;
+        if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2410].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt'].includes(action);
         return this.serviceSupports('program_control', action)
           && (stopping || this.config.program_control === true) ? 'program_control' : null;

@@ -83,5 +83,30 @@ require('./dist/braumeister-display-card.js');
   states['binary_sensor.heartbeat']={state:'off'};
   card.setConfig({language:'en-US',menu_control:true,program_alarm_animation:false,entities});
   assert.match(card.shadowRoot.innerHTML,/class="screen program-paused"/);
-  console.log('PASS: complete stage keys, interrupt 120 pause rendering, explicit backend capability, opt-in/confirmation, stale-state and error gating');
+  // Reported purge status: stopping must work without the start/resume opt-in.
+  card.setConfig({language:'de',menu_control:true,entities});
+  states['sensor.step']={state:'Pumpe wird entlüftet',attributes:{
+    display_state_code:2300,display_interrupt:0,
+    display_pump_flag:'P',display_heater_flag:'h'}};
+  card.render();
+  const purgeButton=card.shadowRoot.innerHTML.match(/<button[^>]*data-menu="request_program_pause"[^>]*>/);
+  assert.ok(purgeButton, 'Purge screen offers Cancel');
+  assert.doesNotMatch(purgeButton[0], /\bdisabled\b/);
+  const purgeCalls=calls.length;
+  await card.navigate('request_program_pause');
+  assert.equal(calls.length,purgeCalls+1);
+  assert.equal(calls.at(-1).service,'program_control');
+  assert.deepEqual(calls.at(-1).service_data,{action:'request_program_pause'});
+  // Numeric strings previously rendered a key but failed the strict dispatch guard.
+  states['sensor.step'].attributes.display_state_code='2300';
+  card.render();
+  assert.doesNotMatch(card.shadowRoot.innerHTML.match(/<button[^>]*data-menu="request_program_pause"[^>]*>/)[0], /\bdisabled\b/);
+  await card.navigate('request_program_pause');
+  assert.equal(calls.length,purgeCalls+2);
+  for (const invalid of ['', ' 2300', '2300x', '2310']) {
+    states['sensor.step'].attributes.display_state_code=invalid;
+    await card.navigate('request_program_pause');
+    assert.equal(calls.length,purgeCalls+2);
+  }
+  console.log('PASS: complete stage keys, interrupt 120 pause rendering, explicit backend capability, opt-in/confirmation, stale-state and error gating; reported purge Cancel enabled and dispatched');
 })().catch(e=>{console.error(e);process.exitCode=1;});

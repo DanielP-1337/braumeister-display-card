@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.8 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.9 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -199,7 +199,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.8`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.9`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -269,7 +269,11 @@
             PH: 'heater_off', Pi: 'heater_off', pi: 'heater_off'}[flags] : undefined,
       };
     }
+    menuStateCode(code) {
+      return typeof code === 'string' && /^\d{3,4}$/.test(code) ? Number(code) : code;
+    }
     menuKeysFor(code) {
+      code = this.menuStateCode(code);
       const interrupt = this._hass?.states[this.ids.step]?.attributes.display_interrupt;
       if (Number.isInteger(code) && code >= 2000 && code < 4000 && interrupt === 1) {
         return [['✕','Abbruch','abort_program'], ['✓','Auswahl','resume_program']];
@@ -284,7 +288,7 @@
     }
     actionService(action) {
       if (programActions.has(action)) {
-        const code = this._hass?.states[this.ids.step]?.attributes.display_state_code;
+        const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
         if (action === 'resume_program' && code !== 2300) return null;
         if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2410].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt'].includes(action);
@@ -295,7 +299,7 @@
       return 'navigate';
     }
     async navigate(action) {
-      const code = this._hass.states[this.ids.step]?.attributes.display_state_code;
+      const code = this.menuStateCode(this._hass.states[this.ids.step]?.attributes.display_state_code);
       if (this.pending) return;
       if (action === 'temperature_readings') {
         if (code !== 4006 || this.state('connection') !== 'online' || this.state('plug') === 'off') return;
@@ -507,5 +511,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.6'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.9'});
 })();

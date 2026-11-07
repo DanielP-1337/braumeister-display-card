@@ -167,6 +167,17 @@ setup; it is not a Display Card option. The control options require the matching
 Companion/Bridge configuration described in this README. This report covers the
 dashboard on the reported tablet setups, not every control action or tablet model.
 
+### Smartphone dashboard tests
+
+On 2026-11-07, a user reported successful Display Card dashboard tests on these Samsung phones:
+
+- Samsung Galaxy S10 Plus
+- Samsung Galaxy S21 Ultra 5G
+- Samsung Galaxy S23 Ultra
+- Samsung Galaxy S25 Ultra
+
+Separate tests on Apple and Xiaomi devices are pending.
+
 ## Hardware validation (2026-10-31)
 
 User-reported test on a pre-2020 Braumeister 20 L Plus with external WLAN module,

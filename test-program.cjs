@@ -26,6 +26,7 @@ require('./dist/braumeister-display-card.js');
     card.render();
   };
   for (const [code, expected] of [[2510,['Abbruch','Auswahl']],[2610,['Abbruch','Auswahl']],[2705,['Abbruch','Ab','Hoch','Auswahl']],[2810,['Abbruch']],[2820,['Abbruch','Auswahl']],
+    ...[3070,3075,3079].map(code => [code,['Abbruch','Ab','Hoch','Auswahl']]),
     ...[2910,2930,2960,3010,3069,3080,3449].map(code => [code,['Abbruch','Auswahl']])]) {
     screen(code);
     const html = card.renderMenu(code);

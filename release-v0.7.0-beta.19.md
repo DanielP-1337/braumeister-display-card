@@ -1,0 +1,1 @@
+During the timed boil between hop prompts, show the four localized preview keys observed in MySpeidel: Cancel, Down, Up, Select. The current integration exposes the boil stage but not the portal edit overlay, so arrows remain visible throughout this stage. Buttons send no commands.

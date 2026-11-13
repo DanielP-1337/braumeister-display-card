@@ -128,5 +128,10 @@
   "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Riprendere il programma? Pompa e riscaldamento possono riattivarsi.",
   "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Questo pulsante richiede un’azione Bridge/Companion supportata e abilitata.",
   "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Seleziona per riprendere; Annulla per interrompere definitivamente.",
-  "Startzeitvorwahl noch nicht verifiziert.": "L’avvio ritardato non è ancora stato verificato."
+  "Startzeitvorwahl noch nicht verifiziert.": "L’avvio ritardato non è ancora stato verificato.",
+  "Malzrohr entnommen": "Tubo del malto rimosso",
+  "Hopfenkochen starten": "Avvia la bollitura",
+  "Hopfen zugegeben": "Luppolo aggiunto",
+  "Whirlpool bestätigen": "Conferma il whirlpool",
+  "Bitte am Braumeister bestätigen.": "Conferma sul Braumeister."
 }

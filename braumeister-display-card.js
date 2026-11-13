@@ -1,7 +1,13 @@
-/* Braumeister Display 0.7.0-beta.12 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.13 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
+  const brewConfirmations = [
+    [2930, 2959, 'Malzrohr entnommen'],
+    [2960, 3009, 'Hopfenkochen starten'],
+    [3080, 3449, 'Hopfen zugegeben'],
+    [3501, 3600, 'Whirlpool bestätigen'],
+  ];
   const menuKeys = {
     101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
       ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
@@ -24,6 +30,11 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Malzrohr entnommen": "Malt pipe removed",
+  "Hopfenkochen starten": "Start boil",
+  "Hopfen zugegeben": "Hops added",
+  "Whirlpool bestätigen": "Confirm whirlpool",
+  "Bitte am Braumeister bestätigen.": "Confirm on the Braumeister.",
   "Auswahl": "Select",
   "Fortsetzen": "Resume",
   "Brauvorgang endgültig abbrechen?": "Abort the brewing program permanently?",
@@ -224,7 +235,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.12`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.13`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -363,6 +374,14 @@
     }
     renderMenu(code) {
       const available = this.menuAvailable();
+      const screen = this.menuStateCode(code);
+      const interrupt = this._hass.states[this.ids.step]?.attributes?.display_interrupt;
+      const preview = Number.isInteger(screen) && interrupt === 0 &&
+        brewConfirmations.find(([first, last]) => screen >= first && screen <= last);
+      if (preview) {
+        const label = esc(this.translate(preview[2]));
+        return `<div class="keys"><div><button type="button" disabled aria-label="${label}">✓</button><small>${label}</small></div></div><p class="hint">${esc(this.translate('Bitte am Braumeister bestätigen.'))}</p>`;
+      }
       const keys = this.menuKeysFor(code);
       const result = {
         pending: 'Menüaktion läuft …', confirmed: 'Menüaktion bestätigt',
@@ -538,5 +557,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.12'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.13'});
 })();

@@ -128,5 +128,10 @@
   "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Wznowić warzenie? Pompa i grzałka mogą ponownie się uruchomić.",
   "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "Ten przycisk wymaga obsługiwanej i włączonej akcji Bridge/Companion.",
   "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Wybierz, aby wznowić; Anuluj, aby trwale przerwać.",
-  "Startzeitvorwahl noch nicht verifiziert.": "Opóźniony start nie został jeszcze zweryfikowany."
+  "Startzeitvorwahl noch nicht verifiziert.": "Opóźniony start nie został jeszcze zweryfikowany.",
+  "Malzrohr entnommen": "Kosz zasypowy wyjęty",
+  "Hopfenkochen starten": "Rozpocznij gotowanie",
+  "Hopfen zugegeben": "Chmiel dodany",
+  "Whirlpool bestätigen": "Potwierdź whirlpool",
+  "Bitte am Braumeister bestätigen.": "Potwierdź na urządzeniu Braumeister."
 }

@@ -1,0 +1,1 @@
+Display-only preview of confirmation buttons for malt pipe removal, boil start, hop additions and whirlpool. Includes eight languages. Confirm on the Braumeister. Compatible with Companion v0.1.0-beta.10 and Bridge 0.5.1-beta.1. Tested with simulated screens, pending a live brew.

@@ -25,6 +25,14 @@ require('./dist/braumeister-display-card.js');
       display_state_code:code,display_interrupt:interrupt}};
     card.render();
   };
+  for (const [code, label] of [[2930,'Malt pipe removed'],[2960,'Start boil'],[3080,'Hops added'],[3501,'Confirm whirlpool']]) {
+    screen(code);
+    assert(card.shadowRoot.innerHTML.includes('disabled aria-label="'+label+'"'));
+    assert(!card.renderMenu(code).includes('data-menu='));
+    screen(code,1);
+    assert(!card.shadowRoot.innerHTML.includes('aria-label="'+label+'"'));
+  }
+  screen(2015);
   assert.equal(card.menuKeysFor(2015).length,4);
   assert.match(card.shadowRoot.innerHTML,/data-menu="select_recipe" disabled/);
   await card.navigate('select_recipe');

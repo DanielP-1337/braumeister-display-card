@@ -128,5 +128,10 @@
   "Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.": "Resume the brewing program? The pump and heater may restart.",
   "Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.": "This button requires a supported and enabled Bridge/Companion action.",
   "Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.": "Select to resume; Cancel to abort permanently.",
-  "Startzeitvorwahl noch nicht verifiziert.": "Delayed-start behavior has not yet been verified."
+  "Startzeitvorwahl noch nicht verifiziert.": "Delayed-start behavior has not yet been verified.",
+  "Malzrohr entnommen": "Malt pipe removed",
+  "Hopfenkochen starten": "Start boil",
+  "Hopfen zugegeben": "Hops added",
+  "Whirlpool bestätigen": "Confirm whirlpool",
+  "Bitte am Braumeister bestätigen.": "Confirm on the Braumeister."
 }

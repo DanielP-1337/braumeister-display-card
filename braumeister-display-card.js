@@ -1,10 +1,7 @@
-/* Braumeister Display 0.7.0-beta.19 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.20 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
-  const brewConfirmations = [
-    [3501, 3600, 'Whirlpool bestätigen'],
-  ];
   const menuKeys = {
     101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
       ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
@@ -232,7 +229,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.19`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.20`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -375,22 +372,16 @@
       const interrupt = this._hass.states[this.ids.step]?.attributes?.display_interrupt;
       const pumpFlag = this._hass.states[this.ids.step]?.attributes?.display_pump_flag;
       const timedBoil = screen >= 3070 && screen < 3080;
-      if (interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen < 3450
+      if (interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen <= 3700
           && !(screen < 2610 && pumpFlag === 'q')) {
-        const keys = [['✕', 'Abbruch']];
-        if ((screen >= 2705 && screen < 2810) || timedBoil) keys.push(['⌄', 'Ab'], ['⌃', 'Hoch']);
+        const keys = screen <= 3500 ? [['✕', 'Abbruch']] : [];
+        if ((screen >= 2705 && screen < 2810) || timedBoil || (screen >= 3450 && screen <= 3500)) keys.push(['⌄', 'Ab'], ['⌃', 'Hoch']);
         if (screen < 2810 || screen === 2820 || screen >= 2910) keys.push(['✓', 'Auswahl']);
         const buttons = keys.map(([icon, key]) => {
           const label = esc(this.translate(key));
           return `<div><button type="button" disabled aria-label="${label}">${icon}</button><small>${label}</small></div>`;
         }).join('');
-        return `<div class="keys mash-preview">${buttons}</div><p class="hint">${esc(this.translate('Bitte am Braumeister bestätigen.'))}</p>`;
-      }
-      const preview = Number.isInteger(screen) && interrupt === 0 &&
-        brewConfirmations.find(([first, last]) => screen >= first && screen <= last);
-      if (preview) {
-        const label = esc(this.translate(preview[2]));
-        return `<div class="keys"><div><button type="button" disabled aria-label="${label}">✓</button><small>${label}</small></div></div><p class="hint">${esc(this.translate('Bitte am Braumeister bestätigen.'))}</p>`;
+        return `<div class="keys mash-preview"${screen > 3500 ? ' style="justify-content:flex-end"' : ''}>${buttons}</div><p class="hint">${esc(this.translate('Bitte am Braumeister bestätigen.'))}</p>`;
       }
       const keys = this.menuKeysFor(code);
       const result = {
@@ -567,5 +558,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.19'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.20'});
 })();

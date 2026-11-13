@@ -1,0 +1,1 @@
+Add the localized yellow Cancel and Select keys at mash-in temperature and the add-malt prompt. The malt confirmation screen also shows Down and Up. Visual preview only. Tested against simulated device screens.

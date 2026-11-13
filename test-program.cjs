@@ -25,6 +25,14 @@ require('./dist/braumeister-display-card.js');
       display_state_code:code,display_interrupt:interrupt}};
     card.render();
   };
+  for (const [code, expected] of [[2510,['Abbruch','Auswahl']],[2610,['Abbruch','Auswahl']],[2705,['Abbruch','Ab','Hoch','Auswahl']]]) {
+    screen(code);
+    const html = card.renderMenu(code);
+    assert.deepEqual([...html.matchAll(/disabled aria-label="([^"]+)"/g)].map(match => match[1]),expected.map(key => card.translate(key)));
+    assert(!html.includes('data-menu='));
+    screen(code,1);
+    assert(!card.renderMenu(code).includes('mash-preview'));
+  }
   for (const [code, label] of [[2930,'Malt pipe removed'],[2960,'Start boil'],[3080,'Hops added'],[3501,'Confirm whirlpool']]) {
     screen(code);
     assert(card.shadowRoot.innerHTML.includes('disabled aria-label="'+label+'"'));

@@ -22,6 +22,15 @@ SCREENS = {
     "cancel_recipe_selection": "2015",
     "recipe_down": "2015",
     "recipe_up": "2015",
+    "select_recipe": "2015",
+}
+PROGRAM_RULES = {
+    "request_program_pause": {
+        "2300": ({"ph", "Ph"}, "000"),
+        "2410": ({"ph", "Ph", "pH", "PH", "pi", "Pi", "qh", "qH", "qi"}, "000"),
+    },
+    "abort_program": {"2300": ({"ph"}, "120"), "2410": ({"ph"}, "120")},
+    "resume_program": {"2300": ({"ph"}, "120")},
 }
 ACTUATOR_FLAGS = {
     "pump_on": {"ph", "pH", "pi"},
@@ -66,17 +75,25 @@ async def async_setup(hass, config):
                 else:
                     raise HomeAssistantError("Configured Braumeister is not visible to the bridge")
                 parts = device.get("bm_stat", "").split(";", 4)
-                fields = parts[3].split("X", 15) if len(parts) >= 4 else []
+                fields = parts[3].split("X") if len(parts) >= 4 else []
                 age = status["now"] - device.get("bm_stat_received", 0)
                 actuator = action in ACTUATOR_FLAGS
-                screen = "4006" if actuator else SCREENS[action]
-                flags = ACTUATOR_FLAGS[action] if actuator else {"ph"}
-                if (
-                    len(fields) < 15 or fields[3] != screen
-                    or fields[14] not in flags or not 0 <= age < 5
-                    or (actuator and device.get("last_response_source") not in ("cloud", "local_control"))
-                ):
-                    raise HomeAssistantError("Wait for a fresh matching device state")
+                program = action in PROGRAM_RULES
+                screen = fields[3] if program and len(fields) >= 16 else "4006" if actuator else SCREENS.get(action)
+                program_rule = PROGRAM_RULES[action].get(screen) if program else None
+                flags = program_rule[0] if program_rule else ACTUATOR_FLAGS[action] if actuator else {"ph"}
+                if not 0 <= age < 5:
+                    raise HomeAssistantError("The bridge has no fresh device status (less than 5 seconds old)")
+                if len(fields) < 15 or fields[3] != screen:
+                    raise HomeAssistantError("The device is not on the screen required for this action")
+                if fields[14] not in flags:
+                    raise HomeAssistantError("The current pump and heater state does not allow this action")
+                if program and (program_rule is None or len(fields) < 16 or fields[15] != program_rule[1]):
+                    raise HomeAssistantError("The current program screen or pause indicator does not allow this action")
+                if action == "select_recipe" and (len(fields) < 16 or fields[15] != "000"):
+                    raise HomeAssistantError("Recipe selection must not be interrupted")
+                if (actuator or program) and device.get("last_response_source") not in ("cloud", "local_control"):
+                    raise HomeAssistantError("The bridge has no recent cloud or local control response")
 
                 actual_id = device["device_id"]
                 queued = await request("POST", "control", json={"device_id": actual_id, "action": action})
@@ -103,6 +120,25 @@ async def async_setup(hass, config):
             except (ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:
                 raise HomeAssistantError("Could not verify the bridge action") from err
 
+    async def get_recipe_picker(call):
+        """Read the existing Bridge snapshot without queuing a device command."""
+        user = await hass.auth.async_get_user(call.context.user_id) if call.context.user_id else None
+        if user is None or not user.is_admin:
+            raise HomeAssistantError("An administrator must request the recipe picker")
+        try:
+            snapshot = await request("GET", "status")
+            for device in snapshot["devices"]:
+                if device["device_id"].lower() == device_id.lower():
+                    age = snapshot["now"] - device.get("bm_stat_received", 0)
+                    return {"picker": recipe_picker(device) if 0 <= age < 5 else None}
+            return {"picker": None}
+        except (ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:
+            raise HomeAssistantError("Could not read the recipe picker") from err
+
+    hass.services.async_register(
+        DOMAIN, "get_recipe_picker", get_recipe_picker,
+        schema=vol.Schema({}), supports_response=SupportsResponse.ONLY,
+    )
     hass.services.async_register(
         DOMAIN, "navigate", navigate,
         schema=vol.Schema({vol.Required("action"): vol.In(SCREENS)}),
@@ -113,6 +149,11 @@ async def async_setup(hass, config):
         schema=vol.Schema({vol.Required("action"): vol.In(ACTUATOR_FLAGS)}),
         supports_response=SupportsResponse.ONLY,
     )
+    hass.services.async_register(
+        DOMAIN, "program_control", navigate,
+        schema=vol.Schema({vol.Required("action"): vol.In(PROGRAM_RULES)}),
+        supports_response=SupportsResponse.ONLY,
+    )
     return True
 
 
@@ -120,12 +161,15 @@ def recipe_picker(device):
     """Return only recipe names and the highlighted slot to the dashboard."""
     parts = device.get("bm_stat", "").split(";", 4)
     fields = parts[3].split("X", 15) if len(parts) >= 4 else []
-    if len(fields) < 15 or fields[3] != "2015" or fields[9] not in ("0", "1", "2", "3"):
+    if len(fields) < 15 or fields[3] != "2015" or fields[8] not in tuple(map(str, range(1, 10))):
+        return None
+    slots = tuple(map(str, range(int(fields[8]))))
+    if fields[9] not in slots:
         return None
     recipes = {}
     for line in device.get("rz", "").splitlines()[1:]:
         head, separator, name = line.split(";", 1)[0].partition(".")
         values = head.split("X")
-        if separator and len(values) == 20 and values[0] in ("0", "1", "2", "3"):
+        if separator and len(values) == 20 and values[0] in slots:
             recipes[values[0]] = name.strip()
     return {"slot": int(fields[9]), "recipes": recipes}

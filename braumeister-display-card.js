@@ -1,10 +1,8 @@
-/* Braumeister Display 0.7.0-beta.16 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.17 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
   const brewConfirmations = [
-    [2930, 2959, 'Malzrohr entnommen'],
-    [2960, 3009, 'Hopfenkochen starten'],
     [3080, 3449, 'Hopfen zugegeben'],
     [3501, 3600, 'Whirlpool bestätigen'],
   ];
@@ -235,7 +233,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.16`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.17`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -377,11 +375,11 @@
       const screen = this.menuStateCode(code);
       const interrupt = this._hass.states[this.ids.step]?.attributes?.display_interrupt;
       const pumpFlag = this._hass.states[this.ids.step]?.attributes?.display_pump_flag;
-      if (interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen < 2910
+      if (interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen < 3070
           && !(screen < 2610 && pumpFlag === 'q')) {
         const keys = [['✕', 'Abbruch']];
         if (screen >= 2705 && screen < 2810) keys.push(['⌄', 'Ab'], ['⌃', 'Hoch']);
-        if (screen < 2810 || screen === 2820) keys.push(['✓', 'Auswahl']);
+        if (screen < 2810 || screen === 2820 || screen >= 2910) keys.push(['✓', 'Auswahl']);
         const buttons = keys.map(([icon, key]) => {
           const label = esc(this.translate(key));
           return `<div><button type="button" disabled aria-label="${label}">${icon}</button><small>${label}</small></div>`;
@@ -569,5 +567,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.16'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.17'});
 })();

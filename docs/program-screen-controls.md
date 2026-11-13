@@ -137,3 +137,20 @@ The user reports a successful test on the real Braumeister after the HACS test r
 This validates the reported pump-purge Cancel use case. The user had previously confirmed heating Cancel, the final-abort confirmation dialog and return to the main menu. This report does not establish validation of resume, water confirmation, delayed start, or every program stage. It also does not prove that the original installed UI failure was caused by a string-valued screen code.
 
 Card beta.9 accepts numeric and numeric-string screen codes at the menu lookup/dispatch boundary; all seven local Node test scripts passed. Companion beta.7 retains beta.6 control rules. Python tests were not rerun in this follow-up because the available interpreter lacks pytest; earlier suite results remain historical. The assistant issued no appliance commands.
+### Open investigation — Select during a timed rest (2026-11-13)
+
+On the second rest of a 20 L Plus brew (72 °C, five minutes), MySpeidel showed only Cancel while heating. Once the rest timer advanced, MySpeidel and HA showed Cancel and Select. The tester reports that pressing Select in MySpeidel then revealed Down and Up between the two existing keys. No visible effect of the arrow keys was reported. The screenshot at 2:49 still shows a 72 °C target and a five-minute duration.
+
+- [ ] Compare the device display and status frames immediately before and after Select to identify how to recognize the four-key screen.
+- [ ] Determine whether Down/Up change a pending value, when a change becomes visible, and how the screen exits. The function of the arrows is unverified.
+
+Follow-up from Chrome DevTools during the timed rest: pressing Up produced a MySpeidel GET request whose path ended in `/k/3`. The server returned HTTP 200 (response header dated 22:31:01 UTC, 2026-11-13). The tester observed both arrow keys disappear immediately after the press. This identifies the key in the cloud UI and the visible exit after Up. Device receipt, any change of target or duration, and the behavior after Down remain unverified.
+
+Down follow-up: Chrome DevTools showed a GET ending in `/k/2` and HTTP 200 from MySpeidel. The response Date was 2026-11-13 22:33:32 UTC (23:33:32 CET). The screenshot records the cloud response only. Whether the arrows disappeared after Down and whether a device value changed are still open.
+
+### Boil target editing — live observation, 2026-11-13
+
+The tester confirmed that Up and Down in MySpeidel adjust the boil target during the running program when the target temperature is framed. The 23:49 screenshot shows a framed 98 °C target. At 23:50 the framed target reads 95 °C, the measured temperature is 96.5 °C, and the boil timer shows 0:07 of 10 minutes. The four keys are Cancel, Down, Up and Select. The per-press increment, commit behavior and device status marker for this edit screen remain to be verified. The effect of the arrows during a mash rest is still open.
+
+At 00:00 on 2026-11-14 the portal showed the running boil at 9:50 of 10 minutes, target 95 °C unframed, actual 94.5 °C, with Cancel and Select only. At 5:49 the same target and actual had appeared with a framed target and all four keys. The mechanism that closed the edit view is unknown. Beta.19 always previews four keys during the timed boil. Compare field 13 (key labels) and field 15 across both live snapshots before mapping the layout; elapsed time alone does not identify it.
+[Full live brew report and remaining questions](live-brew-2026-11-13.md).

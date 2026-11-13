@@ -26,7 +26,7 @@ require('./dist/braumeister-display-card.js');
     card.render();
   };
   for (const [code, expected] of [[2510,['Abbruch','Auswahl']],[2610,['Abbruch','Auswahl']],[2705,['Abbruch','Ab','Hoch','Auswahl']],[2810,['Abbruch']],[2820,['Abbruch','Auswahl']],
-    ...[2910,2930,2960,3010,3069].map(code => [code,['Abbruch','Auswahl']])]) {
+    ...[2910,2930,2960,3010,3069,3080,3449].map(code => [code,['Abbruch','Auswahl']])]) {
     screen(code);
     const html = card.renderMenu(code);
     assert.deepEqual([...html.matchAll(/disabled aria-label="([^"]+)"/g)].map(match => match[1]),expected.map(key => card.translate(key)));
@@ -34,7 +34,7 @@ require('./dist/braumeister-display-card.js');
     screen(code,1);
     assert(!card.renderMenu(code).includes('mash-preview'));
   }
-  for (const [code, label] of [[3080,'Hops added'],[3501,'Confirm whirlpool']]) {
+  for (const [code, label] of [[3501,'Confirm whirlpool']]) {
     screen(code);
     assert(card.shadowRoot.innerHTML.includes('disabled aria-label="'+label+'"'));
     assert(!card.renderMenu(code).includes('data-menu='));

@@ -25,7 +25,7 @@ require('./dist/braumeister-display-card.js');
       display_state_code:code,display_interrupt:interrupt}};
     card.render();
   };
-  for (const [code, expected] of [[2510,['Abbruch','Auswahl']],[2610,['Abbruch','Auswahl']],[2705,['Abbruch','Ab','Hoch','Auswahl']]]) {
+  for (const [code, expected] of [[2510,['Abbruch','Auswahl']],[2610,['Abbruch','Auswahl']],[2705,['Abbruch','Ab','Hoch','Auswahl']],[2810,['Abbruch']],[2820,['Abbruch']]]) {
     screen(code);
     const html = card.renderMenu(code);
     assert.deepEqual([...html.matchAll(/disabled aria-label="([^"]+)"/g)].map(match => match[1]),expected.map(key => card.translate(key)));

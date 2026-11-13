@@ -1,0 +1,1 @@
+Show the localized Select preview at the right during a timed mash rest (2820). Heating toward the rest (2810) keeps Cancel only. The effect of Select on hardware is unverified. Both rest keys are display-only.

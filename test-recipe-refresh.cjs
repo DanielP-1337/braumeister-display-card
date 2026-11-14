@@ -19,6 +19,20 @@ require('./dist/braumeister-display-card.js');
  resolve({response:{picker:{slot:8,recipes:{8:'Ninth'}}}});
  await new Promise(r=>setImmediate(r));
  assert.match(card.shadowRoot.innerHTML,/<mark>Ninth<\/mark>/);
+ // A fresh browser instance receives only one Companion name, but the explicitly
+ // configured integration sensor already has the complete same-device list.
+ card.setConfig({menu_control:true,entities:{step:'sensor.step',connection:'sensor.connection',recipes:'sensor.recipes'}});
+ const recipes=Array.from({length:9},(_,slot)=>({slot,name:slot===8?'Ninth':`Recipe ${slot+1}`}));
+ const complete={...hass,states:{...hass.states,'sensor.recipes':{state:'9',attributes:{recipes}}}};
+ card.hass=complete;
+ assert.equal((card.shadowRoot.innerHTML.match(/<li>/g)||[]).length,9);
+ assert.match(card.shadowRoot.innerHTML,/<mark>Ninth<\/mark>/);
+ card.hass={...complete,states:{...complete.states,'sensor.recipes':{state:'unavailable',attributes:{recipes}}}};
+ assert.equal((card.shadowRoot.innerHTML.match(/<li>/g)||[]).length,1);
+ card.hass={...complete,states:{...complete.states,'sensor.recipes':{state:'9',attributes:{recipes:[...recipes.slice(0,8),{slot:8,name:'<Ninth>'}]}}}};
+ assert.match(card.shadowRoot.innerHTML,/<mark>&lt;Ninth&gt;<\/mark>/);
+ card.hass={...complete,states:{...complete.states,'sensor.recipes':{state:'2',attributes:{recipes:[recipes[0],recipes[0]]}}}};
+ assert.equal((card.shadowRoot.innerHTML.match(/<li>/g)||[]).length,1);
  card.hass={...hass}; assert.equal(calls.length,1);
  card.pickerReadAt=0; card.hass={...hass}; assert.equal(calls.length,2);
  card.hass={...hass,states:{...hass.states,'sensor.step':{state:'Menu',attributes:{display_state_code:101}}}};

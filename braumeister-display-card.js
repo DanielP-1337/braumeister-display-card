@@ -1,7 +1,7 @@
-/* Braumeister Display 0.7.0-beta.20 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.21 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
-  const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
+  const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
   const menuKeys = {
     101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
       ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
@@ -19,6 +19,21 @@
     'confirm_water_filled', 'request_program_pause', 'abort_program', 'resume_program']);
   const energizingActions = new Set(['confirm_water_filled', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // Vector geometry is independent of Android and desktop font metrics.
+  const iconPaths = {
+    '✕': '<path d="m6 6 20 20M26 6 6 26"/>',
+    '⌄': '<path d="m6 11 10 10 10-10"/>',
+    '⌃': '<path d="m6 21 10-10 10 10"/>',
+    '✓': '<path d="m5 17 7 8L27 6"/>',
+    '▣': '<rect x="6" y="5" width="20" height="19"/><path d="M3 28h26"/>',
+    '☷': '<path d="M5 7h6m5 0h11M5 16h6m5 0h11M5 25h6m5 0h11"/>',
+    '⏻': '<path d="M16 3v13M9 7a12 12 0 1 0 14 0"/>',
+    'ⓘ': '<circle cx="16" cy="16" r="13"/><path d="M16 14v10m0-17v2"/>',
+  };
+  const controlIcon = value => iconPaths[value]
+    ? `<svg class="control-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter">${iconPaths[value]}</svg>`
+    : esc(value);
 
   // Only presentation is localized. Backend values, attributes and commands stay intact.
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
@@ -229,7 +244,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.20`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.21`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -379,7 +394,7 @@
         if (screen < 2810 || screen === 2820 || screen >= 2910) keys.push(['✓', 'Auswahl']);
         const buttons = keys.map(([icon, key]) => {
           const label = esc(this.translate(key));
-          return `<div><button type="button" disabled aria-label="${label}">${icon}</button><small>${label}</small></div>`;
+          return `<div><button type="button" disabled aria-label="${label}">${controlIcon(icon)}</button><small>${label}</small></div>`;
         }).join('');
         return `<div class="keys mash-preview"${screen > 3500 ? ' style="justify-content:flex-end"' : ''}>${buttons}</div><p class="hint">${esc(this.translate('Bitte am Braumeister bestätigen.'))}</p>`;
       }
@@ -391,8 +406,18 @@
       };
       const hint = result[this.menuResult] || this.menuResult
         || (available ? 'Lokale Menünavigation' : 'Braumeister-Steuerung noch nicht verfügbar');
+      // An explicitly mapped device-recipe sensor supplies the complete list.
+      // The fresh Companion snapshot remains authoritative for the selected slot.
+      const recipeState = this._hass?.states[this.ids.recipes];
+      const details = recipeState && !['unknown', 'unavailable'].includes(recipeState.state)
+        ? recipeState.attributes?.recipes : null;
+      const deviceRecipes = Array.isArray(details) && details.length > 0 && details.length <= 9
+        && details.every(r => Number.isInteger(r.slot) && r.slot >= 0 && r.slot < 9
+          && typeof r.name === 'string' && r.name.trim())
+        && new Set(details.map(r => r.slot)).size === details.length
+        ? Object.fromEntries(details.map(r => [r.slot, r.name])) : null;
       const picker = code === 2015 && this.picker
-        ? `<ol class="recipe-picker">${Object.entries(this.picker.recipes).sort(([a],[b]) => Number(a)-Number(b)).map(([slot,name]) =>
+        ? `<ol class="recipe-picker">${Object.entries(deviceRecipes || this.picker.recipes || {}).sort(([a],[b]) => Number(a)-Number(b)).map(([slot,name]) =>
           `<li>${Number(slot) === this.picker.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
       const actuators = this.actuatorActions();
       const temperatures = code === 4006 && this.showTemperatureReadings
@@ -407,7 +432,7 @@
         const animate = this.config.menu_pending_animation !== false
           && action && action === this.pendingMenuAction && this.menuResult === 'pending';
         const unsupported = action && !this.actionService(action);
-        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" ${unsupported ? `title="${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}"` : ''} data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${icon}</button><small>${esc(this.translate(label))}</small></div>`;
+        return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" ${unsupported ? `title="${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}"` : ''} data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${controlIcon(icon)}</button><small>${esc(this.translate(label))}</small></div>`;
       }).join('')}</div>${unsupportedKeys?`<p class="hint">${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}</p>`:''}<p class="hint" role="status">${esc(this.translate(hint))}</p>`;
     }
     render(){
@@ -445,7 +470,7 @@
       const menuCode = this.config.menu_control === true && live ? attrs.display_state_code : null;
       const title={display:menuTitles[menuCode] ? this.translate(menuTitles[menuCode]) : heading,recipe:'Aktuelles Rezept',power:'Stromversorgung',details:'Gerätedaten'}[this.page];
       let body='';
-      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div>${this.config.menu_control === true ? this.renderMenu(live ? attrs.display_state_code : null) : `<div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${icon}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`}`;
+      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div>${this.config.menu_control === true ? this.renderMenu(live ? attrs.display_state_code : null) : `<div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${controlIcon(icon)}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`}`;
       if (this.page === 'display' && [8101, 6010, 2015].includes(menuCode)) {
         const menuHint = menuCode === 8101
           ? `<p>${T('Einstellungen können nur direkt am Braumeister geändert werden.')}</p>`
@@ -476,7 +501,7 @@
         }
       :host{display:block;color:#080808;font-family:Arial,sans-serif;container-type:inline-size}*{box-sizing:border-box}
       ha-card{display:block;background:linear-gradient(135deg,#505050,#060606);padding:clamp(14px,5cqw,34px);border-radius:16px;color:#080808;overflow:hidden}
-      .screen{background:#f4f4f4;box-shadow:inset 0 0 15px #999;min-height:360px}
+      .screen{background:#f4f4f4;box-shadow:inset 0 0 15px #999;min-height:0}
       .screen.program-paused{outline:3px solid #b00020;box-shadow:inset 0 0 18px #e66868}
       .screen.program-paused.pulse{animation:program-pause-pulse 1.4s ease-in-out infinite}
       @keyframes program-pause-pulse{50%{box-shadow:inset 0 0 30px #cf3030;outline-color:#ff6565}}
@@ -484,15 +509,15 @@
       header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:6px solid black;font-size:13px;min-height:49px}header .brand-icon{flex:none}header .title{flex:1;overflow-wrap:anywhere}
       button,select{font:inherit}button{cursor:pointer;border:0}button:focus-visible,select:focus-visible{outline:3px solid #008bd2;outline-offset:3px}
       .badge{border:2px solid black;background:transparent;padding:2px 5px;color:black}.badge.active{background:#ffda16}.badge.inactive{background:linear-gradient(45deg,#f4f4f4 50%,#ffda16 50%)}.timer{margin-top:24px}
-      main{padding:22px clamp(14px,4cqw,28px);min-height:290px}h2{font-size:clamp(20px,5cqw,34px);margin:4px 0 26px;overflow-wrap:anywhere}
+      main{padding:22px clamp(14px,4cqw,28px);min-height:clamp(220px,48cqw,290px)}h2{font-size:clamp(20px,5cqw,34px);margin:4px 0 26px;overflow-wrap:anywhere}
       .temp{display:flex;justify-content:space-between;gap:12px;font-size:clamp(19px,4.6cqw,32px);font-weight:bold}.temp strong{text-align:right}.temp small{font-size:12px;display:block;font-weight:normal;margin-top:6px}
       .phase{font-size:clamp(19px,4cqw,28px);font-weight:bold;margin:24px 0 8px;overflow-wrap:anywhere}.sub{font-size:14px}
-      .recipe-picker{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);grid-auto-columns:minmax(0,1fr);gap:6px 24px;padding-left:24px;text-align:left}.recipe-picker li{min-width:0;overflow-wrap:anywhere}.recipe-picker mark{background:#ffda16;color:#000}
-      .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys button{background:#ffda16;border-radius:10px;font-size:36px;font-weight:bold;width:56px;height:56px;color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}.keys.mash-preview button:disabled{opacity:1}small{display:block;font-size:11px;margin-top:7px}
+      .recipe-picker{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);grid-auto-columns:minmax(0,1fr);gap:6px clamp(10px,4cqw,24px);list-style:none;margin:0;padding:0;text-align:left}.recipe-picker li{min-width:0;overflow-wrap:anywhere}.recipe-picker mark{background:#ffda16;color:#000}
+      .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys>div{min-width:0}.control-icon{display:block;width:1em;height:1em;flex:none}.keys button{display:grid;place-items:center;padding:0;line-height:1;background:#ffda16;border-radius:10px;font-size:clamp(26px,8cqw,42px);font-weight:bold;width:clamp(40px,12cqw,64px);height:clamp(40px,12cqw,64px);color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}.keys.mash-preview button:disabled{opacity:1}small{display:block;font-size:11px;margin-top:7px}
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
-      </style><ha-card><div class="screen${programPaused?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${connectionNotice}${this.state('alarm')==='on'?`<div class="notice">${T('Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${i}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
+      </style><ha-card><div class="screen${programPaused?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${connectionNotice}${this.state('alarm')==='on'?`<div class="notice">${T('Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
   class BraumeisterDisplayEditor extends HTMLElement {
@@ -558,5 +583,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.20'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.21'});
 })();

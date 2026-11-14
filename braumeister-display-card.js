@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.21 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.22 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -244,7 +244,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.21`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.22`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -416,9 +416,9 @@
           && typeof r.name === 'string' && r.name.trim())
         && new Set(details.map(r => r.slot)).size === details.length
         ? Object.fromEntries(details.map(r => [r.slot, r.name])) : null;
-      const picker = code === 2015 && this.picker
-        ? `<ol class="recipe-picker">${Object.entries(deviceRecipes || this.picker.recipes || {}).sort(([a],[b]) => Number(a)-Number(b)).map(([slot,name]) =>
-          `<li>${Number(slot) === this.picker.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
+      const picker = code === 2015 && (deviceRecipes || this.picker)
+        ? `<ol class="recipe-picker">${Object.entries(deviceRecipes || this.picker?.recipes || {}).sort(([a],[b]) => Number(a)-Number(b)).map(([slot,name]) =>
+          `<li>${Number(slot) === this.picker?.slot ? `<mark>${esc(name)}</mark>` : esc(name)}</li>`).join('')}</ol>` : '';
       const actuators = this.actuatorActions();
       const temperatures = code === 4006 && this.showTemperatureReadings
         ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
@@ -583,5 +583,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.21'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.22'});
 })();

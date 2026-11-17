@@ -136,5 +136,7 @@
   "Bitte am Braumeister bestätigen.": "Confirm on the Braumeister.",
   "Braustart in": "Brew starts in",
   "Vom Gerät gemeldete Restzeit": "Remaining time reported by the device",
-  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min."
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min.",
+  "Jetzt starten": "Start now",
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Skip the countdown and start now? Is water filled? The pump starts immediately; heating may follow."
 }

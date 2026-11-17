@@ -136,5 +136,7 @@
   "Bitte am Braumeister bestätigen.": "Confirmez sur le Braumeister.",
   "Braustart in": "Début du brassage dans",
   "Vom Gerät gemeldete Restzeit": "Temps restant indiqué par l’appareil",
-  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Départ différé : Haut +30 min, Bas −30 min."
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Départ différé : Haut +30 min, Bas −30 min.",
+  "Jetzt starten": "Démarrer maintenant",
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Ignorer le compte à rebours et démarrer maintenant ? Eau ajoutée ? La pompe démarre immédiatement ; le chauffage peut suivre."
 }

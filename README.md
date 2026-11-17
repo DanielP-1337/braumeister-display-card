@@ -1,3 +1,5 @@
+> New: [Start now beta](release-v0.7.0-beta.24.md).
+
 > New hardware-mapping beta: [versions, installation and test guide](release-v0.7.0-beta.23.md).
 
 # Braumeister Display 0.7.0-beta.8

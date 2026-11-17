@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.23 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.24 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -12,15 +12,15 @@
     2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up'], ['✓','Auswahl','select_recipe']],
     2030: [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_water_filled']],
     2111: [['✕','Abbruch','cancel_water_prompt'], ['⌄','Ab','start_delay_down'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_start_delay']],
-    2120: [['✕','Abbruch','cancel_start_delay'], ['✓','Auswahl']],
+    2120: [['✕','Abbruch','cancel_start_delay'], ['✓','Jetzt starten','start_now']],
     2300: [['✕','Abbruch','request_program_pause']],
     2310: [['✕','Abbruch','request_program_pause']],
     2410: [['✕','Abbruch','request_program_pause']],
   };
   // Future backend contract. Never dispatch through the legacy menu service.
   const programActions = new Set(['cancel_water_prompt', 'start_delay_down', 'start_delay_up',
-    'confirm_water_filled', 'confirm_start_delay', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
-  const energizingActions = new Set(['confirm_water_filled', 'confirm_start_delay', 'resume_program']);
+    'confirm_water_filled', 'confirm_start_delay', 'start_now', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
+  const energizingActions = new Set(['confirm_water_filled', 'confirm_start_delay', 'start_now', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Vector geometry is independent of Android and desktop font metrics.
@@ -42,6 +42,8 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Jetzt starten": "Start now",
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Skip the countdown and start now? Is water filled? The pump starts immediately; heating may follow.",
   "Braustart in": "Brew starts in",
   "Vom Gerät gemeldete Restzeit": "Remaining time reported by the device",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min.",
@@ -250,7 +252,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.23`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.24`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -363,7 +365,9 @@
       const service = actuator ? 'set_actuator' : this.actionService(action);
       if (!service) return;
       if (action === 'heater_on' && !window.confirm(this.translate('Heizung am Braumeister einschalten?'))) return;
-      if (energizingActions.has(action) && !window.confirm(this.translate(['confirm_water_filled', 'confirm_start_delay'].includes(action)
+      if (energizingActions.has(action) && !window.confirm(this.translate(action === 'start_now'
+        ? 'Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.'
+        : ['confirm_water_filled', 'confirm_start_delay'].includes(action)
         ? 'Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.'
         : 'Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.'))) return;
       if (action === 'abort_program' && !window.confirm(this.translate('Brauvorgang endgültig abbrechen?'))) return;
@@ -592,5 +596,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.23'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.24'});
 })();

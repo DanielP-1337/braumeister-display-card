@@ -133,5 +133,8 @@
   "Hopfenkochen starten": "Start boil",
   "Hopfen zugegeben": "Hops added",
   "Whirlpool bestätigen": "Confirm whirlpool",
-  "Bitte am Braumeister bestätigen.": "Confirm on the Braumeister."
+  "Bitte am Braumeister bestätigen.": "Confirm on the Braumeister.",
+  "Braustart in": "Brew starts in",
+  "Vom Gerät gemeldete Restzeit": "Remaining time reported by the device",
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min."
 }

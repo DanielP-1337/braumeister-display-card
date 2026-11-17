@@ -23,8 +23,18 @@ SCREENS = {
     "recipe_down": "2015",
     "recipe_up": "2015",
     "select_recipe": "2015",
+    "open_temperature_editor": "4006",
+    "temperature_up": "4007",
+    "temperature_down": "4007",
+    "confirm_temperature": "4007",
+    "cancel_temperature": "4007",
 }
 PROGRAM_RULES = {
+    "start_delay_up": {"2030": ({"ph"}, "000"), "2111": ({"ph"}, "000")},
+    "start_delay_down": {"2111": ({"ph"}, "000")},
+    "confirm_start_delay": {"2111": ({"ph"}, "000")},
+    "cancel_water_prompt": {"2111": ({"ph"}, "000")},
+    "cancel_start_delay": {"2120": ({"ph"}, "000")},
     "request_program_pause": {
         "2300": ({"ph", "Ph"}, "000"),
         "2410": ({"ph", "Ph", "pH", "PH", "pi", "Pi", "qh", "qH", "qi"}, "000"),
@@ -92,8 +102,8 @@ async def async_setup(hass, config):
                     raise HomeAssistantError("The current program screen or pause indicator does not allow this action")
                 if action == "select_recipe" and (len(fields) < 16 or fields[15] != "000"):
                     raise HomeAssistantError("Recipe selection must not be interrupted")
-                if (actuator or program) and device.get("last_response_source") not in ("cloud", "local_control"):
-                    raise HomeAssistantError("The bridge has no recent cloud or local control response")
+                if (actuator or program) and device.get("last_response_source") not in ("cloud", "local_control", "local"):
+                    raise HomeAssistantError("The bridge has no recent acknowledged device response")
 
                 actual_id = device["device_id"]
                 queued = await request("POST", "control", json={"device_id": actual_id, "action": action})
@@ -115,6 +125,8 @@ async def async_setup(hass, config):
                                 if entry["device_id"] == actual_id:
                                     result["picker"] = recipe_picker(entry)
                                     break
+                        if result.get("result") == "confirmed":
+                            hass.bus.async_fire("braumeister_menu_updated", {"device_id": actual_id})
                         return result
                 return {"result": "unconfirmed"}
             except (ClientError, TimeoutError, ValueError, KeyError, TypeError) as err:

@@ -133,5 +133,8 @@
   "Hopfenkochen starten": "Iniciar la cocción",
   "Hopfen zugegeben": "Lúpulo añadido",
   "Whirlpool bestätigen": "Confirmar el remolino",
-  "Bitte am Braumeister bestätigen.": "Confirma en el Braumeister."
+  "Bitte am Braumeister bestätigen.": "Confirma en el Braumeister.",
+  "Braustart in": "La elaboración comienza en",
+  "Vom Gerät gemeldete Restzeit": "Tiempo restante indicado por el dispositivo",
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Inicio diferido: Arriba +30 min, Abajo −30 min."
 }

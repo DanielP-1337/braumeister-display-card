@@ -133,5 +133,8 @@
   "Hopfenkochen starten": "Rozpocznij gotowanie",
   "Hopfen zugegeben": "Chmiel dodany",
   "Whirlpool bestätigen": "Potwierdź whirlpool",
-  "Bitte am Braumeister bestätigen.": "Potwierdź na urządzeniu Braumeister."
+  "Bitte am Braumeister bestätigen.": "Potwierdź na urządzeniu Braumeister.",
+  "Braustart in": "Warzenie rozpocznie się za",
+  "Vom Gerät gemeldete Restzeit": "Pozostały czas zgłoszony przez urządzenie",
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Opóźnienie startu: W górę +30 min, W dół −30 min."
 }

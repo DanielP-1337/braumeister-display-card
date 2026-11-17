@@ -1,3 +1,5 @@
+> New hardware-mapping beta: [versions, installation and test guide](release-v0.7.0-beta.23.md).
+
 # Braumeister Display 0.7.0-beta.8
 
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.

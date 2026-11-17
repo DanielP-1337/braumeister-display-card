@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.22 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.23 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -6,18 +6,21 @@
     101: [['⚙','Einstellungen','open_settings'], ['☛','Manuell','open_manual'],
       ['▶','Braustart','open_recipe_selection'], ['☰','Rezept','open_recipe_list']],
     8101: [['✕','Abbruch','close_settings']],
-    4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur','temperature_readings']],
+    4006: [['✕','Abbruch','close_manual'], ['P','Pumpe'], ['H','Heizung'], ['↕','Temperatur','open_temperature_editor']],
+    4007: [['✕','Abbruch','cancel_temperature'], ['⌄','Ab','temperature_down'], ['⌃','Hoch','temperature_up'], ['✓','Auswahl','confirm_temperature']],
     6010: [['✕','Abbruch','close_recipe_list']],
     2015: [['✕','Abbruch','cancel_recipe_selection'], ['⌄','Ab','recipe_down'], ['⌃','Hoch','recipe_up'], ['✓','Auswahl','select_recipe']],
-    2030: [['✕','Abbruch','cancel_water_prompt'], ['⌄','Ab','start_delay_down'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_water_filled']],
+    2030: [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_water_filled']],
+    2111: [['✕','Abbruch','cancel_water_prompt'], ['⌄','Ab','start_delay_down'], ['⌃','Hoch','start_delay_up'], ['✓','Auswahl','confirm_start_delay']],
+    2120: [['✕','Abbruch','cancel_start_delay'], ['✓','Auswahl']],
     2300: [['✕','Abbruch','request_program_pause']],
     2310: [['✕','Abbruch','request_program_pause']],
     2410: [['✕','Abbruch','request_program_pause']],
   };
   // Future backend contract. Never dispatch through the legacy menu service.
   const programActions = new Set(['cancel_water_prompt', 'start_delay_down', 'start_delay_up',
-    'confirm_water_filled', 'request_program_pause', 'abort_program', 'resume_program']);
-  const energizingActions = new Set(['confirm_water_filled', 'resume_program']);
+    'confirm_water_filled', 'confirm_start_delay', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
+  const energizingActions = new Set(['confirm_water_filled', 'confirm_start_delay', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Vector geometry is independent of Android and desktop font metrics.
@@ -39,6 +42,9 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Braustart in": "Brew starts in",
+  "Vom Gerät gemeldete Restzeit": "Remaining time reported by the device",
+  "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min.",
   "Malzrohr entnommen": "Malt pipe removed",
   "Hopfenkochen starten": "Start boil",
   "Hopfen zugegeben": "Hops added",
@@ -244,7 +250,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.22`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.23`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -336,11 +342,11 @@
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
         if (action === 'resume_program' && code !== 2300) return null;
         if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2410].includes(code)) return null;
-        const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt'].includes(action);
+        const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
           && (stopping || this.config.program_control === true) ? 'program_control' : null;
       }
-      if (action === 'select_recipe') return this.serviceSupports('navigate', action) ? 'navigate' : null;
+      if (['select_recipe','open_temperature_editor','temperature_up','temperature_down','confirm_temperature','cancel_temperature'].includes(action)) return this.serviceSupports('navigate', action) ? 'navigate' : null;
       return 'navigate';
     }
     async navigate(action) {
@@ -357,7 +363,7 @@
       const service = actuator ? 'set_actuator' : this.actionService(action);
       if (!service) return;
       if (action === 'heater_on' && !window.confirm(this.translate('Heizung am Braumeister einschalten?'))) return;
-      if (energizingActions.has(action) && !window.confirm(this.translate(action === 'confirm_water_filled'
+      if (energizingActions.has(action) && !window.confirm(this.translate(['confirm_water_filled', 'confirm_start_delay'].includes(action)
         ? 'Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.'
         : 'Brauvorgang fortsetzen? Pumpe und Heizung können wieder anlaufen.'))) return;
       if (action === 'abort_program' && !window.confirm(this.translate('Brauvorgang endgültig abbrechen?'))) return;
@@ -424,7 +430,7 @@
         ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
       const paused = keys.some(key => key[2] === 'resume_program');
       const programNote = paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
-        : code === 2030 ? 'Startzeitvorwahl noch nicht verifiziert.' : '';
+        : [2030,2111].includes(code) ? 'Startzeitvorwahl: Hoch +30 min, Ab −30 min.' : '';
       const unsupportedKeys = keys.some(key => key[2] && key[2] !== 'temperature_readings' && !this.actionService(key[2]));
       return `${picker}${temperatures}${programNote?`<p class="hint">${esc(this.translate(programNote))}</p>`:''}<div class="keys">${keys.map(([icon,label,menuAction]) => {
         const action = actuators[label] || menuAction;
@@ -462,6 +468,9 @@
       const targetLabel=Number.isInteger(targetTime)&&targetTime>=0?(targetTime%60?duration(targetTime):String(targetTime/60)):'—';
       const timed=live && Number.isInteger(attrs.display_state_code) && attrs.display_state_code>=2810 && attrs.display_state_code<2910;
       const timer=timed?`<div class="temp timer"><div>${T('Zeit')}<small>${T('Soll / Ist · verstrichen')}</small></div><strong>${targetLabel} / ${duration(attrs.display_time_elapsed_seconds)} min</strong></div>`:'';
+      const delay = attrs.display_start_delay_seconds;
+      const countdown = live && attrs.display_state_code === 2120
+        ? `<div class="temp timer countdown"><div>${T('Braustart in')}<small>${T('Vom Gerät gemeldete Restzeit')}</small></div><strong>${Number.isInteger(delay) && delay >= 0 ? `${Math.floor(delay/3600)}:${String(Math.floor(delay/60)%60).padStart(2,'0')}:${String(delay%60).padStart(2,'0')}` : '—'}</strong></div>` : '';
       const editingRecipes=live && (attrs.display_state_code===6010 || (attrs.display_state_code==null && ['Statuscode 6010','Rezepte bearbeiten'].includes(this.state('step'))));
       const recipeEditHint=editingRecipes?`<p class="recipe-edit-hint">${T('Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.')}</p>`:'';
       const heading=live&&attrs.display_phase?[this.text('recipe'),this.translate(attrs.display_phase)].filter(v=>v!=='—').join(' – '):this.label('step');
@@ -470,7 +479,7 @@
       const menuCode = this.config.menu_control === true && live ? attrs.display_state_code : null;
       const title={display:menuTitles[menuCode] ? this.translate(menuTitles[menuCode]) : heading,recipe:'Aktuelles Rezept',power:'Stromversorgung',details:'Gerätedaten'}[this.page];
       let body='';
-      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div>${this.config.menu_control === true ? this.renderMenu(live ? attrs.display_state_code : null) : `<div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${controlIcon(icon)}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`}`;
+      if(this.page==='display') body=`<h2>${E(this.config.title||'Speidels Braumeister')}</h2><div class="temp"><div>${T('Temp')}<small>${T('Soll / Ist')}</small></div><strong>${reading('target')} / ${reading('temperature')}</strong></div>${timer}${countdown}<p class="phase">${E(online?this.label('step'):this.translate(off?'Zwischenstecker ausgeschaltet':'Keine Online-Verbindung'))}</p>${recipeEditHint}<div class="sub">${E(this.text('recipe'))}</div>${this.config.menu_control === true ? this.renderMenu(live ? attrs.display_state_code : null) : `<div class="keys" aria-label="${T('Braumeister-Steuerung noch nicht verfügbar')}">${[['✕','Abbruch'],['P','Pumpe'],['H','Heizung'],['↕','Temperatur']].map(([icon,label])=>`<div><button disabled title="${T('Benötigt einen Steuerdienst der Integration')}">${controlIcon(icon)}</button><small>${T(label)}</small></div>`).join('')}</div><p class="hint">${T('Live-Anzeige · Braumeister-Steuerung noch nicht verfügbar')}</p>`}`;
       if (this.page === 'display' && [8101, 6010, 2015].includes(menuCode)) {
         const menuHint = menuCode === 8101
           ? `<p>${T('Einstellungen können nur direkt am Braumeister geändert werden.')}</p>`
@@ -583,5 +592,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.22'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.23'});
 })();

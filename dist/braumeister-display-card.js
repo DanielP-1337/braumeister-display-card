@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.28 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.29 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -363,7 +363,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.28`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.29`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -573,7 +573,11 @@
       const recipes=Array.isArray(raw) && raw.length<=9 && raw.every(r=>r && Number.isInteger(r.slot) && r.slot>=0 && r.slot<9 && typeof r.name==='string' && r.name.trim())
         && new Set(raw.map(r=>r.slot)).size===raw.length ? raw : [];
       if(!recipes.length) return `<p class="hint">${T('Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.')}</p>`;
-      const matches=recipes.filter(r=>r.name.trim()===this.text('recipe').trim());
+      const recipeSlot=this._hass.states[this.ids.recipe]?.attributes?.recipe_slot;
+      const hasSlot=recipeSlot!==undefined && recipeSlot!==null;
+      const matches=hasSlot
+        ? recipes.filter(r=>Number.isInteger(recipeSlot) && r.slot===recipeSlot)
+        : recipes.filter(r=>r.name.trim()===this.text('recipe').trim());
       const current=matches.length===1?matches[0]:null;
       const selected=this.previewRecipeSlot === undefined || this.previewRecipeSlot === '' ? current : recipes.find(r=>String(r.slot)===this.previewRecipeSlot);
       const picker=`<label>${T('Geräterezept ansehen')}<select id="recipe-plan"><option value="" ${this.previewRecipeSlot?'':'selected'}>${T('Aktuelles Rezept')}</option>${recipes.map(r=>`<option value="${r.slot}" ${String(r.slot)===this.previewRecipeSlot?'selected':''}>${E(r.name)}</option>`).join('')}</select></label>`;
@@ -760,5 +764,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.28'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.29'});
 })();

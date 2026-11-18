@@ -13,8 +13,9 @@ coverage, and successful HA hardware tests are separate evidence levels.
   This is distinct from the active lid-warning indicator `0D0`.
 - [x] Package qH/000 pause and the pH rest-end target fix together in Bridge
   beta.15 / Integration beta.17, Companion beta.24 and Card beta.37.
-- [ ] Hardware-test qH/000 pause and the pH rest-end target after installing that
-  coordinated beta set. The 20:02–20:03 HA success used PH/000, not qH/000.
+- [x] Hardware-test qH/000 pause after installing that coordinated beta set.
+  HA key 1 at 20:36:36.449 (3795) in `3010/qH/000` reaches
+  `3010/ph/120` at 20:36:38.412 (3797). The pH rest-end target remains pending.
 
 - [x] Add the observed rest-end target variant `2910/Pi/010` -> `2930/pH/000`
   to Bridge source mapping (MySpeidel key 4, 18:50:44–48, sequences 1188–1190).
@@ -41,7 +42,8 @@ coverage, and successful HA hardware tests are separate evidence levels.
   pass; live validation pending).
 - [x] Current-run HA confirmation: rest end, malt-pipe removal, boil start, and
   Heating to boil pause/resume succeeded (user report and recorder follow-up).
-- [ ] Re-test both lid-warning variants through HA.
+- [ ] Finish HA validation of the editor-associated lid-warning variant `0DT`;
+  normal `0D0` Cancel is now verified (see below).
 - [ ] Implement and validate the state-3010 boil editor: Select opens temperature,
   Select advances to time, Select closes; keys 2/3 change temperature by 1 °C or
   duration by 60 seconds. Determine limits and Cancel behavior before enabling
@@ -56,8 +58,10 @@ coverage, and successful HA hardware tests are separate evidence levels.
 - [x] HA final abort from `3010/ph/120` reached `101/ph/000` at 20:03:41,
   after the user confirmed the permanent-abort dialog. HA pause immediately
   before this used `3010/PH/000`. See [validated run](ha-heating-abort-2026-11-18.md).
-- [ ] Hardware-test Cancel at the active normal lid warning `3010/qH/0D0`
-  through HA; the 20:02 run had no active lid-warning indicator.
+- [x] Hardware-test Cancel at the active normal lid warning `3010/qH/0D0`
+  through HA without first pressing Select: key 1 at 20:31:50.808 (3510)
+  reaches `3010/ph/120` at 20:31:52.091 (3512).
+  See [HA evidence](lid-cancel-2026-11-18.md#ha-hardware-validation-at-20312036).
 - [ ] Hardware-test hot-start mash acknowledgment with `2510/qi/010` in the same
   beta set. Cloud key 4 at 18:20:26.582 (3212) reached `2610/ph/000` at
   18:20:27.254 (3214). The old Pi-only guard caused the reported rejection;
@@ -79,6 +83,9 @@ coverage, and successful HA hardware tests are separate evidence levels.
 
 ## Confirmed by the user through HA
 
+- Active normal lid-warning Cancel (`qH/0D0`) -> pause at 20:31, followed by
+  resume to `qH/000` at 20:35 and normal heating-to-boil Cancel -> pause at
+  20:36. All three commands are recorded as `local_control`.
 - Normal heating-to-boil Cancel with PH/000 -> pause, followed by final Cancel
   with confirmation dialog -> main menu (20:02–20:03, local-control log verified).
 - Whirlpool and Cheers Select work (including the latest follow-up).

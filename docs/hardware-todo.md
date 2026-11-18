@@ -7,6 +7,12 @@ coverage, and successful HA hardware tests are separate evidence levels.
 
 ## Open
 
+- [x] Add the observed rest-end target variant `2910/Pi/010` -> `2930/pH/000`
+  to Bridge source mapping (MySpeidel key 4, 18:50:44–48, sequences 1188–1190).
+  Existing `2930/pH/000` malt-pipe confirmation is already supported.
+- [ ] Publish and hardware-validate this target-confirmation adjustment in the
+  next beta. It does not enable source `2910/qi/010`; that remains open.
+
 - [ ] Verify rest-end acknowledgment directly while actuator flags are `qi`.
   At 18:27:03 (sequence 3695), state `2910/qi/010` was reported and HA rejected
   Select. The same prompt changed to `2910/Pi/010` at 18:27:49 (3729), before

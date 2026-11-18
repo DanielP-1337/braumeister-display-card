@@ -7,6 +7,13 @@ coverage, and successful HA hardware tests are separate evidence levels.
 
 ## Open
 
+- [x] Add normal heating-to-boil pause with `3010/qH/000` to Bridge/Companion
+  source mapping. Cloud key 1 at 19:03:00 (1941) reaches `3010/ph/120` (1943);
+  another key 1 at 19:03:09 (1961) reaches `101/ph/000` (1963).
+  This is distinct from the active lid-warning indicator `0D0`.
+- [ ] Release and hardware-test this qH/000 pause addition alongside the pending
+  pH rest-end target fix. Published Bridge beta.14/Companion beta.23 lack qH/000.
+
 - [x] Add the observed rest-end target variant `2910/Pi/010` -> `2930/pH/000`
   to Bridge source mapping (MySpeidel key 4, 18:50:44–48, sequences 1188–1190).
   Existing `2930/pH/000` malt-pipe confirmation is already supported.

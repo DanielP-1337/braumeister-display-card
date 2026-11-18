@@ -35,6 +35,10 @@ coverage, and successful HA hardware tests are separate evidence levels.
   The UI reports pump shutdown at 88 °C and release at 84 °C; a causal link to qi
   is plausible but unconfirmed. At 21:00, HA key 4 used PH/010 and reached
   `2930/pH/000`, then `2930/pi/000`; this was not a qi test or a Pi-source test.
+  Working flag interpretation: q = pump inhibited by temperature protection;
+  i = heater inactive at/above target (possibly a broader heating pause).
+  The recorded PH -> qH change at 21:09:59 coincides with the user's reported
+  pump-protection stop at 88 °C. These meanings remain hypotheses, not new guards.
 
 - [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
   0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge

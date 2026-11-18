@@ -18,6 +18,22 @@ while the water cools. The working hypothesis is that restarting above the pump
 shutdown threshold can produce qi and retain it through short rests until release.
 The exact meanings of q and i, and this causal relationship, remain unconfirmed.
 
+Working interpretation of the individual flags (not a verified protocol definition):
+
+- `q`: pump inhibited by temperature protection, consistent with the UI's shutdown
+  threshold of 88 °C and release threshold of 84 °C.
+- `i`: heater temporarily inactive because the target temperature has been reached
+  or exceeded. A broader meaning such as a heating pause remains possible.
+- `qi`: both conditions together; `qH` is consistent with pump protection while
+  heating remains active.
+
+Supporting follow-up: the user reported the pump stopping for protection and
+supplied a Heating to boil screenshot at 88 °C. The recorder changed from
+`3010/PH/000` (21:07:00.606, sequence 5700) to `3010/qH/000`
+(21:09:59.084, sequence 5864), still present at 21:11:33.964. This correlation
+supports the q hypothesis; it does not establish the exact definition of i or
+prove Select from `2910/qi/010`. Do not broaden action guards from this hypothesis.
+
 At 18:27:03, sequence 3695 reported `2910/qi/010`, but it changed to Pi before
 the MySpeidel acknowledgment. That run does not prove a Select transition under qi.
 The separate cloud acknowledgment at `2510/qi/010` also does not prove behavior

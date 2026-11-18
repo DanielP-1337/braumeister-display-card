@@ -1,7 +1,55 @@
-# Hardware mapping TODO
+# Hardware mapping and validation TODO
 
-- State 2705, Malt added?: test Up/Down directly on the Braumeister. The user observed no recognizable effect through MySpeidel. Both arrows remain disabled; record field changes and display text before mapping.
-- Test the new HA direct-start and mash-prompt actions and Cancel at states 2510, 2610, 2705, 2810 and 2820. Cloud Select transitions are captured, but new HA paths are not yet hardware-verified.
-- Automatic countdown expiry and later rest/boil editors remain unverified.
-- Resume from a paused first rest (2810): user ended the test instead. Do not enable Resume before capturing the actual transition; final Cancel is mapped separately.
-- Verify sound playback/unlock on FireHD and Hue color/restoration with the supplied blueprint.
+Updated November 18, 2026 after the user-operated Braumeister 20 L Plus tests
+(firmware 1.1.27). This list supersedes older pending-test statements in the
+chronological observation documents. Cloud observations, implementation, automated
+coverage, and successful HA hardware tests are separate evidence levels.
+
+## Open
+
+- [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
+  0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge
+  0.5.1-beta.13. Record the exact action/screen/actuator/indicator diagnostic if
+  rejected. Existing captures match supported transitions; the earlier refusal
+  remains unexplained. Do not expand permissions from an old screenshot alone.
+- [ ] Verify obsolete action messages clear on device screen, pause, and editor
+  context changes. Late responses must not restore old messages (automated tests
+  pass; live validation pending).
+- [ ] Re-test rest-end confirmation, malt-pipe removal, boil-start confirmation,
+  Heating to boil pause/resume, and both lid-warning variants through HA. Earlier
+  builds rejected supported contexts or masked mapped buttons with a preview.
+  Cloud transitions are recorded; success in the current HA version is still pending.
+- [ ] Implement and validate the state-3010 boil editor: Select opens temperature,
+  Select advances to time, Select closes; keys 2/3 change temperature by 1 °C or
+  duration by 60 seconds. Determine limits and Cancel behavior before enabling
+  unverified operations. Test state 3070 separately; do not infer identical behavior.
+- [ ] Capture final Cancel from hop/completion pauses (3080/3450, indicator 120),
+  including the actual target screen. These final-abort paths remain unverified.
+- [ ] Test Cancel/Up/Down at the lid warning; do not infer editor-cancellation behavior.
+- [ ] Test physical Up/Down at 2705 (Malt added?). No recognizable effect was
+  observed through MySpeidel; do not assign an invented function.
+- [ ] Verify automatic delayed-start countdown expiry and timed-rest editor behavior.
+- [ ] Finish HA regression checks for direct start and mash/purge prompts, and
+  repeat new-alarm navigation from Recipe/Power/Status with sound muted/unmuted.
+- [ ] Verify Hue notification colors and restoration on actual lights.
+- [ ] Compare the fork with upstream Integration 3.3.0 / Bridge 0.6.0 before any
+  migration. Closing upstream issues #18/#28 is not evidence that every fork fix
+  or action was merged. The version set above is our tested beta baseline.
+
+## Confirmed by the user through HA
+
+- Whirlpool and Cheers Select work (including the latest follow-up).
+- Resume from a tested mash-rest pause works with the confirmation dialog.
+- Sound works on notebook, phone, and tablet; repeat playback and local mute work.
+  Muting does not clear the device alarm or resume the process.
+- Recipe matching and current-stage highlighting work after matching by device slot.
+
+## Related observations
+
+- MySpeidel's per-step info buttons show explanatory text and animations/videos.
+  This is a possible future UI enhancement, not implemented or promised here.
+  Original MySpeidel sound/media files are not included in the repository.
+- Hot start: already-satisfied heating is skipped while the timed rest runs
+  normally. Preserve device behavior rather than introducing a new brewing policy.
+
+No raw diagnostics, device identifiers, credentials, or account data are published.

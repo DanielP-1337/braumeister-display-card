@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.30 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.31 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -24,7 +24,7 @@
     2910: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_rest_end']],
     2930: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','confirm_malt_pipe_removed']],
     2960: [['✕','Abbruch','request_program_pause'], ['✓','Hopfenkochen starten','start_boil']],
-    3080: [['✕','Abbruch'], ['✓','Auswahl','acknowledge_hop_addition']],
+    3080: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_hop_addition']],
     3510: [['✓','Auswahl','confirm_whirlpool']],
     3610: [['✓','Auswahl','finish_brewing']],
   };
@@ -363,7 +363,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.30`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.31`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -440,7 +440,9 @@
       code = this.menuStateCode(code);
       const interrupt = this._hass?.states[this.ids.step]?.attributes.display_interrupt;
       const editorFlags=this._hass?.states[this.ids.step]?.attributes.display_editor_flags;
-      if(code===3010 && editorFlags==='0DT') return [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch'], ['✓','Auswahl','confirm_lid_removed']];
+      if(code===3010 && ['0DT','0D0'].includes(editorFlags)) return editorFlags==='0DT'
+        ? [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch'], ['✓','Auswahl','confirm_lid_removed']]
+        : [['✕','Abbruch'], ['✓','Auswahl','confirm_lid_removed']];
       if (Number.isInteger(code) && code >= 2000 && code < 4000 && interrupt === 1) {
         return [['✕','Abbruch','abort_program'], ['✓','Auswahl','resume_program']];
       }
@@ -459,7 +461,8 @@
     actionService(action) {
       if (programActions.has(action)) {
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
-        if (action === 'resume_program' && ![2300,2310,2810].includes(code)) return null;
+        if (action === 'resume_program' && ![2300,2310,2810,2820,3080].includes(code)) return null;
+        if (action === 'request_program_pause' && code === 3080) return this.serviceSupports('program_control', action) ? 'program_control' : null;
         if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820,2910,2930,2960].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
@@ -554,7 +557,7 @@
       const temperatures = code === 4006 && this.showTemperatureReadings
         ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
       const paused = keys.some(key => key[2] === 'resume_program');
-      const programNote = screen===3010 && this._hass.states[this.ids.step]?.attributes?.display_editor_flags==='0DT' ? 'Bitte Deckel entfernen.' : paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
+      const programNote = screen===3010 && ['0DT','0D0'].includes(this._hass.states[this.ids.step]?.attributes?.display_editor_flags) ? 'Bitte Deckel entfernen.' : paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
         : [2030,2111].includes(code) ? 'Startzeitvorwahl: Hoch +30 min, Ab −30 min.' : '';
       const unsupportedKeys = keys.some(key => key[2] && key[2] !== 'temperature_readings' && !this.actionService(key[2]));
       return `${picker}${temperatures}${programNote?`<p class="hint">${esc(this.translate(programNote))}</p>`:''}<div class="keys">${keys.map(([icon,label,menuAction]) => {
@@ -770,5 +773,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.30'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.31'});
 })();

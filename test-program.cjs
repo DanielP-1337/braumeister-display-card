@@ -99,6 +99,14 @@ require('./dist/braumeister-display-card.js');
   await card.navigate('resume_program');
   assert.equal(calls.length,before+4);
   assert.equal(calls.at(-1).service_data.action,'resume_program');
+  screen(2820,1);
+  await card.navigate('resume_program');
+  assert.equal(calls.at(-1).service_data.action,'resume_program');
+  assert.equal(calls.length,before+5);
+  calls.pop();
+  screen(3010,0);
+  states[entities.step].attributes.display_editor_flags='0D0';
+  assert.deepEqual(card.menuKeysFor(3010).map(v=>v[2]),[undefined,'confirm_lid_removed']);
   screen(2410,2);
   assert.equal(card.menuKeysFor(2410).length,0); // Error is not a resumable pause.
   screen(2410,1);

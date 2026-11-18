@@ -31,6 +31,7 @@ require('./dist/braumeister-display-card.js');
  }
  states['s.step'].attributes={display_state_code:3450,display_interrupt:0};card.render();
  await card.navigate('confirm_whirlpool');assert.equal(calls.length,3);
- assert(card.menuKeysFor(3080).every(k=>k[2]!=='abort_program' && k[2]!=='request_program_pause'));
+ assert.equal(card.menuKeysFor(3080)[0][2],'request_program_pause');
+ assert(card.menuKeysFor(3080).every(k=>k[2]!=='abort_program'));
  console.log('PASS: hop/Whirlpool/Cheers dispatch, capability, opt-in, stale, admin and paused-state guards; no invented completion controls');
 })().catch(e=>{console.error(e);process.exitCode=1;});

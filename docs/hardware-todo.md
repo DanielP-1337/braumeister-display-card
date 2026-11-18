@@ -7,6 +7,15 @@ coverage, and successful HA hardware tests are separate evidence levels.
 
 ## Open
 
+- [ ] Verify rest-end acknowledgment directly while actuator flags are `qi`.
+  At 18:27:03 (sequence 3695), state `2910/qi/010` was reported and HA rejected
+  Select. The same prompt changed to `2910/Pi/010` at 18:27:49 (3729), before
+  MySpeidel key 4 at 18:28:19 (3754) reached `2930/pi/000` (3756).
+  This proves the qi variation exists, but not a key-4 transition under qi.
+  Do not describe that cloud acknowledgment as a directly observed qi command.
+  The new qi permission in Companion beta.23 / Bridge beta.14 applies to state
+  2510 only; it does not resolve this distinct state-2910 finding.
+
 - [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
   0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge
   0.5.1-beta.13. Record the exact action/screen/actuator/indicator diagnostic if

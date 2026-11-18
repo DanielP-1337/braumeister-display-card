@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Resterende tijd gemeld door het apparaat",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Startvertraging: Omhoog +30 min, Omlaag −30 min.",
   "Jetzt starten": "Nu starten",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Aftellen overslaan en nu starten? Water gevuld? De pomp start onmiddellijk; verwarming kan volgen."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Aftellen overslaan en nu starten? Water gevuld? De pomp start onmiddellijk; verwarming kan volgen.",
+  "Alarmton": "Alarmgeluid",
+  "Ton bei Alarm / Pause": "Geluid bij alarm / pauze",
+  "Sound-URL (leer: Signalton)": "Geluids-URL (leeg: ingebouwde toon)",
+  "Lautstärke": "Volume",
+  "Ton testen / freigeben": "Geluid testen / inschakelen",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Eenmaal per nieuw alarm, maximaal 5 seconden. Test eerst het geluid op deze tablet.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Geluid niet beschikbaar. Test het geluid en controleer de browserrechten.",
+  "Hinweis vom Braumeister": "Melding van de Braumeister",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Mout toegevoegd? Bevestigen start de pomp en verwarming."
 }

@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Temps restant indiqué par l’appareil",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Départ différé : Haut +30 min, Bas −30 min.",
   "Jetzt starten": "Démarrer maintenant",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Ignorer le compte à rebours et démarrer maintenant ? Eau ajoutée ? La pompe démarre immédiatement ; le chauffage peut suivre."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Ignorer le compte à rebours et démarrer maintenant ? Eau ajoutée ? La pompe démarre immédiatement ; le chauffage peut suivre.",
+  "Alarmton": "Son d’alarme",
+  "Ton bei Alarm / Pause": "Son lors d’une alarme / pause",
+  "Sound-URL (leer: Signalton)": "URL du son (vide : signal intégré)",
+  "Lautstärke": "Volume",
+  "Ton testen / freigeben": "Tester / activer le son",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Une fois par nouvelle alarme, pendant 5 secondes maximum. Testez d’abord le son sur cette tablette.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Son indisponible. Testez le son et vérifiez les autorisations du navigateur.",
+  "Hinweis vom Braumeister": "Notification du Braumeister",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malt ajouté ? La confirmation démarre la pompe et le chauffage."
 }

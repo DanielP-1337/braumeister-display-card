@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Remaining time reported by the device",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Start delay: Up +30 min, Down −30 min.",
   "Jetzt starten": "Start now",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Skip the countdown and start now? Is water filled? The pump starts immediately; heating may follow."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Skip the countdown and start now? Is water filled? The pump starts immediately; heating may follow.",
+  "Alarmton": "Alarm sound",
+  "Ton bei Alarm / Pause": "Sound on alarm / pause",
+  "Sound-URL (leer: Signalton)": "Sound URL (blank: built-in tone)",
+  "Lautstärke": "Volume",
+  "Ton testen / freigeben": "Test / enable sound",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Once per new alarm, up to 5 seconds. Test sound on this tablet first.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Sound unavailable. Test the sound and check browser permissions.",
+  "Hinweis vom Braumeister": "Braumeister notification",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malt added? Confirming starts the pump and heater."
 }

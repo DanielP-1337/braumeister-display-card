@@ -29,6 +29,7 @@ require('./dist/braumeister-display-card.js');
     ...[3070,3075,3079,3450,3500].map(code => [code,['Abbruch','Ab','Hoch','Auswahl']]),
     ...[3501,3600,3601,3700].map(code => [code,['Auswahl']]),
     ...[2910,2930,2960,3010,3069,3080,3449].map(code => [code,['Abbruch','Auswahl']])]) {
+    if ([2510,2610,2705,2810,2820].includes(code)) continue;
     screen(code);
     const html = card.renderMenu(code);
     assert.deepEqual([...html.matchAll(/disabled aria-label="([^"]+)"/g)].map(match => match[1]),expected.map(key => card.translate(key)));
@@ -117,10 +118,22 @@ require('./dist/braumeister-display-card.js');
   assert.doesNotMatch(card.shadowRoot.innerHTML.match(/<button[^>]*data-menu="request_program_pause"[^>]*>/)[0], /\bdisabled\b/);
   await card.navigate('request_program_pause');
   assert.equal(calls.length,purgeCalls+2);
-  for (const invalid of ['', ' 2300', '2300x', '2310']) {
+  for (const invalid of ['', ' 2300', '2300x', '2320']) {
     states['sensor.step'].attributes.display_state_code=invalid;
     await card.navigate('request_program_pause');
     assert.equal(calls.length,purgeCalls+2);
   }
-  console.log('PASS: complete stage keys, interrupt 120 pause rendering, explicit backend capability, opt-in/confirmation, stale-state and error gating; reported purge Cancel enabled and dispatched');
+  services.program_control.fields.action.selector.select.options.push('cancel_water_prompt','start_delay_up','acknowledge_mash_temperature','open_malt_confirmation','confirm_malt_added');
+  card.setConfig({language:'en-US',menu_control:true,program_control:true,entities});
+  screen(2030);
+  for(const action of ['cancel_water_prompt','start_delay_up','confirm_water_filled']) {
+    const button=card.shadowRoot.innerHTML.match(new RegExp('<button[^>]*data-menu="'+action+'"[^>]*>'));
+    assert(button);assert.doesNotMatch(button[0],/\bdisabled\b/);
+  }
+  for(const [code,action] of [[2510,'acknowledge_mash_temperature'],[2610,'open_malt_confirmation'],[2705,'confirm_malt_added']]) {
+    screen(code);assert(!card.shadowRoot.innerHTML.includes('Confirm on the Braumeister'));
+    const before=calls.length;await card.navigate(action);assert.equal(calls.length,before+1);assert.equal(calls.at(-1).service_data.action,action);
+  }
+  screen(2810);const cancel=calls.length;await card.navigate('request_program_pause');assert.equal(calls.length,cancel+1);
+  console.log('PASS: mapped water/malt/purge/rest controls, confirmation, capability, permission and stale-state guards');
 })().catch(e=>{console.error(e);process.exitCode=1;});

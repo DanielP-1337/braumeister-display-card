@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Vom Gerät gemeldete Restzeit",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Startzeitvorwahl: Hoch +30 min, Ab −30 min.",
   "Jetzt starten": "Jetzt starten",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.",
+  "Alarmton": "Alarmton",
+  "Ton bei Alarm / Pause": "Ton bei Alarm / Pause",
+  "Sound-URL (leer: Signalton)": "Sound-URL (leer: Signalton)",
+  "Lautstärke": "Lautstärke",
+  "Ton testen / freigeben": "Ton testen / freigeben",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.",
+  "Hinweis vom Braumeister": "Hinweis vom Braumeister",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malz eingefüllt? Bestätigung startet Pumpe und Heizung."
 }

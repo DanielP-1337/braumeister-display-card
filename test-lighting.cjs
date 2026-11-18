@@ -50,7 +50,7 @@ require('./dist/braumeister-display-card.js');
  const editor=Card.getConfigElement();editor.setConfig(config);await editor._languageReady;
  assert.equal((editor.shadowRoot.innerHTML.match(/class="swatch"/g)||[]).length,8);
  assert(editor.shadowRoot.innerHTML.includes('type="color"'));
- editor.listeners.click({target:{closest:()=>({dataset:{color:'#00cfff'}})}});
+ editor.listeners.click({target:{closest:selector=>selector.includes('data-color')?({dataset:{color:'#00cfff'}}):null}});
  const event=editor.events.at(-1);assert.equal(event.type,'config-changed');assert(event.bubbles&&event.composed);
  assert.equal(event.detail.config.button_color,'#00cfff');assert.deepEqual(event.detail.config.entities,config.entities);
  assert.equal(JSON.stringify(config),original);assert.deepEqual(event.detail.config.extra,config.extra);

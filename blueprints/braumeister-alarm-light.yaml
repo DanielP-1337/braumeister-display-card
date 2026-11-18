@@ -1,0 +1,109 @@
+blueprint:
+  name: Braumeister — configurable step and pause notifications
+  description: >-
+    Blink selected RGB lights three times on a new device notification or program pause,
+    then restore their previous state. Runs in HA even when the tablet is closed.
+    Select the same alarm, step and connection entities as in the Display Card.
+    Optional actions can notify a phone or play audio on a media player.
+    Do not use the same lights in concurrent notification automations.
+  domain: automation
+  input:
+    alarm:
+      name: Braumeister alarm sensor
+      selector:
+        entity:
+          domain: binary_sensor
+    step:
+      name: Braumeister step sensor (display_interrupt attribute)
+      selector:
+        entity:
+          domain: sensor
+    connection:
+      name: Braumeister connection sensor (online/offline)
+      selector:
+        entity:
+          domain: sensor
+    lights:
+      name: RGB lights (for example, bathroom Hue lights)
+      selector:
+        entity:
+          domain: light
+          multiple: true
+    information_color:
+      name: Normal brewing notification color
+      description: Temperature reached, rest finished, hop addition or brew finished.
+      default: [0, 255, 0]
+      selector:
+        color_rgb: {}
+    attention_color:
+      name: Pause or unclassified alarm color
+      default: [255, 0, 0]
+      selector:
+        color_rgb: {}
+    extra_actions:
+      name: Additional notification actions
+      default: []
+      selector:
+        action: {}
+mode: single
+max_exceeded: silent
+trigger_variables:
+  alarm_entity: !input alarm
+  step_entity: !input step
+triggers:
+  - trigger: template
+    id: information
+    value_template: >-
+      {{ is_state(alarm_entity, 'on') and state_attr(step_entity, 'display_interrupt') != 1 and
+         state_attr(alarm_entity, 'alarm_type') in
+         ['mash_in_temperature_reached', 'rest_end_reached', 'hop_addition', 'brew_finished'] }}
+  - trigger: template
+    id: attention
+    value_template: >-
+      {{ (state_attr(step_entity, 'display_interrupt') == 1 and
+          2000 <= state_attr(step_entity, 'display_state_code') | int(0) < 4000) or
+         (is_state(alarm_entity, 'on') and state_attr(alarm_entity, 'alarm_type') not in
+          ['mash_in_temperature_reached', 'rest_end_reached', 'hop_addition', 'brew_finished']) }}
+conditions:
+  - condition: state
+    entity_id: !input connection
+    state: online
+actions:
+  - variables:
+      saved_scene: "braumeister_alarm_{{ this.context.id | lower }}"
+      information_color: !input information_color
+      attention_color: !input attention_color
+      notification_color: "{{ information_color if trigger is defined and trigger.id == 'information' else attention_color }}"
+  - action: scene.create
+    data:
+      scene_id: "{{ saved_scene }}"
+      snapshot_entities: !input lights
+  - repeat:
+      count: 3
+      sequence:
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id: !input lights
+          data:
+            rgb_color: "{{ notification_color }}"
+            brightness_pct: 70
+            transition: 0
+        - delay:
+            seconds: 1
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id: !input lights
+          data:
+            transition: 0
+        - delay:
+            seconds: 1
+  - action: scene.turn_on
+    target:
+      entity_id: "scene.{{ saved_scene }}"
+  - action: scene.delete
+    target:
+      entity_id: "scene.{{ saved_scene }}"
+  - choose: []
+    default: !input extra_actions

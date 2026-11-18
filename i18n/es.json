@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Tiempo restante indicado por el dispositivo",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Inicio diferido: Arriba +30 min, Abajo −30 min.",
   "Jetzt starten": "Iniciar ahora",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "¿Omitir la cuenta atrás e iniciar ahora? ¿Hay agua? La bomba arranca inmediatamente; después puede activarse el calentamiento."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "¿Omitir la cuenta atrás e iniciar ahora? ¿Hay agua? La bomba arranca inmediatamente; después puede activarse el calentamiento.",
+  "Alarmton": "Sonido de alarma",
+  "Ton bei Alarm / Pause": "Sonido en alarma / pausa",
+  "Sound-URL (leer: Signalton)": "URL del sonido (vacío: tono integrado)",
+  "Lautstärke": "Volumen",
+  "Ton testen / freigeben": "Probar / activar sonido",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Una vez por cada alarma nueva, hasta 5 segundos. Prueba primero el sonido en esta tableta.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Sonido no disponible. Prueba el sonido y comprueba los permisos del navegador.",
+  "Hinweis vom Braumeister": "Aviso del Braumeister",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "¿Malta añadida? La confirmación inicia la bomba y el calentador."
 }

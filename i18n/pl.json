@@ -138,5 +138,14 @@
   "Vom Gerät gemeldete Restzeit": "Pozostały czas zgłoszony przez urządzenie",
   "Startzeitvorwahl: Hoch +30 min, Ab −30 min.": "Opóźnienie startu: W górę +30 min, W dół −30 min.",
   "Jetzt starten": "Uruchom teraz",
-  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Pominąć odliczanie i uruchomić teraz? Czy wlano wodę? Pompa uruchomi się natychmiast; następnie może włączyć się grzanie."
+  "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Pominąć odliczanie i uruchomić teraz? Czy wlano wodę? Pompa uruchomi się natychmiast; następnie może włączyć się grzanie.",
+  "Alarmton": "Dźwięk alarmu",
+  "Ton bei Alarm / Pause": "Dźwięk przy alarmie / pauzie",
+  "Sound-URL (leer: Signalton)": "Adres URL dźwięku (pusty: sygnał wbudowany)",
+  "Lautstärke": "Głośność",
+  "Ton testen / freigeben": "Testuj / włącz dźwięk",
+  "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Raz na każdy nowy alarm, maksymalnie 5 sekund. Najpierw przetestuj dźwięk na tym tablecie.",
+  "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Dźwięk niedostępny. Przetestuj dźwięk i sprawdź uprawnienia przeglądarki.",
+  "Hinweis vom Braumeister": "Powiadomienie z Braumeistera",
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Dodano słód? Potwierdzenie uruchamia pompę i grzałkę."
 }

@@ -54,7 +54,30 @@ The recorder showed PH/Pi rather than qi at that prompt:
 This confirms a PH-source acknowledgment with a transient pH target through HA.
 It does not verify the distinct Pi-source/pH-target combination or qi source.
 
-## Focused test checklist
+## Hot-start follow-up at 21:25–21:27
+
+The next hot-start run reached rest end with qi still active. The supplied HA
+screenshot at 21:26 shows an acknowledgment rejection for
+`action=acknowledge_rest_end, screen=2910, actuators=qi, indicator=010` and an
+actual temperature of 84 °C. The user subsequently reported that the pump resumed
+after the water cooled below 84 °C and that another Select through HA succeeded.
+The resulting malt-pipe-removal screenshot shows 83.5 °C.
+
+| Time | Sequence | Recorder observation |
+| --- | --- | --- |
+| 21:25:26.038 | 6843 | Rest end `2910/qi/010` |
+| 21:27:21.538 | 6939 | Same prompt changes to `2910/Pi/010` |
+| 21:27:32.506 | 6946 | HA (`local_control`) key 4 at `2910/Pi/010` |
+| 21:27:33.627 | 6948 | Malt-pipe removal `2930/pi/000` |
+
+The recorder proves that qi changed to Pi before the successful HA command.
+The below-84 °C pump-release observation comes from the user and screenshots;
+the extracted status transitions above do not independently establish the exact
+temperature at the instant of flag change. Together these observations support
+the pump-protection hypothesis without establishing a formal flag definition.
+The successful command validates the Pi path, not a direct qi acknowledgment.
+
+## Next focused test checklist
 
 1. During a supervised water-only test, repeat the previously observed restart
    with water already above the UI's 88 °C shutdown threshold and the short-rest
@@ -64,13 +87,12 @@ It does not verify the distinct Pi-source/pH-target combination or qi source.
 2. Record the pump-shutdown prompt and how it was acknowledged. Let the short
    rests run normally. At "Mash rest complete," record temperature and time and
    inspect the live diagnostic state for exactly `2910/qi/010`.
-3. If qi is present, press Select in HA once. Record the exact time, resulting
-   screen, or full rejection diagnostic. A UI screenshot alone cannot establish
-   the actuator flags at command dispatch.
-4. If HA rejects it and the rest-end prompt is still active, acknowledge once
-   through MySpeidel. Record time and resulting screen. Verify in the recorder
-   that the cloud key-4 command itself still originated at `2910/qi/010`.
-5. Capture the first resulting state/flags/indicator and subsequent stabilization.
+3. As agreed after the 21:27 run, acknowledge rest end directly through MySpeidel
+   while qi is still active, without repeating the already observed HA rejection
+   first. Record time and resulting screen. Verify in the recorder that the cloud
+   key-4 command itself still originated at `2910/qi/010`; a screenshot alone
+   cannot establish the actuator flags at command dispatch.
+4. Capture the first resulting state/flags/indicator and subsequent stabilization.
    If flags changed to Pi or PH before the command, classify the run accordingly
    and leave qi open. Do not prolong or alter the process solely to force qi.
 

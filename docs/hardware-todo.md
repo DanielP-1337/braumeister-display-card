@@ -39,6 +39,11 @@ coverage, and successful HA hardware tests are separate evidence levels.
   i = heater inactive at/above target (possibly a broader heating pause).
   The recorded PH -> qH change at 21:09:59 coincides with the user's reported
   pump-protection stop at 88 °C. These meanings remain hypotheses, not new guards.
+  At 21:25:26 (6843), rest end again reported qi/010 and HA rejected Select.
+  At 21:27:21 (6939), flags changed to Pi; HA key 4 at 21:27:32 (6946)
+  then reached `2930/pi/000` (6948). The user observed pump release below 84 °C;
+  the result screenshot shows 83.5 °C. Next run: acknowledge directly through
+  MySpeidel while qi persists, then verify the actual command-source tuple.
 
 - [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
   0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge

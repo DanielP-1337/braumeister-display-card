@@ -60,14 +60,15 @@ have unavailable controls in HA. These are not enabled by beta.27.
   in this export; do not label that transition a confirmed Select command.
 - [x] Cloud key 4 at sequence 4382, `3510/ph/000` (`000S`) → sequence 4384,
   `3610/ph/000` (`000S`).
-- [ ] Add and test the exact hop-acknowledgment action in Bridge, Companion and Card.
+- [x] Implement and test the exact hop-acknowledgment action in Bridge, Companion and Card (beta.28 / Companion beta.18 / Bridge beta.10).
 - [x] Final Cheers screen: cloud key 4 at sequence 4464, `3610/ph/000`
   (`000S`) → sequence 4466, main menu `101/ph/000` (`EMSR`). The user
   confirmed both Whirlpool and Cheers through MySpeidel because HA Select
   was still unavailable.
-- [ ] Add and test the recorded 3510 → 3610 and 3610 → 101 confirmations.
+- [x] Implement and test the recorded 3510 → 3610 and 3610 → 101 confirmations.
   Use field 13 to distinguish screens with only Select; do not add Cancel or
   Up/Down to these two completion screens.
+- [ ] Validate the three new HA actions on hardware after updating the coordinated beta set. The source transitions above were observed through MySpeidel; automated tests use simulated device responses.
 - [ ] Verify stopping behavior at hop/end-of-brew prompts; do not infer a Cancel
   action from a Select trace.
 

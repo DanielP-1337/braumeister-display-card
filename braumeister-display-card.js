@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.27 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.28 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -24,9 +24,12 @@
     2910: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_rest_end']],
     2930: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','confirm_malt_pipe_removed']],
     2960: [['✕','Abbruch','request_program_pause'], ['✓','Hopfenkochen starten','start_boil']],
+    3080: [['✕','Abbruch'], ['✓','Auswahl','acknowledge_hop_addition']],
+    3510: [['✓','Auswahl','confirm_whirlpool']],
+    3610: [['✓','Auswahl','finish_brewing']],
   };
   // Future backend contract. Never dispatch through the legacy menu service.
-  const programActions = new Set(['confirm_lid_removed', 'acknowledge_rest_end', 'confirm_malt_pipe_removed', 'start_boil', 'acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
+  const programActions = new Set(['acknowledge_hop_addition', 'confirm_whirlpool', 'finish_brewing', 'confirm_lid_removed', 'acknowledge_rest_end', 'confirm_malt_pipe_removed', 'start_boil', 'acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
     'confirm_water_filled', 'confirm_start_delay', 'start_now', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
   const energizingActions = new Set(['start_boil', 'confirm_malt_added', 'confirm_water_filled', 'confirm_start_delay', 'start_now', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -360,7 +363,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.27`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.28`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -757,5 +760,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.27'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.28'});
 })();

@@ -27,6 +27,7 @@ jobs:
       - run: node test-countdown.cjs
       - run: node test-recipe-refresh.cjs
       - run: node test-recipe-plan.cjs
+      - run: node test-completion.cjs
       - run: node test-progress.cjs
       - run: node test-audio.cjs
       - run: node test-audio-repeat.cjs

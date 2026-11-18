@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.34 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.35 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -268,8 +268,16 @@
       });
     }
     setConfig(config) { this.stopAlarmAudio(); this.config=config; this.ids={...defaults,...config.entities}; this.refreshLanguage(); this.render(); }
+    menuContext(hass=this._hass) {
+      const attrs=hass?.states[this.ids?.step]?.attributes || {};
+      return JSON.stringify([this.menuStateCode(attrs.display_state_code),attrs.display_interrupt,attrs.display_editor_flags,attrs.display_button_labels]);
+    }
     set hass(value) {
       const previous=this._hass; this._hass=value;
+      if(previous && this.menuContext(previous)!==this.menuContext(value)) {
+        this.menuContextEpoch=(this.menuContextEpoch || 0)+1;
+        this.menuResult='';
+      }
       this.refreshLanguage();
       const previousCode = previous?.states[this.ids?.step]?.attributes.display_state_code;
       const code = value.states[this.ids?.step]?.attributes.display_state_code;
@@ -364,7 +372,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.34`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.35`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -499,16 +507,19 @@
       this.pickerReadEpoch = (this.pickerReadEpoch || 0) + 1;
       this.menuResult = 'pending';
       this.pendingMenuAction = action;
+      const contextEpoch=this.menuContextEpoch || 0;
       this.render();
       try {
         const reply = await this._hass.callWS({
           type: 'call_service', domain: 'braumeister_menu', service,
           service_data: {action}, return_response: true,
         });
-        this.menuResult = reply?.response?.result || 'unconfirmed';
-        if (reply?.response?.picker) this.picker = reply.response.picker;
+        if(contextEpoch===(this.menuContextEpoch || 0)) {
+          this.menuResult = reply?.response?.result || 'unconfirmed';
+          if (reply?.response?.picker) this.picker = reply.response.picker;
+        }
       } catch (err) {
-        this.menuResult = err.message || 'unconfirmed';
+        if(contextEpoch===(this.menuContextEpoch || 0)) this.menuResult = err.message || 'unconfirmed';
       } finally {
         this.pendingMenuAction = null;
         this.pending = false;
@@ -775,5 +786,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.34'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.35'});
 })();

@@ -24,12 +24,16 @@ coverage, and successful HA hardware tests are separate evidence levels.
   unverified operations. Test state 3070 separately; do not infer identical behavior.
 - [ ] Capture final Cancel from hop/completion pauses (3080/3450, indicator 120),
   including the actual target screen. These final-abort paths remain unverified.
-- [ ] Capture final Cancel from the Heating to boil pause (3010/120); HA Cancel
-  is still unavailable there. Successful pause/resume does not validate final abort.
+- [x] Capture Cancel at the normal lid warning and final Cancel from the resulting
+  Heating to boil pause: `3010/qH/0D0` → `3010/ph/120` → `101/ph/000`, two
+  separate cloud key-1 commands. See [recorded evidence](lid-cancel-2026-11-18.md).
+- [ ] Implement and hardware-test those exact lid-pause and final-abort actions
+  through HA; the cloud evidence does not establish HA success.
 - [ ] Resolve the portal/editor discrepancy: the user perceived direct-to-time
   entry, but two recorded cycles include `00T` for 6–10 seconds before a second
   Select enters `00Z`. See [timestamped evidence](boil-editor-followup-2026-11-18.md).
-- [ ] Test Cancel/Up/Down at the lid warning; do not infer editor-cancellation behavior.
+- [ ] Test Cancel at the editor-associated lid warning (`0DT`) and any displayed
+  Up/Down buttons; do not infer editor-cancellation behavior from normal `0D0`.
 - [ ] Test physical Up/Down at 2705 (Malt added?). No recognizable effect was
   observed through MySpeidel; do not assign an invented function.
 - [ ] Verify automatic delayed-start countdown expiry and timed-rest editor behavior.

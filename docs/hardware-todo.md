@@ -11,14 +11,15 @@ coverage, and successful HA hardware tests are separate evidence levels.
   source mapping. Cloud key 1 at 19:03:00 (1941) reaches `3010/ph/120` (1943);
   another key 1 at 19:03:09 (1961) reaches `101/ph/000` (1963).
   This is distinct from the active lid-warning indicator `0D0`.
-- [ ] Release and hardware-test this qH/000 pause addition alongside the pending
-  pH rest-end target fix. Published Bridge beta.14/Companion beta.23 lack qH/000.
+- [x] Package qH/000 pause and the pH rest-end target fix together in Bridge
+  beta.15 / Integration beta.17, Companion beta.24 and Card beta.37.
+- [ ] Hardware-test both corrections after installing that coordinated beta set.
 
 - [x] Add the observed rest-end target variant `2910/Pi/010` -> `2930/pH/000`
   to Bridge source mapping (MySpeidel key 4, 18:50:44–48, sequences 1188–1190).
   Existing `2930/pH/000` malt-pipe confirmation is already supported.
-- [ ] Publish and hardware-validate this target-confirmation adjustment in the
-  next beta. It does not enable source `2910/qi/010`; that remains open.
+- [ ] Hardware-validate this target-confirmation adjustment in Bridge beta.15.
+  It does not enable source `2910/qi/010`; that remains open.
 
 - [ ] Verify rest-end acknowledgment directly while actuator flags are `qi`.
   At 18:27:03 (sequence 3695), state `2910/qi/010` was reported and HA rejected

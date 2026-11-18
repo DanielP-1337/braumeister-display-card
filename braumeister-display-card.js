@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.33 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.34 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -364,7 +364,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.33`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.34`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -521,7 +521,7 @@
       const interrupt = this._hass.states[this.ids.step]?.attributes?.display_interrupt;
       const pumpFlag = this._hass.states[this.ids.step]?.attributes?.display_pump_flag;
       const timedBoil = screen >= 3070 && screen < 3080;
-      if (!menuKeys[screen] && interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen <= 3700
+      if (!this.menuKeysFor(screen).some(key=>key[2]) && interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen <= 3700
           && !(screen < 2610 && pumpFlag === 'q')) {
         const keys = screen <= 3500 ? [['✕', 'Abbruch']] : [];
         const attrs=this._hass.states[this.ids.step]?.attributes;
@@ -686,7 +686,7 @@
       .phase{font-size:clamp(19px,4cqw,28px);font-weight:bold;margin:24px 0 8px;overflow-wrap:anywhere}.sub{font-size:14px}
       .recipe-picker{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);grid-auto-columns:minmax(0,1fr);gap:6px clamp(10px,4cqw,24px);list-style:none;margin:0;padding:0;text-align:left}.recipe-picker li{min-width:0;overflow-wrap:anywhere}.recipe-picker mark{background:#ffda16;color:#000}
       .recipe-layout{display:grid;gap:24px}.recipe-layout section{min-width:0}.recipe-plan{list-style:none;padding:0 0 0 12px;border-left:3px solid #aaa}.recipe-plan li{padding:10px 12px;line-height:1.6;font-size:14px}.recipe-plan li.current{background:#ffe000;border-left:4px solid #000}.recipe-layout h3{overflow-wrap:anywhere}.recipe-layout p{font-size:13px;line-height:1.5}@container(min-width:780px){.recipe-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-      .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys>div{min-width:0}.control-icon{display:block;width:1em;height:1em;flex:none}.keys button{display:grid;place-items:center;padding:0;line-height:1;background:#ffda16;border-radius:10px;font-size:clamp(26px,8cqw,42px);font-weight:bold;width:clamp(40px,12cqw,64px);height:clamp(40px,12cqw,64px);color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}.keys.mash-preview button:disabled{opacity:1}small{display:block;font-size:11px;margin-top:7px}
+      .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys>div{min-width:0}.control-icon{display:block;width:1em;height:1em;flex:none}.keys button{display:grid;place-items:center;padding:0;line-height:1;background:#ffda16;border-radius:10px;font-size:clamp(26px,8cqw,42px);font-weight:bold;width:clamp(40px,12cqw,64px);height:clamp(40px,12cqw,64px);color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}small{display:block;font-size:11px;margin-top:7px}
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
@@ -775,5 +775,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.33'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.34'});
 })();

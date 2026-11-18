@@ -22,6 +22,6 @@ browser click count and rendering between them are not captured. Actual
 temperature was 95.5 °C. Target field 4 remained 960 even in the main menu, so
 that residual target alone is not evidence of continued heating.
 
-These exact cloud transitions are now observed. Their HA implementation and
-hardware validation remain open. Do not generalize this observation to the
+These exact cloud transitions are implemented in Card beta.36, Companion beta.23,
+and Bridge beta.14. HA hardware validation remains open. Do not generalize to the
 editor-associated `0DT` lid warning or paused hop/completion states.

@@ -121,7 +121,7 @@ require('./dist/braumeister-display-card.js');
   assert(card.menuKeysFor(3010).every(v=>!v[2]));
   screen(3010,0);
   states[entities.step].attributes.display_editor_flags='0D0';
-  assert.deepEqual(card.menuKeysFor(3010).map(v=>v[2]),[undefined,'confirm_lid_removed']);
+  assert.deepEqual(card.menuKeysFor(3010).map(v=>v[2]),['request_program_pause','confirm_lid_removed']);
   card.render();
   assert(card.shadowRoot.innerHTML.includes('data-menu="confirm_lid_removed"'));
   assert(!card.shadowRoot.innerHTML.includes('keys mash-preview'));
@@ -173,5 +173,16 @@ require('./dist/braumeister-display-card.js');
     const before=calls.length;await card.navigate(action);assert.equal(calls.length,before+1);assert.equal(calls.at(-1).service_data.action,action);
   }
   screen(2810);const cancel=calls.length;await card.navigate('request_program_pause');assert.equal(calls.length,cancel+1);
-  console.log('PASS: mapped water/malt/purge/rest controls, confirmation, capability, permission and stale-state guards');
+  screen(3010);states[entities.step].attributes.display_editor_flags='0D0';card.render();
+  const lidCalls=calls.length;
+  await card.navigate('request_program_pause');assert.equal(calls.length,lidCalls+1);
+  screen(3010,1);states[entities.step].attributes.display_editor_flags='120';card.render();
+  assert(!card.shadowRoot.innerHTML.match(/<button[^>]*data-menu="abort_program"[^>]*>/)[0].includes('disabled'));
+  window.confirm=()=>false;await card.navigate('abort_program');assert.equal(calls.length,lidCalls+1);
+  window.confirm=()=>true;await card.navigate('abort_program');assert.equal(calls.length,lidCalls+2);
+  assert.equal(calls.at(-1).service_data.action,'abort_program');
+  screen(3010);states[entities.step].attributes.display_editor_flags='0DT';card.render();
+  await card.navigate('request_program_pause');assert.equal(calls.length,lidCalls+2);
+  for(const code of [3080,3450]){screen(code,1);await card.navigate('abort_program');assert.equal(calls.length,lidCalls+2);}
+  console.log('PASS: mapped program controls, normal lid pause, guarded final abort, unsupported contexts and existing safety gates');
 })().catch(e=>{console.error(e);process.exitCode=1;});

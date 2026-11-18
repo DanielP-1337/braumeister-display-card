@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.35 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.36 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -372,7 +372,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.35`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.36`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -451,7 +451,7 @@
       const editorFlags=this._hass?.states[this.ids.step]?.attributes.display_editor_flags;
       if(code===3010 && ['0DT','0D0'].includes(editorFlags)) return editorFlags==='0DT'
         ? [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch'], ['✓','Auswahl','confirm_lid_removed']]
-        : [['✕','Abbruch'], ['✓','Auswahl','confirm_lid_removed']];
+        : [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','confirm_lid_removed']];
       if (Number.isInteger(code) && code >= 2000 && code < 4000 && interrupt === 1) {
         return [['✕','Abbruch','abort_program'], ['✓','Auswahl','resume_program']];
       }
@@ -473,7 +473,7 @@
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
         if (action === 'resume_program' && ![2300,2310,2810,2820,3010,3080,3450].includes(code)) return null;
         if (action === 'request_program_pause' && [3010,3080,3450].includes(code)) return this.serviceSupports('program_control', action) ? 'program_control' : null;
-        if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820,2910,2930,2960].includes(code)) return null;
+        if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820,2910,2930,2960,3010].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
           && (stopping || this.config.program_control === true) ? 'program_control' : null;
@@ -786,5 +786,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.35'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.36'});
 })();

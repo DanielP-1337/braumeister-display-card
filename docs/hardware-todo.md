@@ -27,8 +27,14 @@ coverage, and successful HA hardware tests are separate evidence levels.
 - [x] Capture Cancel at the normal lid warning and final Cancel from the resulting
   Heating to boil pause: `3010/qH/0D0` → `3010/ph/120` → `101/ph/000`, two
   separate cloud key-1 commands. See [recorded evidence](lid-cancel-2026-11-18.md).
-- [ ] Implement and hardware-test those exact lid-pause and final-abort actions
-  through HA; the cloud evidence does not establish HA success.
+- [x] Implement those exact lid-pause and final-abort actions in Card beta.36,
+  Companion beta.23 and Bridge beta.14 (Integration beta.16 package).
+- [ ] Hardware-test those new actions through HA; the cloud evidence and automated
+  tests do not establish HA hardware success.
+- [ ] Hardware-test hot-start mash acknowledgment with `2510/qi/010` in the same
+  beta set. Cloud key 4 at 18:20:26.582 (3212) reached `2610/ph/000` at
+  18:20:27.254 (3214). The old Pi-only guard caused the reported rejection;
+  qi is now explicitly supported for this prompt.
 - [ ] Resolve the portal/editor discrepancy: the user perceived direct-to-time
   entry, but two recorded cycles include `00T` for 6–10 seconds before a second
   Select enters `00Z`. See [timestamped evidence](boil-editor-followup-2026-11-18.md).

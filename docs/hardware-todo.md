@@ -15,16 +15,20 @@ coverage, and successful HA hardware tests are separate evidence levels.
 - [ ] Verify obsolete action messages clear on device screen, pause, and editor
   context changes. Late responses must not restore old messages (automated tests
   pass; live validation pending).
-- [ ] Re-test rest-end confirmation, malt-pipe removal, boil-start confirmation,
-  Heating to boil pause/resume, and both lid-warning variants through HA. Earlier
-  builds rejected supported contexts or masked mapped buttons with a preview.
-  Cloud transitions are recorded; success in the current HA version is still pending.
+- [x] Current-run HA confirmation: rest end, malt-pipe removal, boil start, and
+  Heating to boil pause/resume succeeded (user report and recorder follow-up).
+- [ ] Re-test both lid-warning variants through HA.
 - [ ] Implement and validate the state-3010 boil editor: Select opens temperature,
   Select advances to time, Select closes; keys 2/3 change temperature by 1 °C or
   duration by 60 seconds. Determine limits and Cancel behavior before enabling
   unverified operations. Test state 3070 separately; do not infer identical behavior.
 - [ ] Capture final Cancel from hop/completion pauses (3080/3450, indicator 120),
   including the actual target screen. These final-abort paths remain unverified.
+- [ ] Capture final Cancel from the Heating to boil pause (3010/120); HA Cancel
+  is still unavailable there. Successful pause/resume does not validate final abort.
+- [ ] Resolve the portal/editor discrepancy: the user perceived direct-to-time
+  entry, but two recorded cycles include `00T` for 6–10 seconds before a second
+  Select enters `00Z`. See [timestamped evidence](boil-editor-followup-2026-11-18.md).
 - [ ] Test Cancel/Up/Down at the lid warning; do not infer editor-cancellation behavior.
 - [ ] Test physical Up/Down at 2705 (Malt added?). No recognizable effect was
   observed through MySpeidel; do not assign an invented function.

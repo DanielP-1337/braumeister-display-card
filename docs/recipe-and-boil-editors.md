@@ -1,5 +1,9 @@
 # Recipe display and boil editor observations — November 18, 2026
 
+Later validation and the apparent direct-to-time editor entry are documented in
+the [18:08 follow-up](boil-editor-followup-2026-11-18.md). Current open items are
+tracked in [hardware TODO](hardware-todo.md); pending items below are historical.
+
 The Recipe tab uses live step attributes for target/elapsed rest time, verified
 3010 boil heat-up time, and the 2120 start-delay countdown. It does not call the
 legacy integration time value a remaining time. Static schedule data comes only

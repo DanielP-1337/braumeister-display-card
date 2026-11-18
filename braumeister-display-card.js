@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.26 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.27 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -21,11 +21,14 @@
     2705: [['✕','Abbruch','request_program_pause'],['⌄','Ab'],['⌃','Hoch'],['✓','Auswahl','confirm_malt_added']],
     2810: [['✕','Abbruch','request_program_pause']],
     2820: [['✕','Abbruch','request_program_pause']],
+    2910: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_rest_end']],
+    2930: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','confirm_malt_pipe_removed']],
+    2960: [['✕','Abbruch','request_program_pause'], ['✓','Hopfenkochen starten','start_boil']],
   };
   // Future backend contract. Never dispatch through the legacy menu service.
-  const programActions = new Set(['acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
+  const programActions = new Set(['confirm_lid_removed', 'acknowledge_rest_end', 'confirm_malt_pipe_removed', 'start_boil', 'acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
     'confirm_water_filled', 'confirm_start_delay', 'start_now', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
-  const energizingActions = new Set(['confirm_malt_added', 'confirm_water_filled', 'confirm_start_delay', 'start_now', 'resume_program']);
+  const energizingActions = new Set(['start_boil', 'confirm_malt_added', 'confirm_water_filled', 'confirm_start_delay', 'start_now', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // Vector geometry is independent of Android and desktop font metrics.
@@ -47,6 +50,12 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Start boiling? The pump and heater may start.",
+  "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "No device recipe data available. Map the recipe-list entity in the card configuration.",
+  "Geräterezept ansehen": "View device recipe",
+  "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "The current recipe could not be matched uniquely. Select a device recipe.",
+  "Hopfengaben · Minuten vor Kochende": "Hop additions · minutes before boil ends",
+  "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Stored device schedule. Changes during brewing may differ. Selecting a recipe here does not control the device.",
   "Jetzt starten": "Start now",
   "Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.": "Skip the countdown and start now? Is water filled? The pump starts immediately; heating may follow.",
   "Braustart in": "Brew starts in",
@@ -101,7 +110,6 @@
   "Gerätedaten": "Device details",
   "Aktueller Schritt": "Current step",
   "Gemeldeter Fortschritt": "Reported progress",
-  "Gemeldete Zeit¹": "Reported time¹",
   "Verbindung": "Connection",
   "Modus": "Mode",
   "Pumpe · gemeldet": "Pump · reported",
@@ -171,7 +179,6 @@
   "previous": "Previous state",
   "toggle": "Toggle state",
   "wartet": "Waiting",
-  "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Time reported by the integration; not yet verified as remaining time. The available entities do not provide a recipe list or mash schedule.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H show the values reported by the integration. Correct XHR states require the parser fix from PR #8."
 };
   Object.assign(ENGLISH, {"Darstellung": "Appearance", "Tastenbeleuchtung": "Button lighting", "Standard": "Default", "Licht aus": "Lights off", "Eigene Farbe": "Custom color", "HEX-Farbe": "HEX color", "Rot": "Red", "Orange": "Orange", "Gelb": "Yellow", "Grün": "Green", "Cyan": "Cyan", "Blau": "Blue", "Magenta": "Magenta", "Weiß": "White", "Nur die Tastenringe dieser Karte ändern sich.": "Only the button rings on this card change.", "Bitte #RRGGBB eingeben.": "Enter #RRGGBB."});
@@ -252,6 +259,7 @@
         if(b.dataset.menu) this.navigate(b.dataset.menu);
       });
       this.shadowRoot.addEventListener('change',e=>{
+        if(e.target.id==='recipe-plan') { this.previewRecipeSlot=e.target.value; this.render(); }
         if(e.target.id==='behavior') this.command('select','select_option',{entity_id:this.ids.behavior,option:e.target.value});
       });
     }
@@ -352,7 +360,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.26`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.27`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -428,10 +436,16 @@
     menuKeysFor(code) {
       code = this.menuStateCode(code);
       const interrupt = this._hass?.states[this.ids.step]?.attributes.display_interrupt;
+      const editorFlags=this._hass?.states[this.ids.step]?.attributes.display_editor_flags;
+      if(code===3010 && editorFlags==='0DT') return [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch'], ['✓','Auswahl','confirm_lid_removed']];
       if (Number.isInteger(code) && code >= 2000 && code < 4000 && interrupt === 1) {
         return [['✕','Abbruch','abort_program'], ['✓','Auswahl','resume_program']];
       }
       if (Number.isInteger(interrupt) && interrupt > 0) return [];
+      const attrs=this._hass?.states[this.ids.step]?.attributes;
+      if(code===3010 && attrs?.display_button_labels==='ADUS' && ['00T','00Z'].includes(attrs?.display_editor_flags)) {
+        return [['✕','Abbruch'], ['⌄','Ab'], ['⌃','Hoch'], ['✓','Auswahl']];
+      }
       return menuKeys[code] || [];
     }
     serviceSupports(service, action) {
@@ -443,7 +457,7 @@
       if (programActions.has(action)) {
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
         if (action === 'resume_program' && ![2300,2310,2810].includes(code)) return null;
-        if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820].includes(code)) return null;
+        if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820,2910,2930,2960].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
           && (stopping || this.config.program_control === true) ? 'program_control' : null;
@@ -465,7 +479,9 @@
       const service = actuator ? 'set_actuator' : this.actionService(action);
       if (!service) return;
       if (action === 'heater_on' && !window.confirm(this.translate('Heizung am Braumeister einschalten?'))) return;
-      if (energizingActions.has(action) && !window.confirm(this.translate(action === 'confirm_malt_added' ? 'Malz eingefüllt? Bestätigung startet Pumpe und Heizung.' : action === 'start_now'
+      if (action === 'confirm_lid_removed' && !window.confirm(this.translate('Bitte Deckel entfernen.'))) return;
+      if (action === 'confirm_malt_pipe_removed' && !window.confirm(this.translate('Malzrohr entnommen'))) return;
+      if (energizingActions.has(action) && !window.confirm(this.translate(action === 'start_boil' ? 'Hopfenkochen starten? Pumpe und Heizung können anlaufen.' : action === 'confirm_malt_added' ? 'Malz eingefüllt? Bestätigung startet Pumpe und Heizung.' : action === 'start_now'
         ? 'Countdown überspringen und jetzt starten? Wasser eingefüllt? Pumpe startet sofort; Heizung kann folgen.'
         : ['confirm_water_filled', 'confirm_start_delay'].includes(action)
         ? 'Wasser eingefüllt? Bestätigen kann Pumpe und Heizung starten.'
@@ -500,7 +516,9 @@
       if (!menuKeys[screen] && interrupt === 0 && Number.isInteger(screen) && screen >= 2510 && screen <= 3700
           && !(screen < 2610 && pumpFlag === 'q')) {
         const keys = screen <= 3500 ? [['✕', 'Abbruch']] : [];
-        if ((screen >= 2705 && screen < 2810) || timedBoil || (screen >= 3450 && screen <= 3500)) keys.push(['⌄', 'Ab'], ['⌃', 'Hoch']);
+        const attrs=this._hass.states[this.ids.step]?.attributes;
+        const boilEditor=screen===3010 && attrs?.display_button_labels==='ADUS' && ['00T','00Z'].includes(attrs?.display_editor_flags);
+        if (boilEditor || (screen >= 2705 && screen < 2810) || timedBoil || (screen >= 3450 && screen <= 3500)) keys.push(['⌄', 'Ab'], ['⌃', 'Hoch']);
         if (screen < 2810 || screen === 2820 || screen >= 2910) keys.push(['✓', 'Auswahl']);
         const buttons = keys.map(([icon, key]) => {
           const label = esc(this.translate(key));
@@ -533,7 +551,7 @@
       const temperatures = code === 4006 && this.showTemperatureReadings
         ? `<p>${esc(this.translate('Soll / Ist'))}: ${esc(this.number('target','°C'))} / ${esc(this.number('temperature','°C'))}</p>` : '';
       const paused = keys.some(key => key[2] === 'resume_program');
-      const programNote = paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
+      const programNote = screen===3010 && this._hass.states[this.ids.step]?.attributes?.display_editor_flags==='0DT' ? 'Bitte Deckel entfernen.' : paused ? 'Weiter mit Auswahl, endgültiger Abbruch mit Abbruch.'
         : [2030,2111].includes(code) ? 'Startzeitvorwahl: Hoch +30 min, Ab −30 min.' : '';
       const unsupportedKeys = keys.some(key => key[2] && key[2] !== 'temperature_readings' && !this.actionService(key[2]));
       return `${picker}${temperatures}${programNote?`<p class="hint">${esc(this.translate(programNote))}</p>`:''}<div class="keys">${keys.map(([icon,label,menuAction]) => {
@@ -544,6 +562,25 @@
         const unsupported = action && !this.actionService(action);
         return `<div><button type="button" ${animate ? 'class="menu-pending"' : ''} aria-label="${esc(this.translate(label))}" ${unsupported ? `title="${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}"` : ''} data-menu="${action || ''}" ${enabled && !this.pending ? '' : 'disabled'}>${controlIcon(icon)}</button><small>${esc(this.translate(label))}</small></div>`;
       }).join('')}</div>${unsupportedKeys?`<p class="hint">${esc(this.translate('Diese Taste benötigt eine unterstützte und freigegebene Bridge-/Companion-Aktion.'))}</p>`:''}<p class="hint" role="status">${esc(this.translate(hint))}</p>`;
+    }
+    renderRecipePlan(attrs, live) {
+      const E=esc, T=key=>E(this.translate(key));
+      const entity=this._hass.states[this.ids.recipes];
+      const raw=entity && !['unknown','unavailable'].includes(entity.state) ? entity.attributes?.recipes : null;
+      const recipes=Array.isArray(raw) && raw.length<=9 && raw.every(r=>r && Number.isInteger(r.slot) && r.slot>=0 && r.slot<9 && typeof r.name==='string' && r.name.trim())
+        && new Set(raw.map(r=>r.slot)).size===raw.length ? raw : [];
+      if(!recipes.length) return `<p class="hint">${T('Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.')}</p>`;
+      const matches=recipes.filter(r=>r.name.trim()===this.text('recipe').trim());
+      const current=matches.length===1?matches[0]:null;
+      const selected=this.previewRecipeSlot === undefined || this.previewRecipeSlot === '' ? current : recipes.find(r=>String(r.slot)===this.previewRecipeSlot);
+      const picker=`<label>${T('Geräterezept ansehen')}<select id="recipe-plan"><option value="" ${this.previewRecipeSlot?'':'selected'}>${T('Aktuelles Rezept')}</option>${recipes.map(r=>`<option value="${r.slot}" ${String(r.slot)===this.previewRecipeSlot?'selected':''}>${E(r.name)}</option>`).join('')}</select></label>`;
+      if(!selected) return picker+`<p class="hint">${T('Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.')}</p>`;
+      const value=(v,unit)=>typeof v==='number' && Number.isFinite(v) && v>=0?`${E(v)} ${unit}`:'—';
+      const rests=Array.isArray(selected.rests)?selected.rests:[];
+      const active=live && selected===current;
+      const code=attrs.display_state_code;
+      const item=(label,temp,time,isCurrent)=>`<li${isCurrent?' class="current" aria-current="step"':''}><strong>${E(label)}</strong><div>${T('Soll / Ist').split(' / ')[0]}: ${value(temp,'°C')}${time===undefined?'':` · ${value(time,'min')}`}</div></li>`;
+      return picker+`<h3>${E(selected.name)}</h3><ol class="recipe-plan">${item(this.translate('Einmaischen'),selected.mash_in_temperature,undefined,active && code>=2030 && code<=2705)}${rests.map((r,i)=>item(this.translate('{number}. Rast').replace('{number}',i+1),r?.temperature,r?.minutes,active && [2810,2820].includes(code) && attrs.display_rest_number===i+1)).join('')}${item(this.translate('Hopfen kochen'),selected.boil_temperature,selected.boil_minutes,active && code>=3000 && code<4000)}</ol><p>${T('Hopfengaben · Minuten vor Kochende')}: ${Array.isArray(selected.hop_additions)?selected.hop_additions.filter(v=>typeof v==='number' && Number.isFinite(v) && v>=0).map(v=>E(v)).join(', ') || '—':'—'}</p><p class="hint">${T('Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.')}</p>`;
     }
     render(){
       if(!this.config || !this._hass) return;
@@ -574,7 +611,7 @@
       const duration=v=>Number.isInteger(v)&&v>=0?`${Math.floor(v/60)}:${String(v%60).padStart(2,'0')}`:'—';
       const targetTime=attrs.display_time_target_seconds;
       const targetLabel=Number.isInteger(targetTime)&&targetTime>=0?(targetTime%60?duration(targetTime):String(targetTime/60)):'—';
-      const timed=live && Number.isInteger(attrs.display_state_code) && attrs.display_state_code>=2810 && attrs.display_state_code<2910;
+      const timed=live && Number.isInteger(attrs.display_state_code) && ((attrs.display_state_code>=2810 && attrs.display_state_code<2910) || attrs.display_state_code===3010);
       const timer=timed?`<div class="temp timer"><div>${T('Zeit')}<small>${T('Soll / Ist · verstrichen')}</small></div><strong>${targetLabel} / ${duration(attrs.display_time_elapsed_seconds)} min</strong></div>`:'';
       const delay = attrs.display_start_delay_seconds;
       const countdown = live && attrs.display_state_code === 2120
@@ -594,7 +631,7 @@
           : recipeEditHint;
         body = `<h2>${T(menuTitles[menuCode])}</h2>${menuHint}${this.renderMenu(menuCode)}`;
       }
-      if(this.page==='recipe') body=`<h2>${E(this.text('recipe'))}</h2>${row('Aktueller Schritt','step')}${row('Gemeldeter Fortschritt','progress','%')}${row('Gemeldete Zeit¹','time','min')}<p class="hint">${T('¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.')}</p>`;
+      if(this.page==='recipe') body=`<h2>${E(this.text('recipe'))}</h2><div class="recipe-layout"><section>${row('Aktueller Schritt','step')}${row('Gemeldeter Fortschritt','progress','%')}${timer}${countdown}</section><section>${this.renderRecipePlan(attrs,live)}</section></div>`;
       if(this.page==='details') body=`<h2>Braumeister 20L Plus</h2>${row('Verbindung','connection')}${row('Modus','mode')}${row('Pumpe · gemeldet','pump')}${row('Heizung · gemeldet','heater')}<p class="hint">${T('P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.')}</p>`;
       if(this.page==='power') {
         const options=this._hass.states[this.ids.behavior]?.attributes.options||[];
@@ -630,6 +667,7 @@
       .temp{display:flex;justify-content:space-between;gap:12px;font-size:clamp(19px,4.6cqw,32px);font-weight:bold}.temp strong{text-align:right}.temp small{font-size:12px;display:block;font-weight:normal;margin-top:6px}
       .phase{font-size:clamp(19px,4cqw,28px);font-weight:bold;margin:24px 0 8px;overflow-wrap:anywhere}.sub{font-size:14px}
       .recipe-picker{display:grid;grid-auto-flow:column;grid-template-rows:repeat(5,auto);grid-auto-columns:minmax(0,1fr);gap:6px clamp(10px,4cqw,24px);list-style:none;margin:0;padding:0;text-align:left}.recipe-picker li{min-width:0;overflow-wrap:anywhere}.recipe-picker mark{background:#ffda16;color:#000}
+      .recipe-layout{display:grid;gap:24px}.recipe-layout section{min-width:0}.recipe-plan{list-style:none;padding:0 0 0 12px;border-left:3px solid #aaa}.recipe-plan li{padding:10px 12px;line-height:1.6;font-size:14px}.recipe-plan li.current{background:#ffe000;border-left:4px solid #000}.recipe-layout h3{overflow-wrap:anywhere}.recipe-layout p{font-size:13px;line-height:1.5}@container(min-width:780px){.recipe-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
       .keys{display:flex;justify-content:space-between;gap:8px;margin-top:32px;text-align:center}.keys>div{min-width:0}.control-icon{display:block;width:1em;height:1em;flex:none}.keys button{display:grid;place-items:center;padding:0;line-height:1;background:#ffda16;border-radius:10px;font-size:clamp(26px,8cqw,42px);font-weight:bold;width:clamp(40px,12cqw,64px);height:clamp(40px,12cqw,64px);color:black}.keys button:disabled{opacity:.4;cursor:not-allowed}.keys.mash-preview button:disabled{opacity:1}small{display:block;font-size:11px;margin-top:7px}
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
@@ -719,5 +757,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.26'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.27'});
 })();

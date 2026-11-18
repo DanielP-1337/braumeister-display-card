@@ -31,7 +31,6 @@
   "Gerätedaten": "Apparaatgegevens",
   "Aktueller Schritt": "Huidige stap",
   "Gemeldeter Fortschritt": "Gemelde voortgang",
-  "Gemeldete Zeit¹": "Gemelde tijd¹",
   "Verbindung": "Verbinding",
   "Modus": "Modus",
   "Pumpe · gemeldet": "Pomp · gemeld",
@@ -98,7 +97,6 @@
   "previous": "Vorige status",
   "toggle": "Status omkeren",
   "wartet": "Wachten",
-  "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Tijd gemeld door de integratie; nog niet bevestigd als resterende tijd. De beschikbare entiteiten leveren geen receptenlijst of maischschema.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H tonen de waarden van de integratie. Correcte XHR-statussen vereisen de parsercorrectie uit PR #8.",
   "Rezepte bearbeiten": "Recepten bewerken",
   "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Recepten kunnen alleen op myspeidel.com of rechtstreeks op de Braumeister worden bewerkt.",
@@ -150,5 +148,11 @@
   "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Mout toegevoegd? Bevestigen start de pomp en verwarming.",
   "Bis zur Quittierung wiederholen": "Herhalen tot bevestiging",
   "Ton stummschalten": "Geluid dempen",
-  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Herhaalt elke 6 seconden tot bevestiging op het apparaat of dempen. Test eerst het geluid op dit apparaat."
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Herhaalt elke 6 seconden tot bevestiging op het apparaat of dempen. Test eerst het geluid op dit apparaat.",
+  "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "Geen apparaatrecepten beschikbaar. Koppel de receptenlijst-entiteit in de kaartconfiguratie.",
+  "Geräterezept ansehen": "Apparaatrecept bekijken",
+  "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Het huidige recept kon niet eenduidig worden gekoppeld. Kies een apparaatrecept.",
+  "Hopfengaben · Minuten vor Kochende": "Hopgiften · minuten voor einde koken",
+  "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Opgeslagen apparaatprogramma. Wijzigingen tijdens het brouwen kunnen afwijken. Deze keuze bedient het apparaat niet.",
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Koken starten? De pomp en verwarming kunnen starten."
 }

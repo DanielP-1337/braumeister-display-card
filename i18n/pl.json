@@ -31,7 +31,6 @@
   "Gerätedaten": "Dane urządzenia",
   "Aktueller Schritt": "Aktualny krok",
   "Gemeldeter Fortschritt": "Zgłoszony postęp",
-  "Gemeldete Zeit¹": "Zgłoszony czas¹",
   "Verbindung": "Połączenie",
   "Modus": "Tryb",
   "Pumpe · gemeldet": "Pompa · stan zgłoszony",
@@ -98,7 +97,6 @@
   "previous": "Poprzedni stan",
   "toggle": "Odwróć stan",
   "wartet": "Oczekiwanie",
-  "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Czas zgłoszony przez integrację; jeszcze niepotwierdzony jako pozostały czas. Dostępne encje nie udostępniają receptur ani harmonogramu zacierania.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H pokazują wartości integracji. Poprawne stany XHR wymagają poprawki parsera z PR #8.",
   "Rezepte bearbeiten": "Edytuj przepisy",
   "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Przepisy można edytować tylko na myspeidel.com lub bezpośrednio na urządzeniu Braumeister.",
@@ -150,5 +148,11 @@
   "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Dodano słód? Potwierdzenie uruchamia pompę i grzałkę.",
   "Bis zur Quittierung wiederholen": "Powtarzaj do potwierdzenia",
   "Ton stummschalten": "Wycisz dźwięk",
-  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Powtarza co 6 sekund do potwierdzenia na urządzeniu lub wyciszenia. Najpierw przetestuj dźwięk na tym urządzeniu."
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Powtarza co 6 sekund do potwierdzenia na urządzeniu lub wyciszenia. Najpierw przetestuj dźwięk na tym urządzeniu.",
+  "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "Brak danych receptur urządzenia. Przypisz encję listy receptur w konfiguracji karty.",
+  "Geräterezept ansehen": "Wyświetl recepturę urządzenia",
+  "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Nie można jednoznacznie dopasować bieżącej receptury. Wybierz recepturę urządzenia.",
+  "Hopfengaben · Minuten vor Kochende": "Dodatki chmielu · minuty przed końcem gotowania",
+  "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Program zapisany w urządzeniu. Zmiany podczas warzenia mogą się różnić. Ten wybór nie steruje urządzeniem.",
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Rozpocząć gotowanie? Pompa i grzałka mogą się uruchomić."
 }

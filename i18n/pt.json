@@ -31,7 +31,6 @@
   "Gerätedaten": "Dados do dispositivo",
   "Aktueller Schritt": "Passo atual",
   "Gemeldeter Fortschritt": "Progresso comunicado",
-  "Gemeldete Zeit¹": "Tempo comunicado¹",
   "Verbindung": "Ligação",
   "Modus": "Modo",
   "Pumpe · gemeldet": "Bomba · comunicada",
@@ -98,7 +97,6 @@
   "previous": "Estado anterior",
   "toggle": "Inverter estado",
   "wartet": "Em espera",
-  "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Tempo comunicado pela integração, ainda não verificado como tempo restante. As entidades disponíveis não fornecem receitas nem programa de mosturação.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H mostram os valores da integração. Os estados XHR corretos requerem a correção do analisador da PR #8.",
   "Rezepte bearbeiten": "Editar receitas",
   "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "As receitas só podem ser editadas em myspeidel.com ou diretamente no Braumeister.",
@@ -150,5 +148,11 @@
   "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malte adicionado? A confirmação inicia a bomba e o aquecimento.",
   "Bis zur Quittierung wiederholen": "Repetir até confirmar",
   "Ton stummschalten": "Silenciar som",
-  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Repete a cada 6 segundos até confirmar no equipamento ou silenciar. Teste primeiro o som neste dispositivo."
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Repete a cada 6 segundos até confirmar no equipamento ou silenciar. Teste primeiro o som neste dispositivo.",
+  "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "Sem receitas do dispositivo disponíveis. Configure a entidade da lista de receitas no cartão.",
+  "Geräterezept ansehen": "Ver receita do dispositivo",
+  "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Não foi possível identificar a receita atual de forma inequívoca. Selecione uma receita do dispositivo.",
+  "Hopfengaben · Minuten vor Kochende": "Adições de lúpulo · minutos antes do fim da fervura",
+  "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programa guardado no dispositivo. As alterações durante a brassagem podem diferir. Esta seleção não controla o dispositivo.",
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Iniciar a fervura? A bomba e o aquecimento podem arrancar."
 }

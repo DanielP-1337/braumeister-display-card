@@ -29,7 +29,7 @@ require('./dist/braumeister-display-card.js');
     ...[3070,3075,3079,3450,3500].map(code => [code,['Abbruch','Ab','Hoch','Auswahl']]),
     ...[3501,3600,3601,3700].map(code => [code,['Auswahl']]),
     ...[2910,2930,2960,3010,3069,3080,3449].map(code => [code,['Abbruch','Auswahl']])]) {
-    if ([2510,2610,2705,2810,2820].includes(code)) continue;
+    if ([2510,2610,2705,2810,2820,2910,2930,2960].includes(code)) continue;
     screen(code);
     const html = card.renderMenu(code);
     assert.deepEqual([...html.matchAll(/disabled aria-label="([^"]+)"/g)].map(match => match[1]),expected.map(key => card.translate(key)));

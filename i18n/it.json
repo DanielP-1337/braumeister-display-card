@@ -31,7 +31,6 @@
   "Gerätedaten": "Dati del dispositivo",
   "Aktueller Schritt": "Passaggio attuale",
   "Gemeldeter Fortschritt": "Avanzamento segnalato",
-  "Gemeldete Zeit¹": "Tempo segnalato¹",
   "Verbindung": "Connessione",
   "Modus": "Modalità",
   "Pumpe · gemeldet": "Pompa · segnalata",
@@ -98,7 +97,6 @@
   "previous": "Stato precedente",
   "toggle": "Inverti stato",
   "wartet": "In attesa",
-  "¹ Zeitwert der Integration, noch nicht als Restzeit verifiziert. Rezeptliste und Rastplan werden von den vorhandenen Entitäten nicht bereitgestellt.": "¹ Tempo segnalato dall’integrazione, non ancora verificato come tempo rimanente. Le entità disponibili non forniscono ricette né programma delle soste.",
   "P/H zeigen die Meldung der Integration. Die Anzeige übernimmt die Sensorwerte; für korrekte XHR-Zustände wird der Parser-Fix aus PR #8 benötigt.": "P/H mostrano i valori dell’integrazione. Gli stati XHR corretti richiedono la correzione del parser della PR #8.",
   "Rezepte bearbeiten": "Modifica ricette",
   "Bearbeiten von Rezepten ist nur über myspeidel.com oder direkt am Braumeister möglich.": "Le ricette possono essere modificate solo su myspeidel.com o direttamente sul Braumeister.",
@@ -150,5 +148,11 @@
   "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malto aggiunto? La conferma avvia la pompa e il riscaldamento.",
   "Bis zur Quittierung wiederholen": "Ripeti fino alla conferma",
   "Ton stummschalten": "Disattiva audio",
-  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Si ripete ogni 6 secondi fino alla conferma sul dispositivo o alla disattivazione audio. Prova prima il suono su questo dispositivo."
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Si ripete ogni 6 secondi fino alla conferma sul dispositivo o alla disattivazione audio. Prova prima il suono su questo dispositivo.",
+  "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "Nessuna ricetta del dispositivo disponibile. Configura l’entità dell’elenco ricette nella scheda.",
+  "Geräterezept ansehen": "Visualizza ricetta del dispositivo",
+  "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Impossibile identificare univocamente la ricetta attuale. Seleziona una ricetta del dispositivo.",
+  "Hopfengaben · Minuten vor Kochende": "Aggiunte di luppolo · minuti prima della fine della bollitura",
+  "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programma salvato sul dispositivo. Le modifiche durante la cotta possono differire. Questa selezione non controlla il dispositivo.",
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Avviare la bollitura? La pompa e il riscaldamento potrebbero avviarsi."
 }

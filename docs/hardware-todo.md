@@ -13,7 +13,8 @@ coverage, and successful HA hardware tests are separate evidence levels.
   This is distinct from the active lid-warning indicator `0D0`.
 - [x] Package qH/000 pause and the pH rest-end target fix together in Bridge
   beta.15 / Integration beta.17, Companion beta.24 and Card beta.37.
-- [ ] Hardware-test both corrections after installing that coordinated beta set.
+- [ ] Hardware-test qH/000 pause and the pH rest-end target after installing that
+  coordinated beta set. The 20:02–20:03 HA success used PH/000, not qH/000.
 
 - [x] Add the observed rest-end target variant `2910/Pi/010` -> `2930/pH/000`
   to Bridge source mapping (MySpeidel key 4, 18:50:44–48, sequences 1188–1190).
@@ -52,8 +53,11 @@ coverage, and successful HA hardware tests are separate evidence levels.
   separate cloud key-1 commands. See [recorded evidence](lid-cancel-2026-11-18.md).
 - [x] Implement those exact lid-pause and final-abort actions in Card beta.36,
   Companion beta.23 and Bridge beta.14 (Integration beta.16 package).
-- [ ] Hardware-test those new actions through HA; the cloud evidence and automated
-  tests do not establish HA hardware success.
+- [x] HA final abort from `3010/ph/120` reached `101/ph/000` at 20:03:41,
+  after the user confirmed the permanent-abort dialog. HA pause immediately
+  before this used `3010/PH/000`. See [validated run](ha-heating-abort-2026-11-18.md).
+- [ ] Hardware-test Cancel at the active normal lid warning `3010/qH/0D0`
+  through HA; the 20:02 run had no active lid-warning indicator.
 - [ ] Hardware-test hot-start mash acknowledgment with `2510/qi/010` in the same
   beta set. Cloud key 4 at 18:20:26.582 (3212) reached `2610/ph/000` at
   18:20:27.254 (3214). The old Pi-only guard caused the reported rejection;
@@ -75,6 +79,8 @@ coverage, and successful HA hardware tests are separate evidence levels.
 
 ## Confirmed by the user through HA
 
+- Normal heating-to-boil Cancel with PH/000 -> pause, followed by final Cancel
+  with confirmation dialog -> main menu (20:02–20:03, local-control log verified).
 - Whirlpool and Cheers Select work (including the latest follow-up).
 - Resume from a tested mash-rest pause works with the confirmation dialog.
 - Sound works on notebook, phone, and tablet; repeat playback and local mute work.

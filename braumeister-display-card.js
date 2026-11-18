@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.31 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.32 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -27,9 +27,10 @@
     3080: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_hop_addition']],
     3510: [['✓','Auswahl','confirm_whirlpool']],
     3610: [['✓','Auswahl','finish_brewing']],
+    3450: [['✕','Abbruch','request_program_pause'], ['✓','Auswahl','acknowledge_brew_complete']],
   };
   // Future backend contract. Never dispatch through the legacy menu service.
-  const programActions = new Set(['acknowledge_hop_addition', 'confirm_whirlpool', 'finish_brewing', 'confirm_lid_removed', 'acknowledge_rest_end', 'confirm_malt_pipe_removed', 'start_boil', 'acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
+  const programActions = new Set(['acknowledge_brew_complete', 'acknowledge_hop_addition', 'confirm_whirlpool', 'finish_brewing', 'confirm_lid_removed', 'acknowledge_rest_end', 'confirm_malt_pipe_removed', 'start_boil', 'acknowledge_mash_temperature', 'open_malt_confirmation', 'confirm_malt_added', 'cancel_water_prompt', 'start_delay_down', 'start_delay_up',
     'confirm_water_filled', 'confirm_start_delay', 'start_now', 'cancel_start_delay', 'request_program_pause', 'abort_program', 'resume_program']);
   const energizingActions = new Set(['start_boil', 'confirm_malt_added', 'confirm_water_filled', 'confirm_start_delay', 'start_now', 'resume_program']);
   const esc = v => String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -363,7 +364,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.31`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.32`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -461,8 +462,8 @@
     actionService(action) {
       if (programActions.has(action)) {
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
-        if (action === 'resume_program' && ![2300,2310,2810,2820,3080].includes(code)) return null;
-        if (action === 'request_program_pause' && code === 3080) return this.serviceSupports('program_control', action) ? 'program_control' : null;
+        if (action === 'resume_program' && ![2300,2310,2810,2820,3080,3450].includes(code)) return null;
+        if (action === 'request_program_pause' && [3080,3450].includes(code)) return this.serviceSupports('program_control', action) ? 'program_control' : null;
         if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820,2910,2930,2960].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
@@ -773,5 +774,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.31'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.32'});
 })();

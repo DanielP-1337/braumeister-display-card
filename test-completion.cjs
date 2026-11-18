@@ -8,12 +8,12 @@ require('./dist/braumeister-display-card.js');
  const card=new registry['braumeister-display-card'](), calls=[];
  const entities={step:'s.step',connection:'s.online',connection_warning:'s.stale'};
  const config={language:'en-US',menu_control:true,program_control:true,entities};
- const options=['acknowledge_hop_addition','confirm_whirlpool','finish_brewing'];
+ const options=['acknowledge_hop_addition','confirm_whirlpool','finish_brewing','acknowledge_brew_complete'];
  const service={fields:{action:{selector:{select:{options}}}}};
  const states={'s.step':{state:'Hopfen zugeben',attributes:{}},'s.online':{state:'online'},'s.stale':{state:'off'}};
  const hass={states,user:{is_admin:true},services:{braumeister_menu:{navigate:{},program_control:service}},callWS:async req=>{calls.push(req);return{response:{result:'confirmed'}};}};
  card.setConfig(config);card.hass=hass;await card._languageReady;
- for(const [code,action,number] of [[3080,options[0],2],[3510,options[1],1],[3610,options[2],1]]){
+ for(const [code,action,number] of [[3080,options[0],2],[3510,options[1],1],[3610,options[2],1],[3450,options[3],2]]){
   states['s.step'].attributes={display_state_code:code,display_interrupt:0};card.render();
   assert.equal(card.menuKeysFor(code).length,number);
   const button=()=>card.shadowRoot.innerHTML.match(new RegExp('<button[^>]*data-menu="'+action+'"[^>]*>'))[0];
@@ -30,7 +30,7 @@ require('./dist/braumeister-display-card.js');
   hass.user.is_admin=true;states['s.step'].attributes.display_interrupt=1;card.render();await card.navigate(action);assert.equal(calls.length,before+1);
  }
  states['s.step'].attributes={display_state_code:3450,display_interrupt:0};card.render();
- await card.navigate('confirm_whirlpool');assert.equal(calls.length,3);
+ await card.navigate('confirm_whirlpool');assert.equal(calls.length,4);
  assert.equal(card.menuKeysFor(3080)[0][2],'request_program_pause');
  assert(card.menuKeysFor(3080).every(k=>k[2]!=='abort_program'));
  console.log('PASS: hop/Whirlpool/Cheers dispatch, capability, opt-in, stale, admin and paused-state guards; no invented completion controls');

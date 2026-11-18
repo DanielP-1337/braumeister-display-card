@@ -147,5 +147,8 @@
   "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Eenmaal per nieuw alarm, maximaal 5 seconden. Test eerst het geluid op deze tablet.",
   "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Geluid niet beschikbaar. Test het geluid en controleer de browserrechten.",
   "Hinweis vom Braumeister": "Melding van de Braumeister",
-  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Mout toegevoegd? Bevestigen start de pomp en verwarming."
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Mout toegevoegd? Bevestigen start de pomp en verwarming.",
+  "Bis zur Quittierung wiederholen": "Herhalen tot bevestiging",
+  "Ton stummschalten": "Geluid dempen",
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Herhaalt elke 6 seconden tot bevestiging op het apparaat of dempen. Test eerst het geluid op dit apparaat."
 }

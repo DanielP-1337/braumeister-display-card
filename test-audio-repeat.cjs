@@ -1,0 +1,32 @@
+const assert=require('node:assert/strict');
+const timers=new Map();let next=0,tones=0;
+global.setTimeout=(fn,ms)=>{timers.set(++next,{fn,ms});return next;};
+global.clearTimeout=id=>timers.delete(id);
+global.HTMLElement=class{attachShadow(){this.shadowRoot={innerHTML:'',addEventListener(){}};}};
+const registry={};global.customElements={get:k=>registry[k],define:(k,v)=>registry[k]=v};
+global.window={};global.fetch=async()=>({ok:false});
+global.AudioContext=class{state='running';currentTime=0;destination={};async resume(){}createOscillator(){return {frequency:{},connect(){},start(){tones++;},stop(){},disconnect(){}};}createGain(){return {gain:{setValueAtTime(){},linearRampToValueAtTime(){}},connect(){},disconnect(){}};}};
+require('./dist/braumeister-display-card.js');
+(async()=>{
+ const card=new registry['braumeister-display-card']();
+ const config={language:'en-US',alarm_sound:true,entities:{step:'s',alarm:'a',connection:'c'}};
+ card.setConfig(config);
+ const update=(alarm,connection='online')=>{card.hass={states:{s:{state:'step',attributes:{display_state_code:2810,display_interrupt:alarm==='on'?1:0}},a:{state:alarm},c:{state:connection}}};};
+ const tick=()=>new Promise(resolve=>setImmediate(resolve));
+ const repeat=async()=>{const entry=[...timers].find(([,t])=>t.ms===6000);assert(entry);timers.delete(entry[0]);entry[1].fn();await tick();};
+ update('off');update('on');await tick();assert.equal(tones,3);
+ await repeat();assert.equal(tones,6);
+ update('on');await tick();assert.equal(tones,6,'HA update must not duplicate tone');
+ assert(card.shadowRoot.innerHTML.includes('data-audio="mute"'));
+ card.muteAlarmAudio();assert.equal(timers.size,0);update('on');await tick();assert.equal(tones,6);
+ update('off');update('on');await tick();assert.equal(tones,9,'new alarm after acknowledgment sounds again');
+ update('off');assert.equal(timers.size,0,'acknowledgment stops repeats');
+ update('on');await tick();update('on','offline');assert.equal(timers.size,0);
+ update('on');await tick();assert.equal(timers.size,0,'no automatic replay after reconnect');
+ card.setConfig({...config,alarm_repeat:false});update('off');update('on');await tick();assert.equal(timers.size,0);
+ card.setConfig(config);update('off');update('on');await tick();assert.equal(timers.size,1);
+ card.disconnectedCallback();assert.equal(timers.size,0);
+ // Acknowledgment during async audio startup must not leave sound running/repeating.
+ card.setConfig(config);update('off');update('on');update('off');await tick();assert.equal(timers.size,0);
+ console.log('PASS: repeated tone, acknowledgment, local mute, new alarm, stale connection, one-shot option and cleanup');
+})().catch(e=>{console.error(e);process.exitCode=1;});

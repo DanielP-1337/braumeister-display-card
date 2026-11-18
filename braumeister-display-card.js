@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.25 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.26 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -177,6 +177,7 @@
   Object.assign(ENGLISH, {"Darstellung": "Appearance", "Tastenbeleuchtung": "Button lighting", "Standard": "Default", "Licht aus": "Lights off", "Eigene Farbe": "Custom color", "HEX-Farbe": "HEX color", "Rot": "Red", "Orange": "Orange", "Gelb": "Yellow", "Grün": "Green", "Cyan": "Cyan", "Blau": "Blue", "Magenta": "Magenta", "Weiß": "White", "Nur die Tastenringe dieser Karte ändern sich.": "Only the button rings on this card change.", "Bitte #RRGGBB eingeben.": "Enter #RRGGBB."});
   Object.assign(ENGLISH, {"Alarmton": "Alarm sound", "Ton bei Alarm / Pause": "Sound on alarm / pause", "Sound-URL (leer: Signalton)": "Sound URL (blank: built-in tone)", "Lautstärke": "Volume", "Ton testen / freigeben": "Test / enable sound", "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Once per new alarm, up to 5 seconds. Test sound on this tablet first.", "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Sound unavailable. Test the sound and check browser permissions."});
   Object.assign(ENGLISH, {"Hinweis vom Braumeister": "Braumeister notification", "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Malt added? Confirming starts the pump and heater."});
+  Object.assign(ENGLISH, {"Bis zur Quittierung wiederholen":"Repeat until acknowledged","Ton stummschalten":"Mute sound","Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.":"Repeats every 6 seconds until acknowledged on the device or muted. Test sound on this device first."});
   const BUNDLED_LANGUAGES = {};
   const languageCache = new Map();
   const normalizeLanguage = value => {
@@ -244,7 +245,7 @@
       super(); this.attachShadow({mode:'open'}); this.page='display'; this.pending=false;
       this.shadowRoot.addEventListener('click', e => {
         const b=e.target.closest('button'); if(!b || b.disabled) return;
-        if(b.dataset.audio) { this.testAlarmAudio(); return; }
+        if(b.dataset.audio) { if (b.dataset.audio === 'mute') this.muteAlarmAudio(); else this.testAlarmAudio(true); return; }
         if(b.dataset.page) { this.page=b.dataset.page; this.render(); }
         if(b.dataset.info) this.dispatchEvent(new CustomEvent('hass-more-info', {detail:{entityId:this.ids[b.dataset.info]},bubbles:true,composed:true}));
         if(b.dataset.power) this.command('switch', b.dataset.power, {entity_id:this.ids.plug});
@@ -254,7 +255,7 @@
         if(e.target.id==='behavior') this.command('select','select_option',{entity_id:this.ids.behavior,option:e.target.value});
       });
     }
-    setConfig(config) { this.config=config; this.ids={...defaults,...config.entities}; this.refreshLanguage(); this.render(); }
+    setConfig(config) { this.stopAlarmAudio(); this.config=config; this.ids={...defaults,...config.entities}; this.refreshLanguage(); this.render(); }
     set hass(value) {
       const previous=this._hass; this._hass=value;
       this.refreshLanguage();
@@ -280,18 +281,39 @@
       const active = this.alarmActive(), previous = this._alarmActive;
       this._alarmActive = active;
       if (active !== true || this.config.alarm_sound !== true) {
-        if (previous === true) alarmAudio.stop();
+        if (previous === true) this.stopAlarmAudio();
+        if (active === false) this._alarmMuted = false;
         return;
       }
       // No replay on initial dashboard load/reconnect or repeated HA updates.
-      if (previous === false) this.testAlarmAudio();
+      if (previous === false && !this._alarmMuted) this.testAlarmAudio(true);
     }
-    async testAlarmAudio() {
-      try { await alarmAudio.play(this.config); this.audioError = false; }
-      catch (_) { this.audioError = true; }
+    stopAlarmAudio() {
+      clearTimeout(this._alarmRepeatTimer);
+      this._audioEpoch = (this._audioEpoch || 0) + 1;
+      alarmAudio.stop();
+    }
+    muteAlarmAudio() {
+      this._alarmMuted = true;
+      this.stopAlarmAudio();
       this.render();
     }
-    disconnectedCallback() { alarmAudio.stop(); this._alarmActive = null; }
+    async testAlarmAudio(repeat = false) {
+      clearTimeout(this._alarmRepeatTimer);
+      const epoch = this._audioEpoch = (this._audioEpoch || 0) + 1;
+      try { await alarmAudio.play(this.config); this.audioError = false; }
+      catch (_) { this.audioError = true; }
+      if (epoch !== this._audioEpoch) { alarmAudio.stop(); return; }
+      if (repeat && !this.audioError && !this._alarmMuted && this.config.alarm_sound === true
+          && this.config.alarm_repeat !== false && this.alarmActive() === true) {
+        this._alarmRepeatTimer = setTimeout(() => {
+          if (epoch === this._audioEpoch && this.alarmActive() === true && !this._alarmMuted)
+            this.testAlarmAudio(true);
+        }, 6000);
+      }
+      this.render();
+    }
+    disconnectedCallback() { this.stopAlarmAudio(); this._alarmActive = null; }
     async refreshRecipePicker() {
       const code = this.menuStateCode(this._hass?.states[this.ids?.step]?.attributes.display_state_code);
       if (code !== 2015 || !this.menuAvailable()) {
@@ -330,7 +352,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.25`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.26`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -420,7 +442,7 @@
     actionService(action) {
       if (programActions.has(action)) {
         const code = this.menuStateCode(this._hass?.states[this.ids.step]?.attributes.display_state_code);
-        if (action === 'resume_program' && code !== 2300) return null;
+        if (action === 'resume_program' && ![2300,2310,2810].includes(code)) return null;
         if (['request_program_pause', 'abort_program'].includes(action) && ![2300,2310,2410,2510,2610,2705,2810,2820].includes(code)) return null;
         const stopping = ['request_program_pause', 'abort_program', 'cancel_water_prompt', 'cancel_start_delay'].includes(action);
         return this.serviceSupports('program_control', action)
@@ -534,6 +556,10 @@
       const reading=k=>online?this.number(k,this._hass.states[this.ids[k]]?.attributes?.unit_of_measurement || '°C'):'—';
       const attrs=this._hass.states[this.ids.step]?.attributes||{};
       const live=online && !['unknown','unavailable',undefined].includes(this.state('step'));
+      const progressState = this.state('progress');
+      const progressValue = typeof progressState === 'string' && progressState.trim() !== '' ? Number(progressState) : NaN;
+      const progress = live && Number.isFinite(progressValue) && progressValue >= 0 && progressValue <= 100 ? progressValue : null;
+      const progressBar = progress === null ? '' : `<div class="header-progress" role="progressbar" aria-label="${T('Gemeldeter Fortschritt')}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" title="${T('Gemeldeter Fortschritt')}: ${progress}%"><span style="width:${progress}%"></span></div>`;
       const programPaused = live && attrs.display_interrupt === 1
         && Number.isInteger(attrs.display_state_code) && attrs.display_state_code >= 2000 && attrs.display_state_code < 4000;
       const flag=k=>live?attrs[k==='pump'?'display_pump_flag':'display_heater_flag']:null;
@@ -597,7 +623,7 @@
       .screen.program-paused.pulse{animation:program-pause-pulse 1.4s ease-in-out infinite}
       @keyframes program-pause-pulse{50%{box-shadow:inset 0 0 30px #cf3030;outline-color:#ff6565}}
       @media(prefers-reduced-motion:reduce){.screen.program-paused.pulse{animation:none}}
-      header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:6px solid black;font-size:13px;min-height:49px}header .brand-icon{flex:none}header .title{flex:1;overflow-wrap:anywhere}
+      header{position:relative;display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:6px solid black;font-size:13px;min-height:49px}.header-progress{position:absolute;left:0;right:0;bottom:-6px;height:6px;background:#000;overflow:hidden}.header-progress span{display:block;height:100%;background:#ffe000}header .brand-icon{flex:none}header .title{flex:1;overflow-wrap:anywhere}
       button,select{font:inherit}button{cursor:pointer;border:0}button:focus-visible,select:focus-visible{outline:3px solid #008bd2;outline-offset:3px}
       .badge{border:2px solid black;background:transparent;padding:2px 5px;color:black}.badge.active{background:#ffda16}.badge.inactive{background:linear-gradient(45deg,#f4f4f4 50%,#ffda16 50%)}.timer{margin-top:24px}
       main{padding:22px clamp(14px,4cqw,28px);min-height:clamp(220px,48cqw,290px)}h2{font-size:clamp(20px,5cqw,34px);margin:4px 0 26px;overflow-wrap:anywhere}
@@ -608,7 +634,7 @@
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
-      </style><ha-card><div class="screen${programPaused?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}</header>${connectionNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
+      </style><ha-card><div class="screen${programPaused?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}${progressBar}</header>${connectionNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.alarmActive() === true && !this._alarmMuted ? `<button type="button" data-audio="mute">${T("Ton stummschalten")}</button>` : ""}${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
   class BraumeisterDisplayEditor extends HTMLElement {
@@ -621,8 +647,8 @@
       });
       this.shadowRoot.addEventListener('change',event=>{
         const key=event.target.dataset?.audioSetting;
-        if(!['alarm_sound','alarm_sound_url','alarm_volume'].includes(key)) return;
-        const value=key==='alarm_sound'?event.target.checked:key==='alarm_volume'?Number(event.target.value):event.target.value;
+        if(!['alarm_sound','alarm_repeat','alarm_sound_url','alarm_volume'].includes(key)) return;
+        const value=['alarm_sound','alarm_repeat'].includes(key)?event.target.checked:key==='alarm_volume'?Number(event.target.value):event.target.value;
         this.config={...this.config,[key]:value};
         alarmAudio.stop();
         this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
@@ -682,15 +708,16 @@
         <p>${T('Nur die Tastenringe dieser Karte ändern sich.')}</p></fieldset>
       <fieldset><legend>${T('Alarmton')}</legend>
       <label><input type="checkbox" data-audio-setting="alarm_sound" ${this.config.alarm_sound === true ? 'checked' : ''}> ${T('Ton bei Alarm / Pause')}</label>
+      <label><input type="checkbox" data-audio-setting="alarm_repeat" ${this.config.alarm_repeat !== false ? 'checked' : ''}> ${T('Bis zur Quittierung wiederholen')}</label>
       <label>${T('Sound-URL (leer: Signalton)')}<input type="url" data-audio-setting="alarm_sound_url" value="${esc(this.config.alarm_sound_url || '')}" placeholder="/local/sounds/alarm.mp3"></label>
       <label>${T('Lautstärke')}<input type="range" min="0" max="100" step="1" data-audio-setting="alarm_volume" value="${esc(this.config.alarm_volume ?? 50)}"></label>
       <button type="button" data-audio="test">${T('Ton testen / freigeben')}</button>
-      <p>${T('Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.')}</p>
+      <p>${T('Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.')}</p>
       ${this.audioError ? `<p role="alert">${T('Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.')}</p>` : ''}</fieldset>`;
     }
   }
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.25'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.26'});
 })();

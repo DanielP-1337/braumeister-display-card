@@ -147,5 +147,8 @@
   "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Raz na każdy nowy alarm, maksymalnie 5 sekund. Najpierw przetestuj dźwięk na tym tablecie.",
   "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Dźwięk niedostępny. Przetestuj dźwięk i sprawdź uprawnienia przeglądarki.",
   "Hinweis vom Braumeister": "Powiadomienie z Braumeistera",
-  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Dodano słód? Potwierdzenie uruchamia pompę i grzałkę."
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "Dodano słód? Potwierdzenie uruchamia pompę i grzałkę.",
+  "Bis zur Quittierung wiederholen": "Powtarzaj do potwierdzenia",
+  "Ton stummschalten": "Wycisz dźwięk",
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Powtarza co 6 sekund do potwierdzenia na urządzeniu lub wyciszenia. Najpierw przetestuj dźwięk na tym urządzeniu."
 }

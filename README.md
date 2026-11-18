@@ -356,6 +356,25 @@ English and German recipe-editing text on the 20 L Plus.
 - HACS custom-repository installation is supported. Default-catalog inclusion is a separate review process.
 - Native-speaker review of the initial translations is welcome.
 
+### Header progress and repeating sound (0.7.0-beta.26)
+
+The existing black header divider fills yellow from left to right using
+`entities.progress`, the integration's reported percentage (including heating).
+No estimate is made from temperature or time. Missing, invalid, offline, or
+stale readings leave it black. Configure the progress entity in the card YAML.
+
+When sound is enabled, `alarm_repeat` defaults to true: a short tone or up to
+five seconds of your own audio repeats every six seconds while the device
+reports the alarm/pause. Disable repetition in the visual editor for one-shot
+audio. Mute sound silences the current notification locally; it never sends a
+device command. The next alarm after acknowledgment can sound again. Playback
+stops on acknowledgment, connection loss, or removing the card. Browser audio
+permission/background restrictions still apply; test sound on each device.
+
+Resume now includes the hardware-observed states 2310 and 2810. It requires
+Companion 0.1.0-beta.16 and Bridge 0.5.1-beta.8 with existing program/heating
+permissions. Other unverified resume contexts remain unavailable.
+
 ## Origin and license
 
 Extracted from `DanielP-1337/ha-speidel-braumeister`, dashboard commit

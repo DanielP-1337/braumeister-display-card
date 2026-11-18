@@ -147,5 +147,8 @@
   "Einmal pro neuem Alarm, maximal 5 Sekunden. Auf diesem Tablet zuerst den Ton testen.": "Una vez por cada alarma nueva, hasta 5 segundos. Prueba primero el sonido en esta tableta.",
   "Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.": "Sonido no disponible. Prueba el sonido y comprueba los permisos del navegador.",
   "Hinweis vom Braumeister": "Aviso del Braumeister",
-  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "¿Malta añadida? La confirmación inicia la bomba y el calentador."
+  "Malz eingefüllt? Bestätigung startet Pumpe und Heizung.": "¿Malta añadida? La confirmación inicia la bomba y el calentador.",
+  "Bis zur Quittierung wiederholen": "Repetir hasta confirmar",
+  "Ton stummschalten": "Silenciar sonido",
+  "Wiederholung alle 6 Sekunden bis zur Quittierung am Gerät oder Stummschaltung. Auf diesem Gerät zuerst den Ton testen.": "Se repite cada 6 segundos hasta confirmar en el equipo o silenciar. Prueba primero el sonido en este dispositivo."
 }

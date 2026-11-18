@@ -31,6 +31,10 @@ coverage, and successful HA hardware tests are separate evidence levels.
   Do not describe that cloud acknowledgment as a directly observed qi command.
   The new qi permission in Companion beta.23 / Bridge beta.14 applies to state
   2510 only; it does not resolve this distinct state-2910 finding.
+  See the [hot-start/pump-protection hypothesis and focused test checklist](rest-end-qi-hot-start-2026-11-18.md).
+  The UI reports pump shutdown at 88 °C and release at 84 °C; a causal link to qi
+  is plausible but unconfirmed. At 21:00, HA key 4 used PH/010 and reached
+  `2930/pH/000`, then `2930/pi/000`; this was not a qi test or a Pi-source test.
 
 - [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
   0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge

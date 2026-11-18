@@ -77,7 +77,14 @@ temperature at the instant of flag change. Together these observations support
 the pump-protection hypothesis without establishing a formal flag definition.
 The successful command validates the Pi path, not a direct qi acknowledgment.
 
-## Next focused test checklist
+## Optional follow-up test checklist
+
+Scope update: the user classified this hot-start scenario as non-blocking for
+the planned upstream protocol-documentation PR. Normal new-batch operation uses
+cold water in their workflow. No additional artificial hot-start test is required
+to finish that PR. The later claimed MySpeidel result was clarified to refer to
+the same 21:27 HA Select after the change to Pi; it is not new qi evidence.
+The following checklist is retained only for a future investigation.
 
 1. During a supervised water-only test, repeat the previously observed restart
    with water already above the UI's 88 °C shutdown threshold and the short-rest

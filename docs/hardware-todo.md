@@ -23,7 +23,11 @@ coverage, and successful HA hardware tests are separate evidence levels.
 - [ ] Hardware-validate this target-confirmation adjustment in Bridge beta.15.
   It does not enable source `2910/qi/010`; that remains open.
 
-- [ ] Verify rest-end acknowledgment directly while actuator flags are `qi`.
+- [ ] Non-blocking follow-up: verify rest-end acknowledgment directly while
+  actuator flags are `qi`. Per the user's scope decision, this hot-start edge
+  case does not block the upstream protocol-documentation PR; no further
+  artificial hot-start run is required for that PR. Keep the unverified action
+  unsupported and the flag interpretation explicitly hypothetical.
   At 18:27:03 (sequence 3695), state `2910/qi/010` was reported and HA rejected
   Select. The same prompt changed to `2910/Pi/010` at 18:27:49 (3729), before
   MySpeidel key 4 at 18:28:19 (3754) reached `2930/pi/000` (3756).
@@ -42,8 +46,9 @@ coverage, and successful HA hardware tests are separate evidence levels.
   At 21:25:26 (6843), rest end again reported qi/010 and HA rejected Select.
   At 21:27:21 (6939), flags changed to Pi; HA key 4 at 21:27:32 (6946)
   then reached `2930/pi/000` (6948). The user observed pump release below 84 °C;
-  the result screenshot shows 83.5 °C. Next run: acknowledge directly through
-  MySpeidel while qi persists, then verify the actual command-source tuple.
+  the result screenshot shows 83.5 °C. The later report was clarified to refer
+  to this same HA test, not a new MySpeidel run. If revisited, capture MySpeidel
+  acknowledgment while qi persists and verify the actual command-source tuple.
 
 - [ ] Re-test rejected hop acknowledgment and brewing-complete Select with Card
   0.7.0-beta.35, Companion 0.1.0-beta.22, Integration 3.2.1-beta.15 and Bridge

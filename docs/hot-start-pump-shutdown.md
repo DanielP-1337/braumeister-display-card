@@ -7,6 +7,13 @@ as planned at 88 °C and released again at 84 °C. The card shows the pump-shutd
 message and a Braumeister notification. The user reports an audible alarm in
 MySpeidel as well.
 
+The user subsequently confirmed that the program continues without further
+errors when temperature targets are already met or exceeded. The next screenshot
+shows mash rest 1 at a 62 °C target and 85.5 °C actual temperature, with 0:23
+elapsed out of a 5-minute target. This supports progression past heating; it does
+not establish that timed rests are skipped. Reproduce the observed MySpeidel
+behavior without introducing a different brewing policy.
+
 Treat these threshold values as text observed on this firmware/portal, not as
 universal limits or newly measured switching points. Do not conflate the prompt
 with a generic process pause or a fault solely because notification audio plays.

@@ -28,5 +28,21 @@ require('./dist/braumeister-display-card.js');
  card.disconnectedCallback();assert.equal(timers.size,0);
  // Acknowledgment during async audio startup must not leave sound running/repeating.
  card.setConfig(config);update('off');update('on');update('off');await tick();assert.equal(timers.size,0);
+ // Visual attention is independent of sound and mute settings.
+ card.setConfig({...config,alarm_sound:false});await card._languageReady;
+ for(const page of ['recipe','power','details']) {
+   update('off');card.page=page;update('on');
+   assert.equal(card.page,'display');assert(card.shadowRoot.innerHTML.includes('class="screen program-paused'));
+   card.page='recipe';update('on');assert.equal(card.page,'recipe','same alarm must not trap navigation');
+ }
+ card.muteAlarmAudio();update('off');card.page='details';update('on');assert.equal(card.page,'display');
+ update('off');card.page='recipe';update('on','offline');assert.equal(card.page,'recipe');
+ update('on');assert.equal(card.page,'display','reconnection must expose an active alarm visually');
+ update('off');card.page='recipe';
+ const notice={states:{s:{state:'hop',attributes:{display_state_code:3080,display_interrupt:0}},a:{state:'on',attributes:{alarm_type:'hop_addition'}},c:{state:'online'}}};
+ card.hass=notice;assert.equal(card.page,'display');assert(!card.shadowRoot.innerHTML.includes('class="screen program-paused'));
+ card.page='recipe';card.hass={states:{...notice.states,s:{...notice.states.s,attributes:{...notice.states.s.attributes,display_interrupt:1}}}};
+ assert.equal(card.page,'display','pause during an existing notification also needs attention');
+ assert(card.shadowRoot.innerHTML.includes('class="screen program-paused'));
  console.log('PASS: repeated tone, acknowledgment, local mute, new alarm, stale connection, one-shot option and cleanup');
 })().catch(e=>{console.error(e);process.exitCode=1;});

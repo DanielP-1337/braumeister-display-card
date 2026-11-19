@@ -1,6 +1,6 @@
 # Hardware mapping and validation TODO
 
-Updated November 18, 2026 after the user-operated Braumeister 20 L Plus tests
+Updated November 19, 2026 after the user-operated Braumeister 20 L Plus tests
 (firmware 1.1.27). This list supersedes older pending-test statements in the
 chronological observation documents. Cloud observations, implementation, automated
 coverage, and successful HA hardware tests are separate evidence levels.
@@ -95,9 +95,13 @@ coverage, and successful HA hardware tests are separate evidence levels.
 - [ ] Finish HA regression checks for direct start and mash/purge prompts, and
   repeat new-alarm navigation from Recipe/Power/Status with sound muted/unmuted.
 - [ ] Verify Hue notification colors and restoration on actual lights.
-- [ ] Compare the fork with upstream Integration 3.3.0 / Bridge 0.6.0 before any
-  migration. Closing upstream issues #18/#28 is not evidence that every fork fix
-  or action was merged. The version set above is our tested beta baseline.
+- [x] Compare the fork, Companion and Card with upstream after #31/#32 merged.
+  See the [November 19 migration audit](upstream-migration-audit-2026-11-19.md).
+  Main a2e005f contains the later controls; the published v3.3.0 predates them.
+- [ ] Close the migration gaps: current_step display attributes, missing early
+  and manual-editor actions or a restricted capability profile, recipe-picker
+  bounds and an explicit diagnostics-export decision. Validate the combined
+  versions before any authorized HA migration. The running beta remains unchanged.
 
 ## Confirmed by the user through HA
 

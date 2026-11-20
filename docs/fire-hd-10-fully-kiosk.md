@@ -65,6 +65,8 @@ name resolution can differ between clients.
 | Kiosk Mode (PLUS) | Disable Screen Off | **Off** (allow the physical power button) |
 | Kiosk Mode (PLUS) | Disable Volume Buttons | **Off** (allow adjusting dashboard alarm audio) |
 | Motion Detection (PLUS) | Enable Visual Motion Detection | **Off** (no camera-triggered wake-up) |
+| Device Management | Unlock Screen | **On** (verified with HA screen-on command) |
+| Device Management | Unlock Swipe Screen Lock | **On** (alone was insufficient on this Fire OS) |
 
 In the verified installation **Keep Screen On (Advanced)** was also already
 enabled and retained. The previous 42-second Screen Off Timer was disabled.
@@ -128,6 +130,64 @@ past the front camera. Wake it manually with the power button. Amazon's
 advertising lock screen is still enabled and can appear when waking the tablet;
 this correction does not remove ads or guarantee bypass of the lock screen.
 See Fully's [Kiosk Mode option descriptions](https://www.fully-kiosk.com/docs/en/configuration/kiosk-mode).
+
+### Home Assistant screen control and the advertising lock screen
+
+The official [Fully Kiosk integration](https://www.home-assistant.io/integrations/fully_kiosk/)
+was subsequently added using the tablet's LAN address and its **Remote Admin
+Password**, which is separate from the kiosk PIN. Enable **Remote Administration**
+and **Remote Admin from Local Network** in Fully. Leave the settings screen after
+saving the password, then check the local Remote Admin service on port 2323.
+Reserve the tablet's IP address in the router for reliable operation.
+
+HA's screen switch was tested against Android's actual power state: off produced
+`Asleep`, on produced `Awake`. Initially wake-up still showed the Amazon ad screen.
+**Unlock Swipe Screen Lock alone did not fix this.** Enabling **Unlock Screen** as
+well made the Braumeister dashboard appear after HA wake-up, without a manual or
+ADB swipe. Both options remain enabled. This shows Fully above the lock screen;
+it does not uninstall or disable Amazon's advertising components. Behavior after
+a complete tablet reboot was not tested.
+
+Fully also repeatedly requested permission to install apps from APK files after
+Remote Admin was enabled. On this installation, **IGNORE** dismissed that request
+without granting APK installation permission; HA screen control still worked.
+
+### Power-based display automation
+
+The tested smart plug reported **0 W with the Braumeister switched off**, and
+approximately **2.78–2.97 W with it on but heater and pump off**. These measurements
+belong to this particular installation; measure your own plug and machine before
+choosing thresholds.
+
+The installed automation uses the following rules:
+
+- Valid consumption **below 0.5 W for 30 seconds** turns off the tablet and arms
+  the next automatic wake. Network disconnection never counts as power-off.
+- Valid consumption **above 1.5 W**, Braumeister online, a new device timestamp
+  since the measured power-off, and Fully reachable for **5 seconds** consume
+  the permission and turn the tablet on once.
+- A persistent `input_boolean` stores that permission with **Restore previous
+  state** selected. It is consumed **before** sending the screen-on command;
+  failed commands and reconnects cannot repeatedly wake the tablet.
+- A persistent `input_text` stores `last_device_timestamp` from the integration's
+  device-connection diagnostic sensor at power-off. Wake-up requires a larger
+  timestamp. The ordinary online/last-online values kept updating while the
+  machine was physically off in this test; they are insufficient evidence of a
+  new connection. Use the device timestamp, not a cloud polling timestamp.
+- Manual tablet power-off after that wake stays off until the next measured
+  Braumeister off/on cycle. Manual tablet power-on remains available.
+- Unknown, unavailable, non-numeric and negative consumption never mean off.
+  No automation action controls the smart-plug relay, heater or pump.
+
+Automatic wake, a manual tablet-off period of more than one minute with the
+Braumeister still online, consumption-based screen-off/rearming, and a second
+automatic wake with a new device timestamp were verified. HA polls Fully's state every
+30 seconds, so status updates can lag the physical buttons. The persistent helper
+prevents repeated wake-ups after a consumed wake independently of that delay.
+A manual off during the short window *before the first automatic wake* can still
+race that polling interval. A complete HA restart was not tested; the helper's
+restore setting was verified. Trigger hold timers restart on automation reload or
+HA restart, and cycles that occur entirely while HA is offline are not inferred.
 
 ### Volume buttons and dashboard alarm audio
 

@@ -185,9 +185,18 @@ automatic wake with a new device timestamp were verified. HA polls Fully's state
 30 seconds, so status updates can lag the physical buttons. The persistent helper
 prevents repeated wake-ups after a consumed wake independently of that delay.
 A manual off during the short window *before the first automatic wake* can still
-race that polling interval. A complete HA restart was not tested; the helper's
-restore setting was verified. Trigger hold timers restart on automation reload or
-HA restart, and cycles that occur entirely while HA is offline are not inferred.
+race that polling interval.
+
+A full **Home Assistant Core restart** was subsequently tested with the
+Braumeister still running and the tablet manually powered off. HA restored the
+automation as enabled, the wake permission as off, and the saved device timestamp
+unchanged. The power sensor briefly became unknown during startup, then returned
+to approximately 2.9 W with the Braumeister online. The display stayed `Asleep`
+through all 24 ADB observations taken about five seconds apart, including more
+than one minute after valid power readings returned. The automation's last-run
+timestamp remained unchanged across the restart. No HA host reboot or power-loss
+test was performed. Trigger hold timers restart on automation reload or HA
+restart, and cycles that occur entirely while HA is offline are not inferred.
 
 ### Volume buttons and dashboard alarm audio
 

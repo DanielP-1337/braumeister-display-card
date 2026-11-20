@@ -2,8 +2,10 @@
 
 This setup displays the Braumeister dashboard in portrait orientation, without
 the Home Assistant header or sidebar. Fully's PIN-protected menu remains
-available. The changes are local to the tablet; desktop browsers and the card's
-Home Assistant configuration are unaffected.
+available. The display adaptation is local to the tablet; desktop browsers and
+the card's Home Assistant configuration are unaffected. The optional screen
+automation described below additionally uses the Fully integration, helpers and
+an automation in Home Assistant.
 
 ## Verified setup
 
@@ -126,7 +128,8 @@ An additional `KEYCODE_SLEEP` test still reported `Asleep` / `OFF` after
 event was logged as a power-key event rather than Fully's wake lock.
 
 This configuration deliberately does not wake the display when someone walks
-past the front camera. Wake it manually with the power button. Amazon's
+past the front camera. Wake it manually with the power button or use the HA
+automation described below. Amazon's
 advertising lock screen is still enabled and can appear when waking the tablet;
 this correction does not remove ads or guarantee bypass of the lock screen.
 See Fully's [Kiosk Mode option descriptions](https://www.fully-kiosk.com/docs/en/configuration/kiosk-mode).
@@ -163,8 +166,8 @@ The installed automation uses the following rules:
 
 - Valid consumption **below 0.5 W for 30 seconds** turns off the tablet and arms
   the next automatic wake. Network disconnection never counts as power-off.
-- Valid consumption **above 1.5 W**, Braumeister online, a new device timestamp
-  since the measured power-off, and Fully reachable for **5 seconds** consume
+- Valid consumption **above 1.5 W**, Braumeister online, a device timestamp
+  greater than the value stored at power-off, and Fully reachable for **5 seconds** consume
   the permission and turn the tablet on once.
 - A persistent `input_boolean` stores that permission with **Restore previous
   state** selected. It is consumed **before** sending the screen-on command;
@@ -174,6 +177,8 @@ The installed automation uses the following rules:
   timestamp. The ordinary online/last-online values kept updating while the
   machine was physically off in this test; they are insufficient evidence of a
   new connection. Use the device timestamp, not a cloud polling timestamp.
+  Diagnostic attributes can arrive with a delay: this comparison establishes
+  progress beyond the saved value, not the exact time a new connection began.
 - Manual tablet power-off after that wake stays off until the next measured
   Braumeister off/on cycle. Manual tablet power-on remains available.
 - Unknown, unavailable, non-numeric and negative consumption never mean off.
@@ -186,6 +191,10 @@ automatic wake with a new device timestamp were verified. HA polls Fully's state
 prevents repeated wake-ups after a consumed wake independently of that delay.
 A manual off during the short window *before the first automatic wake* can still
 race that polling interval.
+
+This section records the installed automation's logic and measurements; it does
+not include an importable automation or blueprint. Entity IDs and the available
+device-timestamp diagnostic depend on the installed Braumeister integration.
 
 A full **Home Assistant Core restart** was subsequently tested with the
 Braumeister still running and the tablet manually powered off. HA restored the

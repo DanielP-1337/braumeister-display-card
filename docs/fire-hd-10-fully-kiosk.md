@@ -62,12 +62,14 @@ name resolution can differ between clients.
 | Web Auto Reload | Auto Reload after Page Error | `30` seconds |
 | Web Auto Reload | Auto Reload on Network Reconnect | On |
 | Web Auto Reload | Delete Cookies / Webstorage on Auto Reload | Off |
+| Kiosk Mode (PLUS) | Disable Screen Off | **Off** (allow the physical power button) |
+| Motion Detection (PLUS) | Enable Visual Motion Detection | **Off** (no camera-triggered wake-up) |
 
 In the verified installation **Keep Screen On (Advanced)** was also already
 enabled and retained. The previous 42-second Screen Off Timer was disabled.
 Keeping the screen on avoids returning to the advertising lock screen during
-normal dashboard use; this does not remove Amazon's ads. Screen-off, motion
-detection, and scheduled sleep were not validated as part of this setup.
+normal dashboard use; this does not remove Amazon's ads. Manual screen-off was
+subsequently tested as described below. Scheduled sleep was not validated.
 
 ## Kiosk protection and exit
 
@@ -79,8 +81,8 @@ Under **Settings > Kiosk Mode (PLUS)**:
    On Fire OS these let Fully detect and block navigation to other apps.
 4. Keep **Disable Home Button**, **Disable Other Apps**, **Disable Status Bar**,
    **Disable System Dialogs**, and **Disable Context Menus** enabled. The tested
-   configuration also had **Disable Volume Buttons** and **Disable Screen Off**
-   enabled.
+   configuration also had **Disable Volume Buttons** enabled. Keep **Disable
+   Screen Off disabled** if the physical power button should turn the display off.
 5. Accept Fully's restart into kiosk mode. Test the Home button and the exit
    gesture before relying on the tablet unattended.
 
@@ -98,6 +100,33 @@ de.ozerov.fully` and a subsequent launch, Fire OS had removed Fully's
 accessibility-service enablement. Re-enable **Fully Kiosk Browser** in Android
 **Accessibility** settings and test Home again. Do not overwrite the complete
 list of accessibility services if other services are in use.
+
+### Power button immediately wakes the screen and shows ads
+
+A follow-up test exposed two conflicting settings in the initial configuration:
+
+- **Kiosk Mode > Disable Screen Off** was enabled. Fully explicitly documents
+  that this option wakes the display shortly after a short power-button press.
+- **Motion Detection > Enable Visual Motion Detection** was also enabled, with
+  background detection active. Turning off only Disable Screen Off did not fix
+  the symptom; Android's power diagnostics recorded `fully:WakeUpLock`.
+
+Both options were switched off. Acoustic/proximity motion detection and device
+movement detection were already disabled and remained so. Keep Screen On and
+Keep Screen On (Advanced) were retained: the dashboard stays awake while in use,
+but manual screen-off is now allowed. Following an ADB `KEYCODE_POWER` event,
+the tablet reported `mWakefulness=Asleep`, `mLastSleepReason=power_button`, and
+`Display Power: state=OFF` after five seconds. This replaces the initial
+recommendation to leave Disable Screen Off enabled.
+An additional `KEYCODE_SLEEP` test still reported `Asleep` / `OFF` after
+20 seconds, and the user confirmed the display was off. An intervening wake
+event was logged as a power-key event rather than Fully's wake lock.
+
+This configuration deliberately does not wake the display when someone walks
+past the front camera. Wake it manually with the power button. Amazon's
+advertising lock screen is still enabled and can appear when waking the tablet;
+this correction does not remove ads or guarantee bypass of the lock screen.
+See Fully's [Kiosk Mode option descriptions](https://www.fully-kiosk.com/docs/en/configuration/kiosk-mode).
 
 ## Hide the Home Assistant header and sidebar on this tablet
 

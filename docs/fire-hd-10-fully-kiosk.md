@@ -154,21 +154,23 @@ still appeared. The notebook view was not modified.
 
 ## Lock portrait orientation
 
-On the tested KFTUWI the display's natural orientation is 1200 x 1920, so rotation
-`0` is portrait. Read the current values before changing them:
+On the tested KFTUWI the display's natural orientation is 1200 x 1920. The final
+mounting uses **reverse portrait (180 degrees), with the USB connector at the
+bottom**: rotation `2`. Rotation `0` selects the opposite portrait orientation.
+Read the current values before changing them:
 
 ```sh
 adb shell settings --user 0 get system accelerometer_rotation
 adb shell settings --user 0 get system user_rotation
 adb shell settings --user 0 put system accelerometer_rotation 0
-adb shell settings --user 0 put system user_rotation 0
+adb shell settings --user 0 put system user_rotation 2
 ```
 
-These persistently disable sensor rotation and select portrait for user 0.
+These persistently disable sensor rotation and select reverse portrait for user 0.
 Leave Fully's **Screen Orientation** on the system/default choice rather than
 forcing a conflicting landscape orientation. On this device the active Fully
 window used unspecified orientation, and the final display was verified as
-1200 x 1920 with rotation 0. To restore automatic rotation:
+1200 x 1920 with rotation 2 after the mounting correction. To restore automatic rotation:
 
 ```sh
 adb shell settings --user 0 put system accelerometer_rotation 1

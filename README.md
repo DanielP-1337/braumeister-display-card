@@ -2,6 +2,13 @@
 
 ![Recipe editing in English](images/recipe-edit-en.png)
 
+## Fire tablet dashboard
+
+For a dedicated Amazon Fire HD 10 display, see the
+[Fully Kiosk setup guide](docs/fire-hd-10-fully-kiosk.md). It covers portrait
+orientation, a PIN-protected kiosk, tablet-only hiding of the Home Assistant
+header/sidebar, and recovery on Fire OS.
+
 ## Install through HACS
 
 1. In HACS, open the menu and select **Custom repositories**.

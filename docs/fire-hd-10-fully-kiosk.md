@@ -63,6 +63,7 @@ name resolution can differ between clients.
 | Web Auto Reload | Auto Reload on Network Reconnect | On |
 | Web Auto Reload | Delete Cookies / Webstorage on Auto Reload | Off |
 | Kiosk Mode (PLUS) | Disable Screen Off | **Off** (allow the physical power button) |
+| Kiosk Mode (PLUS) | Disable Volume Buttons | **Off** (allow adjusting dashboard alarm audio) |
 | Motion Detection (PLUS) | Enable Visual Motion Detection | **Off** (no camera-triggered wake-up) |
 
 In the verified installation **Keep Screen On (Advanced)** was also already
@@ -80,9 +81,9 @@ Under **Settings > Kiosk Mode (PLUS)**:
 3. Grant Fully's requested **Accessibility Service** and **Usage Data Access**.
    On Fire OS these let Fully detect and block navigation to other apps.
 4. Keep **Disable Home Button**, **Disable Other Apps**, **Disable Status Bar**,
-   **Disable System Dialogs**, and **Disable Context Menus** enabled. The tested
-   configuration also had **Disable Volume Buttons** enabled. Keep **Disable
-   Screen Off disabled** if the physical power button should turn the display off.
+   **Disable System Dialogs**, and **Disable Context Menus** enabled. Leave
+   **Disable Volume Buttons off** so the alarm volume can be adjusted. Keep
+   **Disable Screen Off disabled** if the physical power button should turn the display off.
 5. Accept Fully's restart into kiosk mode. Test the Home button and the exit
    gesture before relying on the tablet unattended.
 
@@ -127,6 +128,24 @@ past the front camera. Wake it manually with the power button. Amazon's
 advertising lock screen is still enabled and can appear when waking the tablet;
 this correction does not remove ads or guarantee bypass of the lock screen.
 See Fully's [Kiosk Mode option descriptions](https://www.fully-kiosk.com/docs/en/configuration/kiosk-mode).
+
+### Volume buttons and dashboard alarm audio
+
+The initial kiosk setup had **Disable Volume Buttons** enabled. A user report
+identified that the hardware buttons are needed for alarm volume. This setting
+was switched off without disabling the remaining kiosk protections.
+
+The dashboard's **Test / enable sound** button was used for a short audio test.
+During playback, a simulated Volume Up key changed Android's `STREAM_MUSIC`
+(speaker) from 9 to 10 out of 25. Volume Down also reduced that stream, and the
+original media level of 9 was restored afterward. The test verified volume-key
+handling during dashboard audio; it did not trigger a brewing process or test
+a real brewing alarm. Confirm the desired audible level on the installed tablet.
+
+Use the dashboard test tone when adjusting volume: without active playback,
+Android may route volume keys differently. A web dashboard sound uses media
+audio; do not assume the Android alarm-volume slider controls it. Kiosk exit
+and Home-button protections remain independent of the volume-button setting.
 
 ## Hide the Home Assistant header and sidebar on this tablet
 

@@ -198,6 +198,13 @@ timestamp remained unchanged across the restart. No HA host reboot or power-loss
 test was performed. Trigger hold timers restart on automation reload or HA
 restart, and cycles that occur entirely while HA is offline are not inferred.
 
+A further physical Braumeister off/on cycle after that HA restart also passed:
+0 W for the configured hold time rearmed wake-up and automatically updated the
+stored device timestamp. Switching the Braumeister back on then woke the tablet
+to the dashboard and consumed the permission again. No manual helper changes,
+HA screen commands or ADB wake/swipe commands were used during this test. Android
+reported `Awake`, and the visible UI showed the Braumeister dashboard.
+
 ### Volume buttons and dashboard alarm audio
 
 The initial kiosk setup had **Disable Volume Buttons** enabled. A user report

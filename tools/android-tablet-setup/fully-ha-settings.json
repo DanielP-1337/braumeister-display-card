@@ -3,6 +3,7 @@
   "fullscreen": true,
   "showActionBar": false,
   "keepScreenOn": true,
+  "screenBrightness": "204",
   "launchOnBoot": true,
   "screenOrientation": "1",
   "reloadOnWifiOn": true,

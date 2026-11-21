@@ -57,7 +57,7 @@ Das Skript lädt bei Bedarf Googles Mac-Paket. Zusätzliche USB-Treiber sind lau
 
 Das Skript wartet standardmäßig bis zu **90 Sekunden** auf die Gerätefreigabe. Bei Erfolg erscheinen Modell, Seriennummer, Android, API-Level und Build-ID im Terminal. **Fire OS** erscheint nur bei Amazon-Geräten oder wenn das Gerät ausdrücklich eine Fire-OS-Version meldet.
 
-Die Angaben werden zusätzlich mit UTC-Zeitpunkt in **`Android-Geraeteinformationen.txt`** neben dem Skript gespeichert. Jeder erfolgreiche Durchlauf ersetzt den vorherigen Bericht, auch beim Wechsel des Tablets. Ohne die optionalen Fully- und Akkuschutz-Optionen werden keine Apps installiert oder Tablet-Einstellungen geändert.
+Die Angaben werden zusätzlich mit UTC-Zeitpunkt in **`Android-Geraeteinformationen.txt`** neben dem Skript gespeichert. Jeder erfolgreiche Durchlauf ersetzt den vorherigen Bericht, auch beim Wechsel des Tablets. Ohne die optionalen Fully-, Akkuschutz- und Helligkeitsoptionen werden keine Apps installiert oder Tablet-Einstellungen geändert.
 
 Bekannte Modellkennungen werden als **Samsung Galaxy Tab A9+ (Wi-Fi)** (`SM-X210`) bzw. **Amazon Fire HD 10 (2023, 13. Generation)** (`KFTUWI`) angezeigt. Andere Geräte werden mit ihrem gemeldeten Hersteller und Modell angezeigt, ohne Herstellerwarnung. Es gibt keine vollständige Modellnamendatenbank. Quellen: [Samsung](https://www.samsung.com/de/support/model/SM-X210NZAAEUB/), [Amazon](https://developer.amazon.com/docs/device-specs/ft-identify-tablet-devices).
 
@@ -70,6 +70,7 @@ Diese Optionen an den jeweiligen Startbefehl aus Schritt 2 anhängen:
 | Nur ADB bereitstellen | `-InstallOnly` | `--install-only` |
 | Bestimmtes Gerät auswählen | `-Serial 'SERIENNUMMER'` | `--serial 'SERIENNUMMER'` |
 | 120 Sekunden warten | `-TimeoutSeconds 120` | `--timeout 120` |
+| Display auf feste 80 % setzen | `-ScreenBrightness80` | `--screen-brightness-80` |
 | Anderen Tools-Ordner verwenden | `-ToolsDirectory 'C:\ADB'` | `--tools-directory "$HOME/AndroidTools"` |
 
 Bei **unauthorized** den Dialog am Tablet bestätigen; bei **offline** das Kabel neu verbinden. Bei mehreren Geräten die gewünschte Seriennummer angeben. Vorhandene Platform Tools werden wiederverwendet, aber nicht automatisch aktualisiert.
@@ -94,7 +95,7 @@ Das gemeinsame Profil `fully-ha-settings.json` richtet dasselbe Dashboard wie au
 
 `http://192.168.2.56:8123/firehd-braumeister/braumeister_tablet`
 
-Es setzt Startseite, Vollbild ohne Aktionsleiste, Hochformat, Display-an während der Nutzung, Autostart und Neuladen nach WLAN-Verbindung. Die JavaScript-Anpassung blendet HA-Kopfzeile und Seitenleiste nur für dieses Dashboard aus und setzt einen dunklen Außenhintergrund. Die Kartenhöhe wählst du ausdrücklich mit `compact` oder `fullscreen` (siehe unten). Ohne diese Auswahl bricht die Fully-Einrichtung vor dem Gerätezugriff ab. Das Tablet muss die konfigurierte HA-Adresse erreichen können.
+Es setzt Startseite, Vollbild ohne Aktionsleiste, Hochformat, Display-an während der Nutzung, **80 % Displayhelligkeit**, Autostart und Neuladen nach WLAN-Verbindung. Die Setup-Skripte deaktivieren dabei die automatische Helligkeit. Die JavaScript-Anpassung blendet HA-Kopfzeile und Seitenleiste nur für dieses Dashboard aus und setzt einen dunklen Außenhintergrund. Die Kartenhöhe wählst du ausdrücklich mit `compact` oder `fullscreen` (siehe unten). Ohne diese Auswahl bricht die Fully-Einrichtung vor dem Gerätezugriff ab. Das Tablet muss die konfigurierte HA-Adresse erreichen können.
 
 Der Import erteilt Fully den nötigen Speicherzugriff, startet die App neu und wartet auf die Verarbeitung von `fully-once-settings.json`. Bei offenen Berechtigungsdialogen am Tablet bestätigen. Bei Erfolg gegebenenfalls **einmal direkt in Home Assistant anmelden**. Passwörter, PINs, Lizenzdaten und Anmeldesitzungen werden nicht kopiert. PLUS-Funktionen benötigen eine Lizenz für das jeweilige Tablet. Eine Sperre gegen das Verlassen der App und die HA-Fully-Integration werden nicht automatisch aktiviert.
 
@@ -234,6 +235,75 @@ Momentaufnahme vom **21.11.2026** mit den oben genannten Versionen. Auf beiden T
 Die Tablet-Werte stammen aus dem Zuwachs der Summe aus Benutzer- und Kernel-CPU-Zeit in `/proc/<PID>/stat`, bei 100 Zählertakten pro Sekunde. Bezogen auf alle **acht aktiven Kerne** entsprechen die Mittelwerte rund **0,11 % beim Fire** und **0,16 % beim Samsung**. Diese Umrechnung beschreibt CPU-Zeit, nicht die unterschiedliche Rechenleistung der Kerne. Die gerundete HA-App-Anzeige ist eine andere Messquelle; **0 % bedeutet nicht exakt null Rechenarbeit**. Es wurde weder hohe VPN-Datenlast erzeugt noch der gesamte Stromverbrauch gemessen.
 
 Der Geräteschlüssel-Ablauf wurde nicht deaktiviert; beim HA-Gerät wurden sechs Monate angezeigt. Für den Dauerbetrieb Tailscale-Hinweise zur erforderlichen Neuanmeldung beachten. Nach App-, OS- oder Netzwerkkonfigurationsänderungen den Hotspot- und Autostart-Test erneut durchführen.
+
+## Displayhelligkeit für den Dauerbetrieb
+
+Bei `-SetupFully` / `--setup-fully` werden automatisch **feste 80 % Displayhelligkeit** eingestellt. Nur die Helligkeit eines verbundenen Tablets ändern, ohne Fully zu installieren oder neu zu starten:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -ScreenBrightness80
+```
+
+```bash
+bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --screen-brightness-80
+```
+
+Bei zwei angeschlossenen Tablets den Befehl einmal je Seriennummer ausführen. Beide Skripte setzen `screen_brightness_mode=0` (Automatik aus) und `screen_brightness=204` im Android-Systembereich. **204 von 255 entspricht 80 % der Einstellskala**, nicht einer gemessenen Leuchtdichte oder 20 % Stromersparnis. Die Werte werden zurückgelesen; erst nach erfolgreicher Prüfung erscheint die Bestätigung im Terminal und in `Android-Geraeteinformationen.txt`. Bei Schreib- oder Prüffehlern bricht das Skript ab; bereits gesetzte Werte können bestehen bleiben.
+
+Das gemeinsame Fully-Profil enthält zusätzlich `screenBrightness: "204"` für die vollständige Einrichtung. Der einzelne Helligkeitsaufruf setzt nur die Android-Systemwerte: Eine abweichende Helligkeitsvorgabe in einer vorhandenen App kann diese übersteuern. In Fully unter **Device Management → Screen Brightness** dafür `204` oder ein leeres Feld (Systemvorgabe) verwenden. Fully nutzt gewöhnlich die Skala **0–255**; `80` im Fully-Feld bedeutet nicht 80 %. Bei anderen Geräten können Skalierung und tatsächliche Darstellung abweichen. Quellen: [Android-Systemeinstellungen](https://developer.android.com/reference/android/provider/Settings.System#SCREEN_BRIGHTNESS), [Fully Device Management](https://www.fully-kiosk.com/docs/en/configuration/device-management).
+
+**Am 21.11.2026 per USB geprüft:** Fire HD 10 und Galaxy Tab A9+ meldeten nach Ausführung der PowerShell-Option jeweils `204` und Automatik `0`. Auch der Displaydienst bestätigte manuelle Helligkeit von rund `0,8`; Fully blieb auf beiden Tablets im Vordergrund. Zuvor war die Automatik aktiv und die Helligkeit niedriger, daher erhöhte diese Änderung die aktuelle Helligkeit. Ein zusätzlicher Neustarttest wurde dafür nicht durchgeführt. Die Bash-Variante wird mit simulierten Linux-/macOS-Geräten einschließlich Fehlerfällen geprüft; kein physischer Linux-/macOS-Test.
+
+**Nutzerfeedback vom 21.11.2026:** Beide Tablets sind mit festen 80 % etwas heller als zuvor mit automatischer Helligkeit im Innenraum bei eingeschaltetem Licht. Beide Displays sind dabei laut Nutzer sehr gut lesbar.
+
+Die reine ADB-Abfrage und ein reiner Layoutwechsel ändern die Helligkeit nicht. `-InstallOnly` / `--install-only` lässt sich nicht mit der Helligkeitsoption kombinieren. Zum späteren Anpassen die Android-Anzeigeeinstellungen sowie gegebenenfalls Fullys eigene Helligkeitsvorgabe ändern; erneute vollständige Fully-Einrichtung setzt wieder 80 %.
+
+## Dynamische Helligkeit über Home Assistant
+
+Die optionale HA-Automation ergänzt die festen 80 % der beiden Setup-Skripte. Sie steuert beide Tablets gemeinsam über die **Fully Kiosk Browser-Integration** und liest den Braumeister-Zustand. Die Skripte installieren diese HA-Automation nicht automatisch: Entitäten und Leistungsschwellen müssen zur jeweiligen Installation passen.
+
+| Situation | Verhalten |
+|---|---|
+| Brauprogramm, manueller Betrieb, Alarm oder unklarer Zustand | Bedienhelligkeit, zunächst **80 %**; kein automatischer Bildschirmschoner |
+| Bestätigtes Hauptmenü, Pumpe und Heizung aus | Nach **120 Sekunden ohne Berührung** schwarzer Fully-Bildschirmschoner mit rund **10 %** Helligkeit |
+| Berührung des Bildschirmschoners | Dashboard mit der gewählten Bedienhelligkeit; keine erneute HA-Anmeldung |
+| Heller Raum oder größerer Abstand | Gemeinsamen HA-Regler bei Bedarf höher stellen; Bereich **60–100 %** in 5-%-Schritten |
+| Braumeister ausgeschaltet | Fire: bestehende Displayabschaltung bleibt aktiv. Samsung: nur dimmen nach 120 Sekunden ohne Berührung |
+| Tablet manuell ausgeschaltet | Die Helligkeitsautomation schaltet es nicht wieder ein |
+
+Der Regler heißt **Braumeister Tablet Bedienhelligkeit** (`input_number.braumeister_tablet_bedienhelligkeit`). Er ist unter **Einstellungen → Geräte & Dienste → Helfer** erreichbar und kann als Entität zum eigenen Dashboard hinzugefügt werden. 60–80 % sind der normale Bedienbereich, höhere Werte eine manuelle Wahl. Das ist eine Steuerung nach Gerätezustand und Inaktivität, keine automatische Messung des Raumlichts.
+
+### Einrichten
+
+1. Fully PLUS mit **Remote Administration → Enable Remote Administration** und **Remote Admin from Local Network** aktivieren, ein eigenes Remote-Admin-Passwort direkt am Tablet setzen und die Fully-Einstellungen wieder verlassen. Die Kiosk-PIN ist ein anderes Passwort. Bei offenen Fully-Einstellungen antwortete die Samsung-Fernverwaltung zunächst nicht.
+2. Beide Tablets in HA unter **Einstellungen → Geräte & Dienste → Integration hinzufügen → Fully Kiosk Browser** einbinden. Bei Nutzung über den Hotspot jeweils die **Tailscale-Adresse des Tablets** als Host verwenden. HA muss diese Adresse auf Port 2323 erreichen können; die funktionierende Richtung Tablet → HA allein genügt nicht. HTTPS nur aktivieren, wenn Fully entsprechend eingerichtet ist.
+3. Fully das **Ändern von Systemeinstellungen** für die Helligkeit erlauben und für den Dauerbetrieb von der Akkuoptimierung ausnehmen. Am Samsung wurde der Geräteadministrator ausdrücklich **nicht** freigegeben: Es bleibt beim Dimmen. Kamera, Mikrofon, Standort, Bluetooth und APK-Installation sind dafür nicht erforderlich und wurden nicht freigegeben.
+4. Falls Fully beim Aktivieren der Fernverwaltung alle möglichen Berechtigungen verlangt: Kiosk-Sperre vorübergehend über HA lösen, unbenötigte Android-Dialoge ablehnen und anschließend Fullys angebotene Schaltfläche **IGNORE** verwenden. Danach die Kiosk-Sperre wieder aktivieren. IGNORE erteilt keine Berechtigung; Funktionen, die sie benötigen, bleiben eingeschränkt. Details: [Fully-Berechtigungen](https://www.fully-kiosk.com/docs/en/features/permissions).
+5. Den Zahlenhelfer mit Minimum 60, Maximum 100, Schrittweite 5 und Einheit `%` erstellen und einmal auf 80 setzen. Vorhandene Helfer nicht doppelt anlegen. [tablet-helpers.yaml](examples/tablet-helpers.yaml) zeigt die Konfiguration; die Boolean-/Text-Helfer darin betreffen nur die optionale Fire-Abschaltung.
+6. Eine leere HA-Automation erstellen, **Menü → In YAML bearbeiten** öffnen und [braumeister-tablet-brightness.yaml](examples/braumeister-tablet-brightness.yaml) einfügen. Vor dem Speichern alle Braumeister-, Leistungs- und Fully-Entitäten auf die eigene Installation anpassen. Die Datei ist eine einzelne Automation, kein komplettes HA-Paket. Anschließend aktivieren und die Ablaufverfolgung prüfen.
+7. In Fully den **Screen Off Timer auf 0** belassen. Für das Dimmen werden Screen Brightness, Screensaver Brightness und Screensaver Timer über HA gesetzt. Die Bewegungserkennung ist auf beiden Testgeräten ausgeschaltet. Vorhandene abweichende Bildschirmschoner-Inhalte oder weitere Helligkeitsautomationen prüfen, damit sie nicht gegeneinander arbeiten.
+
+### Regeln und Grenzen
+
+Das Hauptmenü wird nur bei `idle`, `waiting`, Display-Code `101`, Verbindung `online`, ausgeschalteter Pumpe/Heizung und ausgeschaltetem Alarm erkannt. Zusätzlich müssen Leistung über 1,5 W und eine höchstens 90 Sekunden alte HA-Aktualisierung des Schritts vorliegen. Damit wird beispielsweise eine Heizpause während des Brauens nicht als ungenutztes Hauptmenü behandelt. Als ausgeschaltet gilt hier eine aktuelle, nichtnegative Leistung unter 0,5 W. Diese Schwellen gehören zur getesteten Installation und müssen bei anderen Geräten geprüft werden. HA-Aktualisierungszeit und tatsächliche Aktualität der Geräteantwort sind nicht dasselbe; die Automation ist kein Sicherheitsmonitor für den Brauprozess.
+
+Die Regel reagiert auf Zustandsänderungen und gleicht zusätzlich jede Minute sowie nach einem HA-Start ab. Sie schreibt nur abweichende Werte, damit laufende Inaktivitätstimer nicht ständig neu beginnen. Bei erkannten unklaren Daten wird ein laufender Bildschirmschoner auf einem eingeschalteten Tablet beendet. Ein manuell ausgeschaltetes Tablet wird übersprungen. Weder Smartplug noch Pumpe oder Heizung werden geschaltet.
+
+Fällt HA oder die Verbindung zur Fully-Fernverwaltung aus, bleiben die zuletzt übertragenen Fully-Einstellungen wirksam. Ein zuvor gesetzter 120-s-Bildschirmschoner kann dann weiter starten; Berühren beendet ihn lokal. Eine automatische Anpassung an einen späteren Braumeister-Zustand benötigt wieder die HA-Verbindung. Die 10 % beziehen sich auf die Einstellskala: Ein schwarzer Bildschirmschoner ist bei diesen LCD-Tablets **kein ausgeschaltetes Display**.
+
+Die vorhandene Fire-Aus/Ein-Regel ist separat als [fire-tablet-display.yaml](examples/fire-tablet-display.yaml) dokumentiert. Sie verwendet eine gemessene Aus/Ein-Folge mit einmaliger Weckfreigabe und erhält manuelles Ausschalten innerhalb dieses Zyklus. Am Samsung wurde die neu angelegte **Samsung Tablet – Displayautomatik deaktiviert**, weil keine Geräteadministrator-Rechte gewünscht sind. Die gemeinsame Helligkeitsautomation bleibt für beide aktiv.
+
+Zum Zurücksetzen die Helligkeitsautomation deaktivieren, dann an beiden Fully-Geräten Screensaver Timer auf `0`, einen laufenden Bildschirmschoner aus und Screen Brightness auf `204` setzen. Die separate Fire-Abschaltautomatik bei Bedarf unabhängig davon ändern. Eine erneute vollständige Skript-Einrichtung setzt die Basishelligkeit wieder auf 80 %; eine aktive HA-Helligkeitsautomation übernimmt danach wieder ihren Reglerwert.
+
+### Prüfung am 21.11.2026
+
+- Beide Tablets dimmten im bestätigten Hauptmenü automatisch nach 120 Sekunden. Der Android-Displaydienst meldete rund **0,098 beim Fire** und **0,102 beim A9+**.
+- Der gemeinsame HA-Regler wurde von 80 auf **90 %** und zurück auf **80 %** gestellt. Beide Displays folgten: rund 0,901/0,902 bei 90 % und 0,799/0,800 bei 80 %. Dies misst die Helligkeitseinstellung, keine Leuchtdichte oder Energieeinsparung.
+- Eine Berührung zeigte auf beiden Tablets wieder das angemeldete HA-Dashboard. Am Samsung erschien nach IGNORE auch bei der Änderung der Helligkeit kein Berechtigungsdialog mehr; die Kiosk-Sperre war wieder aktiv. Geräteadministrator, Kamera, Mikrofon, Standort und Bluetooth blieben abgelehnt.
+- Beide Tablets wurden über den Android-Schlafbefehl manuell ausgeschaltet. Nach gut vier Minuten und mehreren HA-Abgleichen waren beide Displays weiterhin `OFF`; HA meldete ebenfalls beide Bildschirmschalter als `off`. Anschließendes manuelles Aufwecken stellte das angemeldete Dashboard mit 80 % wieder her.
+- Fully wurde am Samsung zusätzlich beendet und neu gestartet. Das Dashboard erschien mit 80 % ohne erneute Anmeldung und ohne Berechtigungsdialog. In HA war die Helligkeitsautomation aktiv, die Fire-Displayautomatik aktiv und die Samsung-Displayautomatik deaktiviert.
+- Auch das erneute automatische Dimmen nach dem Aufwecken wurde abschließend auf beiden Geräten bestätigt: Fire rund 0,098, Samsung rund 0,102 und jeweils Fullys `ScreensaverActivity` im Vordergrund. Der Nutzer bestätigte die Dimmung des Fire zusätzlich. Die konfigurierte Wartezeit beträgt 120 Sekunden; die genaue Verzögerung dieses Wiederholungstests wurde nicht separat gestoppt.
+- Die tatsächlichen Übergänge eines Brauprogramms sowie ein erneuter physischer Braumeister-Aus/Ein-Zyklus wurden für diese Helligkeitserweiterung nicht ausgelöst. Die früheren Fire-Abschalttests ersetzen keinen neuen Samsung-Test; am Samsung ist die automatische Abschaltung ausdrücklich deaktiviert. Ein vollständiger Tablet-Neustart wurde in diesem Prüflauf nicht durchgeführt.
 
 ## Akkuschutz fuer den Dauerbetrieb
 

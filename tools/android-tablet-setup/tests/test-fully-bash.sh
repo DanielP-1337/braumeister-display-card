@@ -55,8 +55,9 @@ for layout in compact fullscreen; do
             grep -q '^install -r ' "$FULLY_TEST_LOG"
             grep -q '"startURL"' "$FULLY_TEST_IMPORT"
             grep -q '"launchOnBoot"' "$FULLY_TEST_IMPORT"
+            grep -Eq '"screenBrightness"[[:space:]]*:[[:space:]]*"204"' "$FULLY_TEST_IMPORT"
         else
-            if grep -q '^install ' "$FULLY_TEST_LOG" || grep -Eq '"(startURL|screenOrientation|launchOnBoot|fullscreen)"[[:space:]]*:' "$FULLY_TEST_IMPORT"; then
+            if grep -q '^install ' "$FULLY_TEST_LOG" || grep -Eq '"(startURL|screenOrientation|launchOnBoot|fullscreen|screenBrightness)"[[:space:]]*:' "$FULLY_TEST_IMPORT"; then
                 echo 'Layout-only mode changed app or other settings' >&2; exit 1
             fi
         fi

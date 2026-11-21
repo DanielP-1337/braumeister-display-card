@@ -1,0 +1,17 @@
+# Reference for configuration.yaml / a package, OR create equivalent UI helpers.
+# Do not install duplicate helpers if they already exist.
+input_number:
+  braumeister_tablet_bedienhelligkeit:
+    name: Braumeister Tablet Bedienhelligkeit
+    min: 60
+    max: 100
+    step: 5
+    unit_of_measurement: "%"
+    mode: slider
+    # Set to 80 once after creation. No initial: preserve later user choices.
+input_boolean:
+  braumeister_tablet_wake_armed:
+    name: Braumeister Tablet Wake Armed
+input_text:
+  braumeister_tablet_off_timestamp:
+    name: Braumeister Tablet Off Timestamp

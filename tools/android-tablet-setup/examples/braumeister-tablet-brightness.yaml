@@ -1,0 +1,101 @@
+# Single automation for the HA automation UI (not a package).
+# Helper: input_number.braumeister_tablet_bedienhelligkeit, 60..100 %, step 5.
+# Initialize the helper to 80. No actions control brewing hardware.
+alias: Braumeister Tablets – Helligkeit
+description: >-
+  Bedienhelligkeit 60–100 % (Helfer, Standard 80 %). Nur bei frischem,
+  bestaetigtem Hauptmenue/idle oder gemessenem BM-Aus nach 120 s ohne Beruehrung
+  auf 10 % dimmen.
+  Brauprogramme, manueller Betrieb, Alarm und unklare Daten bleiben hell.
+  Schaltet keinen Bildschirm ein oder aus; die Displayautomatik bleibt getrennt.
+mode: restart
+triggers:
+  - trigger: state
+    entity_id:
+      - sensor.badezimmer_braumeister_20l_plus_prozessstatus_2
+      - sensor.badezimmer_braumeister_20l_plus_geratemodus_2
+      - sensor.badezimmer_braumeister_20l_plus_aktueller_schritt_4
+      - sensor.badezimmer_braumeister_20l_plus_pumpenstatus_2
+      - sensor.badezimmer_braumeister_20l_plus_heizungsstatus_2
+      - sensor.badezimmer_braumeister_20l_plus_verbindungsstatus_2
+      - sensor.braumeister_20l_r_s60_3_power
+      - binary_sensor.badezimmer_braumeister_20l_plus_alarm_2
+      - input_number.braumeister_tablet_bedienhelligkeit
+      - switch.fire_tablet_bildschirm
+      - switch.controlroom_tab_a9_bildschirm
+    from: null
+  - trigger: time_pattern
+    minutes: /1
+  - trigger: homeassistant
+    event: start
+conditions: []
+variables:
+  powered_off: >-
+    {% set p = states('sensor.braumeister_20l_r_s60_3_power') %}
+    {% set seen = as_timestamp(states.sensor.braumeister_20l_r_s60_3_power.last_updated, 0) %}
+    {{ is_number(p) and 0 <= p | float < 0.5
+       and 0 <= as_timestamp(now()) - seen | float < 90
+       and not is_state('binary_sensor.badezimmer_braumeister_20l_plus_alarm_2', 'on') }}
+  idle: >-
+    {% set p = states('sensor.braumeister_20l_r_s60_3_power') %}
+    {% set seen = as_timestamp(states.sensor.badezimmer_braumeister_20l_plus_aktueller_schritt_4.last_updated, 0) %}
+    {{ is_number(p) and p | float > 1.5
+       and is_state('sensor.badezimmer_braumeister_20l_plus_verbindungsstatus_2', 'online')
+       and is_number(seen) and 0 <= as_timestamp(now()) - seen | float < 90
+       and is_state('sensor.badezimmer_braumeister_20l_plus_prozessstatus_2', 'idle')
+       and is_state('sensor.badezimmer_braumeister_20l_plus_geratemodus_2', 'waiting')
+       and state_attr('sensor.badezimmer_braumeister_20l_plus_aktueller_schritt_4', 'display_state_code') == 101
+       and is_state('sensor.badezimmer_braumeister_20l_plus_pumpenstatus_2', 'off')
+       and is_state('sensor.badezimmer_braumeister_20l_plus_heizungsstatus_2', 'off')
+       and is_state('binary_sensor.badezimmer_braumeister_20l_plus_alarm_2', 'off') }}
+  brightness: >-
+    {% set percent = states('input_number.braumeister_tablet_bedienhelligkeit') | float(80) %}
+    {{ (([100, [60, percent] | max] | min) * 255 / 100) | round(0) | int }}
+  dim_allowed: "{{ idle or powered_off }}"
+  saver_timer: "{{ 120 if dim_allowed else 0 }}"
+actions:
+  - repeat:
+      for_each:
+        - screen: switch.fire_tablet_bildschirm
+          brightness: number.fire_tablet_bildschirmhelligkeit
+          saver: switch.fire_tablet_bildschirmschoner
+          timer: number.fire_tablet_bildschirmschoner_timer
+          dim: number.fire_tablet_bildschirmschoner_helligkeit
+        - screen: switch.controlroom_tab_a9_bildschirm
+          brightness: number.controlroom_tab_a9_bildschirmhelligkeit
+          saver: switch.controlroom_tab_a9_bildschirmschoner
+          timer: number.controlroom_tab_a9_bildschirmschoner_timer
+          dim: number.controlroom_tab_a9_bildschirmschoner_helligkeit
+      sequence:
+        - if: "{{ is_state(repeat.item.screen, 'on') }}"
+          then:
+            - if: "{{ states(repeat.item.brightness) | float(-1) != brightness | float }}"
+              then:
+                - action: number.set_value
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item.brightness }}"
+                  data:
+                    value: "{{ brightness }}"
+            - if: "{{ states(repeat.item.dim) | float(-1) != 26 }}"
+              then:
+                - action: number.set_value
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item.dim }}"
+                  data:
+                    value: 26
+            - if: "{{ states(repeat.item.timer) | float(-1) != saver_timer | float }}"
+              then:
+                - action: number.set_value
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item.timer }}"
+                  data:
+                    value: "{{ saver_timer }}"
+            - if: "{{ not dim_allowed and is_state(repeat.item.saver, 'on') }}"
+              then:
+                - action: switch.turn_off
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ repeat.item.saver }}"

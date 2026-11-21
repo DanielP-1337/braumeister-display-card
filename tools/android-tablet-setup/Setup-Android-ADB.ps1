@@ -21,6 +21,7 @@ param(
     [switch]$InstallOnly,
     [switch]$SetupFully,
     [switch]$BatteryProtection80,
+    [switch]$ScreenBrightness80,
     [string]$FullyApkPath,
     [ValidateSet('compact', 'fullscreen')][string]$FullyLayout
 )
@@ -33,7 +34,7 @@ if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
 }
 
 try {
-    if ($InstallOnly -and ($SetupFully -or $BatteryProtection80 -or $FullyLayout)) { throw '-InstallOnly kann nicht mit Geraeteeinrichtung kombiniert werden.' }
+    if ($InstallOnly -and ($SetupFully -or $BatteryProtection80 -or $ScreenBrightness80 -or $FullyLayout)) { throw '-InstallOnly kann nicht mit Geraeteeinrichtung kombiniert werden.' }
     if ($FullyApkPath -and -not $SetupFully) { throw '-FullyApkPath benoetigt -SetupFully.' }
     if ($SetupFully -and -not $FullyLayout) { throw 'Darstellung bitte bewusst waehlen: -SetupFully -FullyLayout compact oder -FullyLayout fullscreen. Siehe README.' }
     if ($env:OS -ne 'Windows_NT') { throw 'Dieses Skript benoetigt Windows.' }
@@ -203,6 +204,22 @@ Am Android-Tablet (Menues unterscheiden sich je nach Hersteller):
             if ($SetupFully -or $FullyLayout) {
                 & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'scripts/Setup-Fully.ps1') -Adb $adb -Serial $target -ApkPath $FullyApkPath -Layout $FullyLayout -LayoutOnly:(-not $SetupFully)
                 Add-Content -LiteralPath $reportPath -Value ("Fully-Darstellung: {0} (Import verarbeitet)." -f $FullyLayout.ToLowerInvariant()) -Encoding UTF8
+            }
+            if ($ScreenBrightness80 -or $SetupFully) {
+                # Android's standard brightness scale is 0..255: 80 percent = 204.
+                & $adb -s $target shell settings put system screen_brightness_mode 0
+                if ($LASTEXITCODE -ne 0) { throw 'Automatische Helligkeit konnte nicht deaktiviert werden.' }
+                & $adb -s $target shell settings put system screen_brightness 204
+                if ($LASTEXITCODE -ne 0) { throw 'Displayhelligkeit konnte nicht gesetzt werden.' }
+                $brightnessMode = @(& $adb -s $target shell settings get system screen_brightness_mode) -join ''
+                if ($LASTEXITCODE -ne 0) { throw 'Helligkeitsmodus konnte nicht geprueft werden.' }
+                $brightness = @(& $adb -s $target shell settings get system screen_brightness) -join ''
+                if ($LASTEXITCODE -ne 0 -or $brightnessMode.Trim() -ne '0' -or $brightness.Trim() -ne '204') {
+                    throw 'Displayhelligkeit geschrieben, aber nicht bestaetigt. Anzeigeeinstellungen am Tablet pruefen.'
+                }
+                $brightnessResult = 'Displayhelligkeit: 80 % (204/255), automatische Helligkeit aus (Systemwerte bestaetigt).'
+                Write-Host $brightnessResult
+                Add-Content -LiteralPath $reportPath -Value $brightnessResult -Encoding UTF8
             }
             Write-Host 'Weitere Befehle in PowerShell:'
             Write-Host ('& "{0}" -s "{1}" shell getprop ro.build.display.id' -f $adb, $target)

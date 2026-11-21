@@ -34,6 +34,18 @@ case "$1" in
 esac
 [[ "$1" == -s && "$2" == TEST123 && "$3" == shell ]] || exit 2
 if [[ "$4" == settings ]]; then
+    if [[ "$6" == system ]]; then
+        case "$7" in screen_brightness|screen_brightness_mode) ;; *) exit 91 ;; esac
+        if [[ "$5" == put ]]; then
+            [[ "${TEST_CASE:-}" != brightness_write_failure ]] || exit 92
+            echo "$8" > "$TEST_BATTERY_STATE/$7"
+        elif [[ "${TEST_CASE:-}" == brightness_verify_failure ]]; then
+            echo null
+        else
+            cat "$TEST_BATTERY_STATE/$7"
+        fi
+        exit 0
+    fi
     if [[ "$5" == put ]]; then
         [[ "${TEST_MANUFACTURER:-}" == samsung && "${TEST_CASE:-}" != unsupported_battery ]] || exit 90
         echo "$8" > "$TEST_BATTERY_STATE/$7"
@@ -71,7 +83,10 @@ report="$fixture/Android-Geraeteinformationen.txt"
 export TEST_BATTERY_STATE="$fixture"
 for os in Linux Darwin; do
     export TEST_OS=$os TEST_CASE=success
+    echo 1 > "$fixture/screen_brightness_mode"
+    echo 79 > "$fixture/screen_brightness"
     run
+    [[ "$(cat "$fixture/screen_brightness_mode")" == 1 && "$(cat "$fixture/screen_brightness")" == 79 ]]
     grep -q 'Amazon Fire HD 10 (2023, 13. Generation)' "$report"
     grep -q 'Fire OS 8.3.3.8' "$report"
     grep -q 'Android: *11' "$report"
@@ -109,6 +124,15 @@ for os in Linux Darwin; do
     run --battery-protection-80
     grep -q 'uebersprungen' "$report"
     unset TEST_MANUFACTURER TEST_MODEL
+    run --screen-brightness-80
+    [[ "$(cat "$fixture/screen_brightness_mode")" == 0 && "$(cat "$fixture/screen_brightness")" == 204 ]]
+    grep -q 'Displayhelligkeit: 80 % (204/255)' "$report"
+    for scenario in brightness_write_failure brightness_verify_failure; do
+        export TEST_CASE=$scenario
+        if run --screen-brightness-80; then echo "Unverified brightness accepted: $scenario" >&2; exit 1; fi
+        if grep -q 'Displayhelligkeit:' "$report"; then echo 'Failed brightness reported as successful' >&2; exit 1; fi
+    done
+    export TEST_CASE=success
 done
 if run --timeout 601; then echo 'Invalid timeout accepted' >&2; exit 1; fi
 if run --serial; then echo 'Missing option value accepted' >&2; exit 1; fi
@@ -116,12 +140,18 @@ if run --setup-fully; then echo 'Implicit layout accepted' >&2; exit 1; fi
 if run --fully-layout invalid; then echo 'Invalid layout accepted' >&2; exit 1; fi
 if run --fully-layout; then echo 'Missing layout value accepted' >&2; exit 1; fi
 if run --install-only --fully-layout compact; then echo 'Conflicting layout flags accepted' >&2; exit 1; fi
+if run --install-only --screen-brightness-80; then echo 'Conflicting brightness flags accepted' >&2; exit 1; fi
 for layout in compact fullscreen; do
+    echo 1 > "$fixture/screen_brightness_mode"
+    echo 79 > "$fixture/screen_brightness"
     run --fully-layout "$layout"
+    [[ "$(cat "$fixture/screen_brightness_mode")" == 1 && "$(cat "$fixture/screen_brightness")" == 79 ]]
     grep -q "layout=$layout mode=layout" "$TEST_FULLY_ARGS"
     grep -q "Fully-Darstellung: $layout" "$report"
     run --setup-fully --fully-layout "$layout"
     grep -q "layout=$layout mode=setup" "$TEST_FULLY_ARGS"
+    grep -q 'Displayhelligkeit: 80 % (204/255)' "$report"
+    [[ "$(cat "$fixture/screen_brightness_mode")" == 0 && "$(cat "$fixture/screen_brightness")" == 204 ]]
 done
 export TEST_FULLY_FAIL=yes
 if run --fully-layout compact; then echo 'Failed import accepted' >&2; exit 1; fi

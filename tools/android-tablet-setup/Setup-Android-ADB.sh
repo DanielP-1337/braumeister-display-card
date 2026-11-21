@@ -13,6 +13,7 @@ Aufruf: bash Setup-Android-ADB.sh [Optionen]
   --install-only        Nur ADB bereitstellen, keine Geraeteabfrage
   --setup-fully         Fully installieren/aktualisieren und HA-Dashboard einrichten
   --battery-protection-80  Samsung-Akkuschutz auf 80 % setzen (auch bei --setup-fully)
+  --screen-brightness-80   Feste Displayhelligkeit 80 %, Automatik aus (auch bei --setup-fully)
   --fully-apk DATEI     Lokale offizielle APK statt aktuellem Download verwenden
   --fully-layout MODUS  compact oder fullscreen; bei --setup-fully erforderlich
                         Ohne --setup-fully nur Layout der vorhandenen App aendern
@@ -24,6 +25,7 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 serial=''; timeout=90; tools_dir=''; adb=''; install_only=false
 setup_fully=false; fully_apk=''; fully_layout=''
 battery_protection=false
+screen_brightness=false
 while (( $# )); do
     case "$1" in
         --serial|--timeout|--tools-directory|--adb|--fully-apk|--fully-layout)
@@ -40,11 +42,12 @@ while (( $# )); do
         --install-only) install_only=true; shift ;;
         --setup-fully) setup_fully=true; shift ;;
         --battery-protection-80) battery_protection=true; shift ;;
+        --screen-brightness-80) screen_brightness=true; shift ;;
         --help|-h) usage; exit 0 ;;
         *) die "Unbekannte Option: $1 (siehe --help)" ;;
     esac
 done
-if "$install_only" && { "$setup_fully" || "$battery_protection" || [[ -n "$fully_layout" ]]; }; then die '--install-only kann nicht mit Geraeteeinrichtung kombiniert werden.'; fi
+if "$install_only" && { "$setup_fully" || "$battery_protection" || "$screen_brightness" || [[ -n "$fully_layout" ]]; }; then die '--install-only kann nicht mit Geraeteeinrichtung kombiniert werden.'; fi
 if [[ -n "$fully_apk" ]] && ! "$setup_fully"; then die '--fully-apk benoetigt --setup-fully.'; fi
 case "$fully_layout" in ''|compact|fullscreen) ;; *) die '--fully-layout muss compact oder fullscreen sein.' ;; esac
 if "$setup_fully" && [[ -z "$fully_layout" ]]; then die 'Darstellung bitte bewusst waehlen: --setup-fully --fully-layout compact oder --fully-layout fullscreen. Siehe README.'; fi
@@ -209,4 +212,15 @@ if "$setup_fully" || [[ -n "$fully_layout" ]]; then
     if "$setup_fully"; then fully_mode=setup; fi
     bash "$script_dir/scripts/setup-fully.sh" "$adb" "$target" "$fully_apk" "$fully_layout" "$fully_mode"
     printf 'Fully-Darstellung: %s (Import verarbeitet).\n' "$fully_layout" >> "$report"
+fi
+if "$screen_brightness" || "$setup_fully"; then
+    # Android's standard brightness scale is 0..255: 80 percent = 204.
+    "$adb" -s "$target" shell settings put system screen_brightness_mode 0 || die 'Automatische Helligkeit konnte nicht deaktiviert werden.'
+    "$adb" -s "$target" shell settings put system screen_brightness 204 || die 'Displayhelligkeit konnte nicht gesetzt werden.'
+    brightness_mode=$("$adb" -s "$target" shell settings get system screen_brightness_mode) || die 'Helligkeitsmodus konnte nicht geprueft werden.'
+    brightness=$("$adb" -s "$target" shell settings get system screen_brightness) || die 'Displayhelligkeit konnte nicht geprueft werden.'
+    [[ "${brightness_mode//$'\r'/}" == 0 && "${brightness//$'\r'/}" == 204 ]] || die 'Displayhelligkeit geschrieben, aber nicht bestaetigt. Anzeigeeinstellungen am Tablet pruefen.'
+    brightness_result='Displayhelligkeit: 80 % (204/255), automatische Helligkeit aus (Systemwerte bestaetigt).'
+    printf '%s\n' "$brightness_result"
+    printf '%s\n' "$brightness_result" >> "$report"
 fi

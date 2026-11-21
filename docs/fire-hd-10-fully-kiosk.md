@@ -241,6 +241,9 @@ for the tablet-only display adaptation supplied with this guide:
 1. Download [fully-dashboard-only.js](../examples/fully-kiosk/fully-dashboard-only.js).
    Replace `HA_HOST:8123` with the host and port of your Start URL. Adjust the
    `/firehd-braumeister/` path prefix if your dashboard uses another path.
+   Choose `const layout = 'compact';` for the original content height and rounded
+   corners, or `const layout = 'fullscreen';` for at least the viewport height
+   and square corners. See the [screenshot comparison and setup options](../tools/android-tablet-setup/README.md#6-darstellung-bewusst-wählen).
 2. Create a JSON import containing **only** `injectJsCode`. For example, in
    PowerShell, from the directory containing the downloaded script:
 
@@ -267,11 +270,15 @@ script does not require enabling Fully's separate **JavaScript Interface**.
 
 The script inserts CSS into Home Assistant's shadow DOM and periodically checks
 for newly rendered layout elements. It removes the navigation's reserved space
-as well as hiding the elements. It does not alter the card's buttons or issue
-brewing commands. The origin/path check limits where it initially applies;
-styles can remain during same-document Home Assistant navigation until a full
-page reload. This is a visual adaptation, **not an authorization boundary** or
-a substitute for Home Assistant user permissions.
+as well as hiding the elements. The dashboard background is dark regardless of
+the system theme. In `fullscreen` mode the Braumeister card has square outer
+corners and a minimum height matching the viewport. In `compact` mode its
+original height and corners are retained. Longer content can still scroll. A mutation
+observer restores the card layout when HA updates replace its shadow contents.
+It does not issue brewing commands. When navigating outside the configured
+host/path, the next interval removes the injected styles. This is a visual
+adaptation, **not an authorization boundary** or a substitute for Home Assistant
+user permissions.
 
 Home Assistant frontend updates can change these internal selectors. If the
 layout breaks, remove the code from **Inject JavaScript** and fully reload the
@@ -284,6 +291,12 @@ page. To clear just this setting by file import, use:
 The script was checked on the tablet after a Fully restart: the HA header and
 sidebar were absent, the Braumeister controls remained, and the Fully PIN prompt
 still appeared. The notebook view was not modified.
+
+The full-height/square-corner update was additionally checked on a Samsung
+Galaxy Tab A9+ on 2026-11-21. Its light system mode exposed white space behind
+the original card; the Fire HD's dark system mode made the same unused space
+less apparent. The new layout was imported on the Samsung only. It does not
+change either device's system mode or the HA account theme.
 
 ## Lock portrait orientation
 

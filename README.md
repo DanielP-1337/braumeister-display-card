@@ -9,6 +9,11 @@ For a dedicated Amazon Fire HD 10 display, see the
 orientation, a PIN-protected kiosk, tablet-only hiding of the Home Assistant
 header/sidebar, and recovery on Fire OS.
 
+For Windows, Linux and macOS, the [Android tablet setup scripts](tools/android-tablet-setup/README.md)
+also support Samsung tablets, Fully installation/updates and an explicit choice
+between compact and full-height dashboard layouts. The guide includes a
+[side-by-side tablet screenshot comparison](tools/android-tablet-setup/README.md#6-darstellung-bewusst-wählen).
+
 ## Install through HACS
 
 1. In HACS, open the menu and select **Custom repositories**.

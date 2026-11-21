@@ -34,7 +34,7 @@ Nach erfolgreichem Auslesen speichert das Skript diese Angaben zusammen mit Hers
 .\Setup-Android-ADB.ps1 -ToolsDirectory 'C:\ADB'
 ```
 
-Vorhandene Tools werden nicht automatisch aktualisiert. Der Download bleibt als ZIP in einem eindeutig benannten Unterordner von `tools` erhalten. Ohne -SetupFully und -BatteryProtection80 setzt das Skript keinen dauerhaften PATH, installiert keine Apps und aendert keine Tablet-Einstellungen. Es aktiviert auch kein Netzwerk-ADB. Bei der Verbindungspruefung startet ADB seinen lokalen Server und kann im Windows-Benutzerprofil seine ueblichen Schluesseldateien anlegen. Die optionale Fully-Einrichtung ist unten beschrieben; die Home-Assistant-Serverkonfiguration bleibt unveraendert.
+Vorhandene Tools werden nicht automatisch aktualisiert. Der Download bleibt als ZIP in einem eindeutig benannten Unterordner von `tools` erhalten. Ohne -SetupFully, -FullyLayout und -BatteryProtection80 setzt das Skript keinen dauerhaften PATH, installiert keine Apps und aendert keine Tablet-Einstellungen. Es aktiviert auch kein Netzwerk-ADB. Bei der Verbindungspruefung startet ADB seinen lokalen Server und kann im Windows-Benutzerprofil seine ueblichen Schluesseldateien anlegen. Die optionale Fully-Einrichtung ist unten beschrieben; die Home-Assistant-Serverkonfiguration bleibt unveraendert.
 
 ## Fehlerbehebung
 
@@ -82,18 +82,18 @@ Der automatische Linux-Download ist auf x86_64 beschraenkt. Unter ARM-Linux stat
 
 Unter macOS sind laut Google keine zusaetzlichen USB-Treiber erforderlich. Unter Linux koennen passende udev-Regeln und Gruppenrechte erforderlich sein. Fuer Ubuntu nennt Google die Gruppe `plugdev` und das Paket `android-sdk-platform-tools-common`; nach einer Gruppenaenderung ist erneutes Anmelden erforderlich. Das Skript nimmt keine System- oder Gruppenanpassungen vor und sollte als normaler Benutzer gestartet werden. Details: [Google: Geraet fuer Entwicklung einrichten](https://developer.android.com/studio/run/device).
 
-Ohne --setup-fully und --battery-protection-80 aendert die Bash-Version wie die Windows-Version keine Tablet-Einstellungen und installiert keine Apps. Netzwerk-ADB wird nicht aktiviert. ADB startet seinen lokalen Server und kann Schluessel im Benutzerprofil anlegen. Exitcode `0` bedeutet Erfolg, ein anderer Exitcode einen Fehler. Die Wartezeit `--timeout` gilt fuer die Geraeteerkennung, nicht fuer einzelne ADB-Aufrufe.
+Ohne --setup-fully, --fully-layout und --battery-protection-80 aendert die Bash-Version wie die Windows-Version keine Tablet-Einstellungen und installiert keine Apps. Netzwerk-ADB wird nicht aktiviert. ADB startet seinen lokalen Server und kann Schluessel im Benutzerprofil anlegen. Exitcode `0` bedeutet Erfolg, ein anderer Exitcode einen Fehler. Die Wartezeit `--timeout` gilt fuer die Geraeteerkennung, nicht fuer einzelne ADB-Aufrufe.
 
 ## Optionale Fully-Kiosk-Einrichtung
 
-Die Hauptskripte starten mit `-SetupFully` (Windows) bzw. `--setup-fully` (Linux/macOS) die Helfer in `scripts/`. Den gesamten Projektordner inklusive `fully-ha-settings.json` verwenden. Ohne Setup- und Akkuschutz-Option erfolgt weiterhin nur die ADB-Geraetepruefung.
+Die Hauptskripte starten mit `-SetupFully` (Windows) bzw. `--setup-fully` (Linux/macOS) die Helfer in `scripts/`. Dazu ist eine explizite Darstellung erforderlich: `-FullyLayout compact|fullscreen` bzw. `--fully-layout compact|fullscreen`. Den gesamten Projektordner inklusive `fully-ha-settings.json` verwenden. Ohne Setup-, Layout- und Akkuschutz-Option erfolgt weiterhin nur die ADB-Geraetepruefung.
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -SetupFully
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -SetupFully -FullyLayout compact
 ```
 
 ```bash
-bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --setup-fully
+bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --setup-fully --fully-layout compact
 ```
 
 Die aktuelle regulaere APK wird ueber die offizielle Fully-Downloadseite ermittelt und heruntergeladen. Eine lokale offizielle APK kann stattdessen mit `-FullyApkPath` bzw. `--fully-apk` angegeben werden. Bei inkompatibler Signatur, falscher Edition oder einem verhinderten Downgrade wird abgebrochen, nicht automatisch deinstalliert. `adb install -r` erhaelt die App-Daten; die im Profil enthaltenen Einstellungen werden anschliessend gezielt ueberschrieben.
@@ -134,3 +134,29 @@ Die Automatik prueft Hersteller, vorhandene Samsung-Einstellungen und den Akkudi
 Geprueft am Galaxy Tab A9+ SM-X210 mit Android 16 / One UI 8. Die Samsung-Schnittstelle ist herstellerspezifisch; fuer andere Modelle/Firmware ist keine allgemeine Garantie moeglich. Ohne Setup- oder Akkuschutz-Option bleibt die ADB-Abfrage unveraendert. `-InstallOnly` / `--install-only` kann nicht mit diesen Optionen kombiniert werden.
 
 Ein bereits hoeherer Ladestand sinkt nicht sofort auf 80 %. Die erfolgreiche Pruefung bestaetigt die konfigurierte Ladegrenze, keinen vollstaendigen Lade-/Entladezyklus. Zum Rueckgaengigmachen Einstellungen > Akku > Akkuschutz am Tablet verwenden.
+
+## Korrektur des Samsung-Kioskstarts (21.11.2026)
+
+Bei der Nachpruefung waren sowohl Fully Kiosk Browser als auch Fully Single App Kiosk installiert. Single App Kiosk wurde fuer Benutzer 0 reversibel deaktiviert (keine Deinstallation). Der Browser hatte noch keinen aktiven Kiosk-Modus; Standard-Home war One UI. Die fruehere Benutzerbeobachtung zum Autostart ist daher keine Bestaetigung einer dauerhaften Kiosk-/Home-Konfiguration.
+
+Am Tablet wurden Kiosk-Modus, Nutzungsdatenzugriff und zeitgebundene Aktionen aktiviert und Fully Kiosk Browser als Standard-Home gesetzt. Der Benutzer legt die Ausstiegs-PIN selbst fest; sie wird hier nicht dokumentiert. Power- und Lautstaerketasten bleiben nutzbar. Home-Aufloesung bestaetigt `de.ozerov.fully/.LauncherReplacement`. Home-Taste sowie Display-Schlafen/Aufwecken per ADB wurden getestet: danach erscheint das angemeldete Braumeister-Dashboard im Vollbild. Screenshot lokal: fully-samsung-kiosk-wake.png. Bedienungshilfen wurden nicht aktiviert; kein vollstaendiger Test gegen Umgehen der Kiosksperre.
+
+Die Setup-Skripte konfigurieren weiterhin nur das Dashboard-Profil; Kiosk-Aktivierung, eigene PIN und Auswahl als Standard-Home bleiben zusaetzliche Einrichtungsschritte am Tablet. Die separate Single-App-Kiosk-App wird durch die Skripte nicht automatisch deaktiviert. Fuer ein Wandtablet diese Schritte nach dem Profilimport durchfuehren. Bei Bedarf Single App Kiosk wieder mit `adb -s SERIENNUMMER shell pm enable com.fullykiosk.singleapp` aktivieren. Zum Ruecksetzen der Startoberflaeche Kiosk-Modus in Fully deaktivieren und One UI als Standard-Home waehlen.
+
+Zwei vollstaendige Neustarts anschliessend per ADB geprueft, jeweils mit geaenderter Boot-ID und automatisch gestarteter LauncherReplacement-Aktivitaet. Im ersten Durchlauf blieb Home Assistant mehrere Minuten auf Loading; erst nach einem Ausstiegs-/PIN-Dialog war das Dashboard sichtbar. Dieser Durchlauf gilt nicht als unbeaufsichtigt erfolgreich, seine Ursache ist offen. Im zweiten Durchlauf erschien das angemeldete Dashboard ohne App-Start, Eingabe oder Menuebedienung durch den Tester im Vollbild. Screenshot lokal: fully-samsung-boot-repeat.png. USB-Freigabe und Akkuschutz Maximum/80 % blieben erhalten.
+
+## Bildschirmfuellende Dashboard-Darstellung (21.11.2026)
+
+Auf dem A9+ waren weisse Ecken und ein unterer Streifen sichtbar. Die Karte hatte abgerundete Aussenkanten und eine inhaltsabhaengige Hoehe; dahinter lag der helle HA-Hintergrund. Auf dem Fire HD zeigte der Vergleichsscreenshot ebenfalls freie Flaeche, jedoch dunkel. ADB meldete fuer Fire HD `Night mode: yes`, fuer Samsung `Night mode: no`. Damit sind unterschiedliche Systemmodi bestaetigt; die HA-Theme-Auswahl selbst wurde nicht ausgelesen. HA kann der Systemeinstellung folgen oder ein eigenes Theme verwenden: [HA-Frontend-Dokumentation](https://www.home-assistant.io/integrations/frontend/#dark-mode-support).
+
+Die gemeinsame `injectJsCode`-Anpassung in `fully-ha-settings.json` setzt fuer den konfigurierten Host/Pfad einen dunklen Aussenhintergrund. Im Modus `fullscreen` entfernt sie den aeusseren Kartenradius und gibt der Karte mindestens die aktuelle Viewport-Hoehe (`100dvh`, mit `100vh` als Rueckfall). Im Modus `compact` bleiben die urspruengliche Inhaltshoehe und Rundung erhalten. Laengere Seiten bleiben scrollbar. Die Kartenanpassung wird nach einem HA-Neurendern wiederhergestellt. Beim Wechsel auf andere HA-Pfade werden die eingesetzten Stile beim naechsten Intervall entfernt. Es werden weder System-Darkmode noch HA-Benutzer-Theme umgestellt.
+
+Auf dem Samsung wurde nur `injectJsCode` per Einmalimport aktualisiert. Screenshot nach App-Neustart: fully-samsung-edge-to-edge.png, Dashboard ohne weisse Aussenraender und ohne erneute HA-Anmeldung. Beide Setup-Versionen verwenden dieses gemeinsame Profil. Das Fire HD wurde fuer den Vergleich nur ausgelesen; die neue Layout-Version wurde dort nicht importiert.
+
+Ein weiterer vollstaendiger Samsung-Neustart nach dem Layout-Import wurde ohne manuelles Oeffnen von Fully geprueft: geaenderte Boot-ID, `sys.boot_completed=1`, LauncherReplacement im Vordergrund und angemeldetes Dashboard mit neuem Layout. Screenshot lokal: fully-samsung-layout-boot.png.
+
+Direkter Hochformat-Vergleich auf Benutzerwunsch: beide Screenshots 1200 x 1920 Pixel. Die Fire-HD-Karte endet bei etwa 1133 Pixeln Hoehe mit dunkler Restflaeche darunter. Die Samsung-Karte fuellt durch die neue Mindesthoehe alle 1920 Pixel; der helle Innenbereich wird hoeher und die untere Navigation rutscht nach unten. Schrift und Tasten bleiben gleich gross. Die Hoehenstreckung stammt aus dieser Layout-Anpassung, nicht aus einer anderen Bildschirmaufloesung. Vergleich lokal: fully-fire-portrait-compare.png und fully-samsung-portrait-compare.png. Beim Vergleich wurden keine weiteren Layout-Aenderungen vorgenommen.
+
+Beide Varianten sind jetzt bewusst waehlbar. Die [README mit Screenshot-Vergleich](README.md#6-darstellung-bewusst-wählen) zeigt die Einrichtung und den spaeteren Wechsel. `-FullyLayout` / `--fully-layout` ohne Setup-Option importiert nur `injectJsCode` und startet Fully neu; APK, Startadresse, Ausrichtung, PIN und Akkuschutz werden dabei nicht gesetzt. Eigener Inject-JavaScript-Code wird ersetzt. Der gewaehlte Modus steht nach erfolgreichem Import im Bericht. Vorhandene Importdateien sowie fehlende App oder ungueltige Auswahl fuehren zum Abbruch. Die Profilvorlage selbst bleibt unveraendert; der ausgewaehlte Wert wird in einer temporaeren Importdatei eingesetzt.
+
+Die neue Optionsverarbeitung und beide Importvarianten wurden unter Windows PowerShell 5.1 sowie mit simuliertem ADB unter Bash geprueft, einschliesslich fehlender App und Fehlerfaellen. Keine erneute Aenderung der Tablet-Darstellungen fuer diese Tests. Hinweise zu Hotspot, Nabu Casa und Tailscale stehen ebenfalls in der README; VPN-Einrichtung ist kein Bestandteil dieses Skripts.

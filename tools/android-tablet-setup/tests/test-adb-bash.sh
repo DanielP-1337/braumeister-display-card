@@ -4,6 +4,13 @@ set -euo pipefail
 source_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 fixture=$(mktemp -d)
 mkdir "$fixture/bin"
+mkdir "$fixture/scripts"
+export TEST_FULLY_ARGS="$fixture/fully-args.txt"
+cat > "$fixture/scripts/setup-fully.sh" <<'MOCK'
+#!/usr/bin/env bash
+printf 'layout=%s mode=%s\n' "$4" "$5" > "$TEST_FULLY_ARGS"
+[[ "${TEST_FULLY_FAIL:-}" != yes ]]
+MOCK
 cp "$source_dir/Setup-Android-ADB.sh" "$fixture/Setup-Android-ADB.sh"
 cat > "$fixture/bin/uname" <<'MOCK'
 #!/usr/bin/env bash
@@ -105,4 +112,18 @@ for os in Linux Darwin; do
 done
 if run --timeout 601; then echo 'Invalid timeout accepted' >&2; exit 1; fi
 if run --serial; then echo 'Missing option value accepted' >&2; exit 1; fi
+if run --setup-fully; then echo 'Implicit layout accepted' >&2; exit 1; fi
+if run --fully-layout invalid; then echo 'Invalid layout accepted' >&2; exit 1; fi
+if run --fully-layout; then echo 'Missing layout value accepted' >&2; exit 1; fi
+if run --install-only --fully-layout compact; then echo 'Conflicting layout flags accepted' >&2; exit 1; fi
+for layout in compact fullscreen; do
+    run --fully-layout "$layout"
+    grep -q "layout=$layout mode=layout" "$TEST_FULLY_ARGS"
+    grep -q "Fully-Darstellung: $layout" "$report"
+    run --setup-fully --fully-layout "$layout"
+    grep -q "layout=$layout mode=setup" "$TEST_FULLY_ARGS"
+done
+export TEST_FULLY_FAIL=yes
+if run --fully-layout compact; then echo 'Failed import accepted' >&2; exit 1; fi
+if grep -q 'Fully-Darstellung:' "$report"; then echo 'Failed import reported as successful' >&2; exit 1; fi
 printf 'PASS: Linux/macOS simulation, report, selection, error cases. Fixtures: %s\n' "$fixture"

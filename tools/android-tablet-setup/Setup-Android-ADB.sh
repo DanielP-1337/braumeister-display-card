@@ -14,17 +14,19 @@ Aufruf: bash Setup-Android-ADB.sh [Optionen]
   --setup-fully         Fully installieren/aktualisieren und HA-Dashboard einrichten
   --battery-protection-80  Samsung-Akkuschutz auf 80 % setzen (auch bei --setup-fully)
   --fully-apk DATEI     Lokale offizielle APK statt aktuellem Download verwenden
+  --fully-layout MODUS  compact oder fullscreen; bei --setup-fully erforderlich
+                        Ohne --setup-fully nur Layout der vorhandenen App aendern
   --help                Hilfe anzeigen
 HELP
 }
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 serial=''; timeout=90; tools_dir=''; adb=''; install_only=false
-setup_fully=false; fully_apk=''
+setup_fully=false; fully_apk=''; fully_layout=''
 battery_protection=false
 while (( $# )); do
     case "$1" in
-        --serial|--timeout|--tools-directory|--adb|--fully-apk)
+        --serial|--timeout|--tools-directory|--adb|--fully-apk|--fully-layout)
             (( $# >= 2 )) && [[ -n "$2" ]] || die "Wert fuer $1 fehlt."
             case "$1" in
                 --serial) serial=$2 ;;
@@ -32,6 +34,7 @@ while (( $# )); do
                 --tools-directory) tools_dir=$2 ;;
                 --adb) adb=$2 ;;
                 --fully-apk) fully_apk=$2 ;;
+                --fully-layout) fully_layout=$2 ;;
             esac
             shift 2 ;;
         --install-only) install_only=true; shift ;;
@@ -41,8 +44,10 @@ while (( $# )); do
         *) die "Unbekannte Option: $1 (siehe --help)" ;;
     esac
 done
-if "$install_only" && { "$setup_fully" || "$battery_protection"; }; then die '--install-only kann nicht mit Geraeteeinrichtung kombiniert werden.'; fi
+if "$install_only" && { "$setup_fully" || "$battery_protection" || [[ -n "$fully_layout" ]]; }; then die '--install-only kann nicht mit Geraeteeinrichtung kombiniert werden.'; fi
 if [[ -n "$fully_apk" ]] && ! "$setup_fully"; then die '--fully-apk benoetigt --setup-fully.'; fi
+case "$fully_layout" in ''|compact|fullscreen) ;; *) die '--fully-layout muss compact oder fullscreen sein.' ;; esac
+if "$setup_fully" && [[ -z "$fully_layout" ]]; then die 'Darstellung bitte bewusst waehlen: --setup-fully --fully-layout compact oder --fully-layout fullscreen. Siehe README.'; fi
 [[ "$timeout" =~ ^[0-9]{1,3}$ ]] || die '--timeout muss zwischen 0 und 600 liegen.'
 timeout=$((10#$timeout))
 (( timeout <= 600 )) || die '--timeout muss zwischen 0 und 600 liegen.'
@@ -199,6 +204,9 @@ if "$battery_protection" || "$setup_fully"; then
     printf '%s\n' "$battery_result"
     printf '%s\n' "$battery_result" >> "$report"
 fi
-if "$setup_fully"; then
-    bash "$script_dir/scripts/setup-fully.sh" "$adb" "$target" "$fully_apk"
+if "$setup_fully" || [[ -n "$fully_layout" ]]; then
+    fully_mode=layout
+    if "$setup_fully"; then fully_mode=setup; fi
+    bash "$script_dir/scripts/setup-fully.sh" "$adb" "$target" "$fully_apk" "$fully_layout" "$fully_mode"
+    printf 'Fully-Darstellung: %s (Import verarbeitet).\n' "$fully_layout" >> "$report"
 fi

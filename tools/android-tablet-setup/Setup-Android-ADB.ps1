@@ -8,6 +8,10 @@ Richtet Android Platform Tools unter Windows ein und prueft ein Android-Tablet.
 .\Setup-Android-ADB.ps1 -InstallOnly
 .EXAMPLE
 .\Setup-Android-ADB.ps1 -Serial G000000000000000 -TimeoutSeconds 120
+.EXAMPLE
+.\Setup-Android-ADB.ps1 -Serial SERIENNUMMER -SetupFully -FullyLayout compact
+.EXAMPLE
+.\Setup-Android-ADB.ps1 -Serial SERIENNUMMER -FullyLayout fullscreen
 #>
 [CmdletBinding()]
 param(
@@ -17,7 +21,8 @@ param(
     [switch]$InstallOnly,
     [switch]$SetupFully,
     [switch]$BatteryProtection80,
-    [string]$FullyApkPath
+    [string]$FullyApkPath,
+    [ValidateSet('compact', 'fullscreen')][string]$FullyLayout
 )
 
 Set-StrictMode -Version Latest
@@ -28,8 +33,9 @@ if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
 }
 
 try {
-    if ($InstallOnly -and ($SetupFully -or $BatteryProtection80)) { throw '-InstallOnly kann nicht mit Geraeteeinrichtung kombiniert werden.' }
+    if ($InstallOnly -and ($SetupFully -or $BatteryProtection80 -or $FullyLayout)) { throw '-InstallOnly kann nicht mit Geraeteeinrichtung kombiniert werden.' }
     if ($FullyApkPath -and -not $SetupFully) { throw '-FullyApkPath benoetigt -SetupFully.' }
+    if ($SetupFully -and -not $FullyLayout) { throw 'Darstellung bitte bewusst waehlen: -SetupFully -FullyLayout compact oder -FullyLayout fullscreen. Siehe README.' }
     if ($env:OS -ne 'Windows_NT') { throw 'Dieses Skript benoetigt Windows.' }
     if (-not $ToolsDirectory) {
         $ToolsDirectory = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'tools'
@@ -194,8 +200,9 @@ Am Android-Tablet (Menues unterscheiden sich je nach Hersteller):
                 Write-Host $batteryResult
                 Add-Content -LiteralPath $reportPath -Value $batteryResult -Encoding UTF8
             }
-            if ($SetupFully) {
-                & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'scripts/Setup-Fully.ps1') -Adb $adb -Serial $target -ApkPath $FullyApkPath
+            if ($SetupFully -or $FullyLayout) {
+                & (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) 'scripts/Setup-Fully.ps1') -Adb $adb -Serial $target -ApkPath $FullyApkPath -Layout $FullyLayout -LayoutOnly:(-not $SetupFully)
+                Add-Content -LiteralPath $reportPath -Value ("Fully-Darstellung: {0} (Import verarbeitet)." -f $FullyLayout.ToLowerInvariant()) -Encoding UTF8
             }
             Write-Host 'Weitere Befehle in PowerShell:'
             Write-Host ('& "{0}" -s "{1}" shell getprop ro.build.display.id' -f $adb, $target)

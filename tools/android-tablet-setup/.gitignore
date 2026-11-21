@@ -7,6 +7,8 @@
 /Android-Geraeteinformationen.txt
 /FireHD10-Geraeteinformationen.txt
 *.png
+!/docs/images/layout-compact-fire-hd-10.png
+!/docs/images/layout-fullscreen-samsung-a9-plus.png
 
 # Temporary deployment/test files
 .adb-report.*

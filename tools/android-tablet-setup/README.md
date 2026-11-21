@@ -81,11 +81,11 @@ Weitere Details stehen in `ADB-Einrichtung.md`. Die Windows-Version wurde mit Fi
 Den Projektordner einschließlich `scripts/` und `fully-ha-settings.json` verwenden. Tablet verbinden und den gewünschten Startbefehl ausführen:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -SetupFully
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -SetupFully -FullyLayout compact
 ```
 
 ```bash
-bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --setup-fully
+bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --setup-fully --fully-layout compact
 ```
 
 Dabei wird die aktuelle reguläre APK von der offiziellen Fully-Downloadseite geladen und mit `adb install -r` installiert bzw. aktualisiert. Bei Signaturkonflikten oder einem neueren installierten Stand bricht das Skript ab; es deinstalliert nichts automatisch. Alternativ eine bereits heruntergeladene offizielle APK angeben: `-FullyApkPath 'C:\Downloads\Fully.apk'` bzw. `--fully-apk "$HOME/Downloads/Fully.apk"` zusätzlich zur Setup-Option.
@@ -94,13 +94,54 @@ Das gemeinsame Profil `fully-ha-settings.json` richtet dasselbe Dashboard wie au
 
 `http://192.168.2.56:8123/firehd-braumeister/braumeister_tablet`
 
-Es setzt Startseite, Vollbild ohne Aktionsleiste, Hochformat, Display-an während der Nutzung, Autostart und Neuladen nach WLAN-Verbindung. Die vorhandene JavaScript-Anpassung blendet HA-Kopfzeile und Seitenleiste nur für dieses Dashboard aus. Das Tablet muss den HA-Server im lokalen Netz erreichen können.
+Es setzt Startseite, Vollbild ohne Aktionsleiste, Hochformat, Display-an während der Nutzung, Autostart und Neuladen nach WLAN-Verbindung. Die JavaScript-Anpassung blendet HA-Kopfzeile und Seitenleiste nur für dieses Dashboard aus und setzt einen dunklen Außenhintergrund. Die Kartenhöhe wählst du ausdrücklich mit `compact` oder `fullscreen` (siehe unten). Ohne diese Auswahl bricht die Fully-Einrichtung vor dem Gerätezugriff ab. Das Tablet muss die konfigurierte HA-Adresse erreichen können.
 
 Der Import erteilt Fully den nötigen Speicherzugriff, startet die App neu und wartet auf die Verarbeitung von `fully-once-settings.json`. Bei offenen Berechtigungsdialogen am Tablet bestätigen. Bei Erfolg gegebenenfalls **einmal direkt in Home Assistant anmelden**. Passwörter, PINs, Lizenzdaten und Anmeldesitzungen werden nicht kopiert. PLUS-Funktionen benötigen eine Lizenz für das jeweilige Tablet. Eine Sperre gegen das Verlassen der App und die HA-Fully-Integration werden nicht automatisch aktiviert.
 
-Neustarttest am Samsung (21.11.2026): Nach vollstaendigem Tablet-Neustart bestaetigte der Benutzer Fully mit geladenem HA-Dashboard, ohne manuellen App-Start. Eine erneute ADB-Sichtpruefung blieb wegen fehlender USB-Debugging-Freigabe aus. Details in ADB-Einrichtung.md.
+Für den Start als Kiosk zusätzlich am Tablet den Kiosk-Modus mit eigener PIN aktivieren, angeforderte Berechtigungen prüfen und **Fully Kiosk Browser als Standard-Home-App** wählen. Eine parallel installierte Fully Single App Kiosk ist eine andere App; sie wurde auf dem Testgerät separat deaktiviert. Diese Schritte erledigen die Setup-Skripte nicht automatisch.
 
-Nach wiederhergestellter ADB-Freigabe wurde die erhaltene HA-Anmeldung auch per Screenshot bestaetigt; Fully lief bereits und wurde fuer die Sichtkontrolle wieder in den Vordergrund geholt.
+Neustarttests am Samsung (21.11.2026): Nach dieser Korrektur blieb der erste Durchlauf länger auf „Loading…“. Ein zweiter vollständiger Neustart zeigte das angemeldete Dashboard automatisch im Vollbild, ohne App-Start oder Menübedienung durch den Tester. Die Ursache des ersten Hängers ist offen. Details in `ADB-Einrichtung.md`.
+
+## 6. Darstellung bewusst wählen
+
+Beide Layouts funktionieren auf beiden Tablet-Modellen. **Fully-Vollbild** (keine Android-/Browserleisten) bleibt in beiden Fällen aktiv. Die Auswahl betrifft die **Höhe der Dashboard-Karte**:
+
+| | `compact` – kompakt | `fullscreen` – bildschirmfüllend |
+|---|---|---|
+| Kartenhöhe | Nach Inhalt; unten kann dunkle Fläche bleiben | Mindestens die Bildschirmhöhe |
+| Außenkanten | Ursprünglich abgerundet | Gerade, ohne Außenradius |
+| Innenbereich und Navigation | Navigation direkt unter dem Inhalt | Heller Innenbereich wächst; Navigation wandert nach unten |
+| Schrift und Tasten | Unverändert | Unverändert; kein Zoom |
+| Referenz im Hochformat | Fire HD 10 | Samsung Galaxy Tab A9+ |
+| Screenshot | <img src="docs/images/layout-compact-fire-hd-10.png" width="240" alt="Kompakte Karte auf dem Fire HD 10 mit dunkler Restfläche darunter"> | <img src="docs/images/layout-fullscreen-samsung-a9-plus.png" width="240" alt="Bildschirmfüllende Karte auf dem Samsung A9+ mit Navigation am unteren Rand"> |
+
+Aufnahmen vom 21.11.2026, jeweils **1200 × 1920 Pixel**. Die kompakte Referenz zeigt die bisherige Fire-Darstellung (Kartenhöhe ca. 1133 Pixel); die Samsung-Referenz zeigt das neue Vollhöhenlayout. Der dunkle Außenhintergrund wird jetzt in beiden Varianten unabhängig vom Systemmodus gesetzt. Lange Inhalte bleiben scrollbar. Diese lokale Fully-Anpassung ändert weder das HA-Benutzer-Theme noch die Darstellung auf anderen Geräten.
+
+Bei der Einrichtung oben `compact` durch `fullscreen` ersetzen, wenn die Karte den Bildschirm ausfüllen soll. Ein späterer Wechsel benötigt keine erneute APK-Installation:
+
+```powershell
+# Windows: nur Darstellung einer bereits installierten Fully-App ändern
+.\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -FullyLayout fullscreen
+# Zurück zur kompakten Darstellung:
+.\Setup-Android-ADB.ps1 -Serial 'SERIENNUMMER' -FullyLayout compact
+```
+
+```bash
+# Linux/macOS: nur Darstellung ändern
+bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --fully-layout fullscreen
+# Zurück zur kompakten Darstellung:
+bash ./Setup-Android-ADB.sh --serial 'SERIENNUMMER' --fully-layout compact
+```
+
+Der reine Layout-Wechsel importiert **nur `injectJsCode`** aus dem mitgelieferten Profil und startet Fully neu. Er ersetzt dabei eventuell vorhandenes eigenes Inject-JavaScript; vorher sichern bzw. zusammenführen. Startadresse, Ausrichtung, Kiosk-PIN und Akkuschutz werden dabei nicht gesetzt. Der Host-/Pfadfilter im Profil muss zur bereits verwendeten Dashboard-Adresse passen. Fully muss installiert sein und der automatische Einstellungsimport aktiviert sein. Bei einer Bedienungshilfen-Freigabe nach dem Neustart prüfen, ob sie erhalten blieb, insbesondere auf Fire OS. Die gewählte Variante wird nach verarbeitetem Import im Gerätebericht vermerkt.
+
+## 7. Heimnetz, Hotspot und Fernzugriff
+
+Fully kann auch über einen Handy-Hotspot auf HA zugreifen. Bei **Nabu Casa** in `fully-ha-settings.json` die `startURL` auf die eigene HTTPS-Fernzugriffsadresse plus Dashboard-Pfad umstellen und den Host-/Pfadfilter in `injectJsCode` entsprechend anpassen. Auf der neuen Adresse in HA anmelden. Die bisherige LAN-IP ist über einen gewöhnlichen Hotspot nicht erreichbar. [Nabu-Casa-Einrichtung](https://support.nabucasa.com/hc/en-us/articles/26474279202973-Enabling-remote-access-to-Home-Assistant)
+
+**Tailscale** ist eine Alternative: HA und Tablet im selben Tailscale-Netz verbinden, anschließend HA über die VPN-Adresse erreichen. Mit einer freigegebenen Subnetzroute kann die bisherige LAN-Adresse weiter genutzt werden. Für HA-Befehle an Fully (z. B. Bildschirm ein/aus) ist zusätzlich die Rückverbindung zur Tablet-VPN-Adresse nötig; bei der HA-Community-App dafür `userspace_networking: false` und passende Zugriffsregeln verwenden. Nabu Casa allein stellt diesen Rückweg nicht her. [Tailscale-HA-App und Konfiguration](https://github.com/hassio-addons/addon-tailscale/blob/main/tailscale/DOCS.md), [Fully-Fernsteuerung](https://www.fully-kiosk.com/docs/en/features/remote-admin)
+
+Für Samsung gibt es die [Tailscale-Android-App](https://tailscale.com/docs/install/android); für geeignete Fire-OS-Geräte die [offizielle Universal-APK](https://tailscale.com/docs/install/amazon-fire) mit manuellen Updates. Installation, VPN-Anmeldung und Tests nach Neustart/Ruhezustand erfolgen separat. Diese Setup-Skripte installieren oder konfigurieren weder Tailscale noch Nabu Casa. Die Fernzugriffsvarianten wurden hier nicht am Gerät getestet.
 
 ## Akkuschutz fuer den Dauerbetrieb
 

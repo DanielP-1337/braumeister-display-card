@@ -303,7 +303,33 @@ Zum Zurücksetzen die Helligkeitsautomation deaktivieren, dann an beiden Fully-G
 - Beide Tablets wurden über den Android-Schlafbefehl manuell ausgeschaltet. Nach gut vier Minuten und mehreren HA-Abgleichen waren beide Displays weiterhin `OFF`; HA meldete ebenfalls beide Bildschirmschalter als `off`. Anschließendes manuelles Aufwecken stellte das angemeldete Dashboard mit 80 % wieder her.
 - Fully wurde am Samsung zusätzlich beendet und neu gestartet. Das Dashboard erschien mit 80 % ohne erneute Anmeldung und ohne Berechtigungsdialog. In HA war die Helligkeitsautomation aktiv, die Fire-Displayautomatik aktiv und die Samsung-Displayautomatik deaktiviert.
 - Auch das erneute automatische Dimmen nach dem Aufwecken wurde abschließend auf beiden Geräten bestätigt: Fire rund 0,098, Samsung rund 0,102 und jeweils Fullys `ScreensaverActivity` im Vordergrund. Der Nutzer bestätigte die Dimmung des Fire zusätzlich. Die konfigurierte Wartezeit beträgt 120 Sekunden; die genaue Verzögerung dieses Wiederholungstests wurde nicht separat gestoppt.
-- Die tatsächlichen Übergänge eines Brauprogramms sowie ein erneuter physischer Braumeister-Aus/Ein-Zyklus wurden für diese Helligkeitserweiterung nicht ausgelöst. Die früheren Fire-Abschalttests ersetzen keinen neuen Samsung-Test; am Samsung ist die automatische Abschaltung ausdrücklich deaktiviert. Ein vollständiger Tablet-Neustart wurde in diesem Prüflauf nicht durchgeführt.
+- Die tatsächlichen Übergänge eines Brauprogramms sowie ein erneuter physischer Braumeister-Aus/Ein-Zyklus wurden für diese Helligkeitserweiterung nicht ausgelöst. Die früheren Fire-Abschalttests ersetzen keinen neuen Samsung-Test; am Samsung ist die automatische Abschaltung ausdrücklich deaktiviert. Vollständige Tablet-Neustarts folgten im nachstehenden Nachtest.
+
+### Vollständiger Neustart beider Tablets am 21.11.2026
+
+**Beide Tests bestanden**, durchgeführt von 19:23 bis 19:28 Uhr (Europe/Berlin). Fire HD 10 und Galaxy Tab A9+ wurden jeweils per `adb reboot` vollständig neu gestartet. Geänderte Boot-IDs und `sys.boot_completed=1` bestätigten die Neustarts. Danach wurden weder Apps manuell geöffnet noch Displays entsperrt; die erste Berührung erfolgte erst zum Prüfen der Rückkehr aus dem automatisch gestarteten Bildschirmschoner.
+
+| Prüfung | Fire HD 10 | Samsung Galaxy Tab A9+ |
+|---|---|---|
+| Tailscale-Autostart | Prozess und VPN-Tunnel aktiv | Prozess und VPN-Tunnel aktiv |
+| HA über seine Tailscale-Adresse erreichbar | 3/3 Ping-Antworten, 0 % Paketverlust | 3/3 Ping-Antworten, 0 % Paketverlust |
+| Fully-Autostart | Automatisch im Vollbild | Automatisch im Vollbild |
+| HA-Dashboard | Ohne erneute Anmeldung sichtbar | Ohne erneute Anmeldung sichtbar |
+| Bedienhelligkeit nach Start | Rund 80 % (`0,799`) | 80 % (`0,800`) |
+| Automatischer Bildschirmschoner | Rund 10 % (`0,098`) | Rund 10 % (`0,102`) |
+| Nach Antippen | Dashboard wieder bei rund 80 % | Dashboard wieder bei 80 % |
+| Neue Berechtigungsdialoge | Keine | Keine; Geräteadministrator weiterhin nicht freigegeben |
+
+Beide Tablets waren bei diesem Nachtest im **Heim-WLAN**. Die VPN-Verbindung wurde gezielt über die Tailscale-Adresse des HA-Servers geprüft; dies war kein neuer Handy-Hotspot-Test. Das Dashboard zeigte das Braumeister-Hauptmenü. Pumpe, Heizung und Stromversorgung des Braumeisters wurden nicht geschaltet. Der Timer blieb auf 120 Sekunden konfiguriert; die genaue Zeit zwischen Boot, letzter Fully-Aktivität und Dimmung wurde nicht separat gestoppt. Die Zahlen stammen vom Android-Displaydienst und sind keine Messung von Leuchtdichte oder Stromverbrauch.
+
+Zusätzlich bestätigte der Nutzer vor dem Neustart, dass beide gedimmten Displays nur einen leichten „Glow“ zeigten und beim Antippen sofort zum Braumeister-Dashboard zurückkehrten. Das entspricht dem schwarzen Bildschirmschoner bei etwa 10 % Hintergrundbeleuchtung.
+
+Die **vier unveränderten Screenshots** zeigen je Gerät beide Ausrichtungen: Hochformat direkt nach dem automatischen Start (ca. 19:25 Uhr), Querformat nach anschließendem Drehen der Tablets (ca. 19:32 Uhr). Die Querformat-Aufnahmen sind kein zusätzlicher Neustart-Test. Screenshots belegen die Darstellung; die tatsächliche Hintergrundbeleuchtung ist darin nicht messbar.
+
+| Ausrichtung | Fire HD 10, `compact` | Galaxy Tab A9+, `fullscreen` |
+|---|---|---|
+| Hochformat nach Neustart | ![Fire HD 10: Dashboard im Hochformat nach automatischem Start](docs/images/reboot-fire-hd-10-portrait.png) | ![Galaxy Tab A9+: Dashboard im Hochformat nach automatischem Start](docs/images/reboot-samsung-a9-plus-portrait.png) |
+| Aktuelles Querformat | ![Fire HD 10: Dashboard im Querformat](docs/images/dashboard-fire-hd-10-landscape.png) | ![Galaxy Tab A9+: Dashboard im Querformat](docs/images/dashboard-samsung-a9-plus-landscape.png) |
 
 ## Akkuschutz fuer den Dauerbetrieb
 

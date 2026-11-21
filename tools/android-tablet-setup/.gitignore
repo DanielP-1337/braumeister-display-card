@@ -11,6 +11,10 @@
 !/docs/images/layout-fullscreen-samsung-a9-plus.png
 !/docs/images/tailscale-fire-hotspot-after-reboot.png
 !/docs/images/tailscale-samsung-after-reboot.png
+!/docs/images/reboot-fire-hd-10-portrait.png
+!/docs/images/reboot-samsung-a9-plus-portrait.png
+!/docs/images/dashboard-fire-hd-10-landscape.png
+!/docs/images/dashboard-samsung-a9-plus-landscape.png
 
 # Temporary deployment/test files
 .adb-report.*

@@ -139,9 +139,91 @@ Der reine Layout-Wechsel importiert **nur `injectJsCode`** aus dem mitgelieferte
 
 Fully kann auch über einen Handy-Hotspot auf HA zugreifen. Bei **Nabu Casa** in `fully-ha-settings.json` die `startURL` auf die eigene HTTPS-Fernzugriffsadresse plus Dashboard-Pfad umstellen und den Host-/Pfadfilter in `injectJsCode` entsprechend anpassen. Auf der neuen Adresse in HA anmelden. Die bisherige LAN-IP ist über einen gewöhnlichen Hotspot nicht erreichbar. [Nabu-Casa-Einrichtung](https://support.nabucasa.com/hc/en-us/articles/26474279202973-Enabling-remote-access-to-Home-Assistant)
 
-**Tailscale** ist eine Alternative: HA und Tablet im selben Tailscale-Netz verbinden, anschließend HA über die VPN-Adresse erreichen. Mit einer freigegebenen Subnetzroute kann die bisherige LAN-Adresse weiter genutzt werden. Für HA-Befehle an Fully (z. B. Bildschirm ein/aus) ist zusätzlich die Rückverbindung zur Tablet-VPN-Adresse nötig; bei der HA-Community-App dafür `userspace_networking: false` und passende Zugriffsregeln verwenden. Nabu Casa allein stellt diesen Rückweg nicht her. [Tailscale-HA-App und Konfiguration](https://github.com/hassio-addons/addon-tailscale/blob/main/tailscale/DOCS.md), [Fully-Fernsteuerung](https://www.fully-kiosk.com/docs/en/features/remote-admin)
+**Tailscale** wurde auf einem Raspberry Pi 5 mit Home Assistant sowie auf beiden Tablets eingerichtet und getestet. Alle drei Geräte sind im selben privaten Tailscale-Netz (Tailnet) angemeldet. Eine freigegebene Route nur zum HA-Server erhält die bisherige Dashboard-Adresse und damit die vorhandene HA-Anmeldung sowie den Host-/Pfadfilter des Inject-JavaScripts.
 
-Für Samsung gibt es die [Tailscale-Android-App](https://tailscale.com/docs/install/android); für geeignete Fire-OS-Geräte die [offizielle Universal-APK](https://tailscale.com/docs/install/amazon-fire) mit manuellen Updates. Installation, VPN-Anmeldung und Tests nach Neustart/Ruhezustand erfolgen separat. Diese Setup-Skripte installieren oder konfigurieren weder Tailscale noch Nabu Casa. Die Fernzugriffsvarianten wurden hier nicht am Gerät getestet.
+Die folgenden Schritte erfolgen **separat von den Setup-Skripten**. `Setup-Android-ADB.ps1` und `.sh` installieren oder konfigurieren weiterhin weder Tailscale noch Nabu Casa.
+
+### Tailscale auf dem Raspberry Pi 5 mit Home Assistant
+
+1. In Home Assistant unter **Einstellungen → Apps → App-Store** die **Home Assistant Community App: Tailscale** installieren. Voraussetzung ist eine HA-Installation mit App-/Add-on-Unterstützung und ein bestehender Tailscale-Account.
+2. In der App-Konfiguration die unten gezeigten Werte setzen. `192.168.2.56` ist die HA-Adresse dieses Projekts; bei einer anderen Installation durch die eigene feste HA-LAN-Adresse ersetzen. `/32` bezeichnet genau diesen einen Host.
+3. **Start on boot** und **Watchdog** aktivieren, die App starten und **Open Web UI** öffnen. Über **Log In** mit dem bestehenden Account anmelden und das HA-Gerät mit **Connect device** verbinden.
+4. In der [Tailscale-Geräteverwaltung](https://console.tailscale.com/admin/machines) beim HA-Gerät unter **Subnets → Review/Edit** genau die angebotene HA-Route freigeben. Erst dann können die Tablets diese LAN-Adresse über das VPN erreichen.
+5. In der Geräteübersicht prüfen, dass HA und beide Tablets verbunden sind. Bei angepassten Tailnet-Zugriffsregeln muss der Zugriff der Tablets auf HA, hier TCP-Port `8123`, erlaubt sein.
+
+Die im Test verwendeten Einstellungen als Ausschnitt der App-Konfiguration:
+
+```yaml
+accept_dns: false
+accept_routes: false
+advertise_routes:
+  - 192.168.2.56/32
+advertise_exit_node: false
+userspace_networking: false
+snat_subnet_routes: true
+```
+
+`accept_dns: false` behält die bestehende DNS-Konfiguration des HA-Hosts bei. Es wurde kein Exit Node und kein öffentlicher Funnel eingerichtet. Die Route stellt nur den HA-Host bereit, nicht das gesamte Heimnetz. Weitere Optionen und deren Bedeutung stehen in der [Dokumentation der HA-Community-App](https://github.com/hassio-addons/app-tailscale/blob/main/tailscale/DOCS.md).
+
+Für HA-Befehle **an Fully** (z. B. Bildschirm ein/aus) ist zusätzlich die Rückverbindung zur Tablet-VPN-Adresse nötig. Dafür wurde `userspace_networking: false` gewählt; außerdem müssen Fullys Remote Administration und passende Zugriffsregeln eingerichtet sein. Dieser Rückweg ist vom hier geprüften Dashboard-Zugriff zu unterscheiden und wurde nicht als HA-Fernsteuerungstest abgenommen. [Fully-Fernsteuerung](https://www.fully-kiosk.com/docs/en/features/remote-admin)
+
+### Tailscale auf Samsung und Fire HD 10
+
+1. Fully vorübergehend über die eigene Kiosk-PIN verlassen, damit Anmelde- und Android-VPN-Dialoge im Vordergrund bleiben. Tailscale aus einer offiziellen Quelle installieren: [Android-Anleitung](https://tailscale.com/docs/install/android) bzw. [Fire-Anleitung und Universal-APK](https://tailscale.com/docs/install/amazon-fire). Im Test wurde auf **beiden** Tablets die offizielle Universal-APK `1.104.7` installiert und deren SHA-256 mit dem Herstellerdownload verglichen. Eine per APK installierte Version bei Bedarf manuell aktualisieren.
+2. Tailscale öffnen, die Android-VPN-Verbindungsanfrage bestätigen und jedes Tablet mit demselben bestehenden Account anmelden. Die Geräteverknüpfung kann über den jeweiligen Anmeldelink auch am Notebook bestätigt werden. Anschließend muss Tailscale **Connected** anzeigen; ein Exit Node ist für diesen Aufbau nicht erforderlich.
+3. In den Android-VPN-Einstellungen für Tailscale **Durchgehend aktives VPN / Always-on VPN** aktivieren. **Verbindungen ohne VPN blockieren** blieb im Test ausgeschaltet. Beim Fire ließ sich die VPN-Einstellungsseite über ADB öffnen; dort das Zahnrad neben Tailscale verwenden:
+
+   ```powershell
+   .\tools\platform-tools\adb.exe -s 'SERIENNUMMER' shell am start -a android.settings.VPN_SETTINGS
+   ```
+
+4. Auf dem Samsung-Testgerät wurde Always-on stattdessen per ADB gesetzt und **nach einem vollständigen Neustart** im VPN-Dienst mit `alwaysOn=true` bestätigt:
+
+   ```powershell
+   .\tools\platform-tools\adb.exe -s 'SERIENNUMMER' shell settings put secure always_on_vpn_app com.tailscale.ipn
+   # Nach dem Neustart prüfen:
+   .\tools\platform-tools\adb.exe -s 'SERIENNUMMER' shell settings get secure always_on_vpn_app
+   .\tools\platform-tools\adb.exe -s 'SERIENNUMMER' shell dumpsys vpn_management
+   ```
+
+   Dies ist ein am SM-X210 mit Android 16 geprüfter manueller Schritt, keine herstellerübergreifende Automatik. Ein gespeicherter Einstellungswert allein beweist noch keinen funktionierenden Autostart. Unter Linux/macOS dieselben ADB-Argumente mit `./tools/platform-tools/adb` verwenden; den Pfad bei einem abweichenden Tools-Verzeichnis anpassen.
+
+5. Fullys Kiosk-Modus und Startverhalten wiederherstellen und das Dashboard öffnen. Bei unveränderter URL war auf beiden Tablets **keine erneute HA-Anmeldung** nötig. Wurde Fully per ADB zwangsweise beendet, vor dem Neustart-Test die zuvor verwendete Bedienungshilfe prüfen: Fire OS hatte diese Freigabe dabei zurückgesetzt.
+
+Beim Fire verlangte die bereits aktivierte **Fully Remote Administration** beim ersten Neustart zusätzlich ungefähren und genauen Standortzugriff. Nach bewusster Freigabe **bei Nutzung der App** war der zweite Neustart dialogfrei. Diese Abfrage kam von Fullys Fernverwaltung, nicht von Tailscale. Offene Berechtigungsdialoge vor einem unbeaufsichtigten Kiosk-Test klären.
+
+### Hotspot- und Neustart-Tests vom 21.11.2026
+
+Getestet mit **Tailscale 1.104.7**, **HA-Community-App 0.30.7** und **Fully Kiosk Browser 1.61.4**. Geräte: **Galaxy Tab A9+ SM-X210, Android 16 / One UI 8**, und **Fire HD 10 KFTUWI (2023), Fire OS 8.3.3.8 / Android 11**.
+
+Für den Fernzugriffstest den Handy-Hotspot mit **mobilen Daten und ausgeschaltetem Handy-WLAN** betreiben. Auf jedem Tablet die tatsächliche Hotspot-SSID und eine Adresse außerhalb des Heimnetzes prüfen; erst danach die vorhandene HA-Startseite in Fully neu laden. So wird eine noch sichtbare, zuvor geladene Seite nicht allein als erfolgreicher Verbindungstest gewertet.
+
+| Prüfung | Samsung Galaxy Tab A9+ | Fire HD 10 |
+|---|---|---|
+| HA-Dashboard über Handy-Hotspot und Tailscale | Erfolgreich, ohne erneute HA-Anmeldung | Erfolgreich, ohne erneute HA-Anmeldung |
+| Erreichbarkeit des HA-Hosts | 3 von 3 Ping-Antworten | 3 von 3 Ping-Antworten |
+| Gegenprobe: Tailscale am Hotspot ausschalten | HA nicht erreichbar (0 von 2 Antworten); nach Wiederverbinden wieder erreichbar | Nicht separat durchgeführt |
+| Vollständiger Neustart ohne manuelles Öffnen der Apps | Tailscale und Fully automatisch aktiv, angemeldetes Dashboard sichtbar; Tablet wählte dabei das **Heim-WLAN** | Tailscale und Fully automatisch aktiv, angemeldetes Dashboard über den **Handy-Hotspot** sichtbar; nach der genannten Berechtigungskorrektur ohne Dialog |
+
+Der kombinierte **Neustart über den Hotspot** ist damit auf dem Fire bestätigt. Beim Samsung wurden Hotspot-Zugriff und Neustart getrennt erfolgreich geprüft; der Neustart fand im Heim-WLAN statt. Die vollständigen Fire-Neustarts wurden zusätzlich über wechselnde Boot-IDs verifiziert. Nach dem abschließenden Neustart lieferte HA 3/3 Ping-Antworten mit rund **33–68 ms** Laufzeit. Das ist eine kurze Funktionsprüfung, keine Langzeit- oder Durchsatzmessung. Nabu Casa und das Verhalten nach längerem Ruhezustand wurden nicht getestet.
+
+| Fire: Dashboard nach Neustart am Hotspot | Samsung: Dashboard nach Neustart im Heim-WLAN |
+|---|---|
+| <img src="docs/images/tailscale-fire-hotspot-after-reboot.png" width="240" alt="Fire HD 10 zeigt nach vollständigem Neustart das kompakte HA-Dashboard über den Handy-Hotspot"> | <img src="docs/images/tailscale-samsung-after-reboot.png" width="240" alt="Samsung A9+ zeigt nach vollständigem Neustart im Heim-WLAN das HA-Dashboard im Vollhöhenlayout"> |
+
+### CPU-Auslastung bei geöffnetem Dashboard
+
+Momentaufnahme vom **21.11.2026** mit den oben genannten Versionen. Auf beiden Tablets liefen Fully und Tailscale; gemessen wurde nur die CPU-Zeit des **Tailscale-Prozesses**. Das Fire war am Handy-Hotspot, das Samsung im Heim-WLAN.
+
+| Gerät | Messung | CPU-Auslastung |
+|---|---|---|
+| Raspberry Pi 5 / HA | Statistik der laufenden Tailscale-App in Home Assistant | **0 % angezeigt (gerundet)**; zusätzlich 31,5 MB RAM |
+| Fire HD 10 | 32,11 s, sieben Prozesszähler-Ablesungen | **0,87 % eines Kerns** im Mittel; 1,70 % im höchsten ca. 5-s-Intervall |
+| Samsung Galaxy Tab A9+ | 31,96 s, sieben Prozesszähler-Ablesungen | **1,31 % eines Kerns** im Mittel; 2,46 % im höchsten ca. 5-s-Intervall |
+
+Die Tablet-Werte stammen aus dem Zuwachs der Summe aus Benutzer- und Kernel-CPU-Zeit in `/proc/<PID>/stat`, bei 100 Zählertakten pro Sekunde. Bezogen auf alle **acht aktiven Kerne** entsprechen die Mittelwerte rund **0,11 % beim Fire** und **0,16 % beim Samsung**. Diese Umrechnung beschreibt CPU-Zeit, nicht die unterschiedliche Rechenleistung der Kerne. Die gerundete HA-App-Anzeige ist eine andere Messquelle; **0 % bedeutet nicht exakt null Rechenarbeit**. Es wurde weder hohe VPN-Datenlast erzeugt noch der gesamte Stromverbrauch gemessen.
+
+Der Geräteschlüssel-Ablauf wurde nicht deaktiviert; beim HA-Gerät wurden sechs Monate angezeigt. Für den Dauerbetrieb Tailscale-Hinweise zur erforderlichen Neuanmeldung beachten. Nach App-, OS- oder Netzwerkkonfigurationsänderungen den Hotspot- und Autostart-Test erneut durchführen.
 
 ## Akkuschutz fuer den Dauerbetrieb
 

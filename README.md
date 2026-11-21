@@ -13,6 +13,8 @@ For Windows, Linux and macOS, the [Android tablet setup scripts](tools/android-t
 also support Samsung tablets, Fully installation/updates and an explicit choice
 between compact and full-height dashboard layouts. The guide includes a
 [side-by-side tablet screenshot comparison](tools/android-tablet-setup/README.md#6-darstellung-bewusst-wählen).
+It also documents [Tailscale access through a phone hotspot](tools/android-tablet-setup/README.md#7-heimnetz-hotspot-und-fernzugriff),
+the Raspberry Pi 5 and tablet configuration, verified reboot behavior, and measured CPU usage.
 
 ## Install through HACS
 

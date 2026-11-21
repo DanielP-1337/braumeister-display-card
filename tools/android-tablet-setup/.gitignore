@@ -9,6 +9,8 @@
 *.png
 !/docs/images/layout-compact-fire-hd-10.png
 !/docs/images/layout-fullscreen-samsung-a9-plus.png
+!/docs/images/tailscale-fire-hotspot-after-reboot.png
+!/docs/images/tailscale-samsung-after-reboot.png
 
 # Temporary deployment/test files
 .adb-report.*

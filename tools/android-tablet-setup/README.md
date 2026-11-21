@@ -2,6 +2,8 @@
 
 Die Skripte stellen Android Debug Bridge (ADB) bereit, prüfen die Verbindung zu Android-Tablets verschiedener Hersteller und speichern Modell und Android-Version. Bei Fire-Geräten wird zusätzlich Fire OS angezeigt. Android Studio ist nicht erforderlich. Fehlende Platform Tools werden von Google heruntergeladen; dafür ist eine Internetverbindung nötig.
 
+Für Apple-Tablets gibt es eine separate [iPad-Orientierung für die Community](../../docs/ipad-community-guide.md) mit Modellgrenzen und einem Vergleich von HA-App, Kiosker, HomeView und HomeKit. Die iPad-Optionen sind hier ungetestet; auch unter macOS richten diese ADB-Skripte ausschließlich Android-Geräte ein.
+
 ## 1. Tablet vorbereiten
 
 1. **Einstellungen → Über das Tablet / Tablet-Info → Softwareinformationen** öffnen (Menüpfad je nach Hersteller unterschiedlich).

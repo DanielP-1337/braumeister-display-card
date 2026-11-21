@@ -16,6 +16,12 @@ between compact and full-height dashboard layouts. The guide includes a
 It also documents [Tailscale access through a phone hotspot](tools/android-tablet-setup/README.md#7-heimnetz-hotspot-und-fernzugriff),
 the Raspberry Pi 5 and tablet configuration, verified reboot behavior, and measured CPU usage.
 
+For Apple devices, see the [iPad community guide (German)](docs/ipad-community-guide.md).
+It compares the HA Companion app, Kiosker, HomeView and Apple Home/HomeKit,
+including OS requirements, Tailscale, startup and brightness control.
+These options have not been tested by this project. The original iPad and iPad 2
+are below the current HA frontend requirements; community test reports are welcome.
+
 ## Install through HACS
 
 1. In HACS, open the menu and select **Custom repositories**.

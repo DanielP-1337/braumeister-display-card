@@ -211,6 +211,16 @@ Der kombinierte **Neustart über den Hotspot** ist damit auf dem Fire bestätigt
 |---|---|
 | <img src="docs/images/tailscale-fire-hotspot-after-reboot.png" width="240" alt="Fire HD 10 zeigt nach vollständigem Neustart das kompakte HA-Dashboard über den Handy-Hotspot"> | <img src="docs/images/tailscale-samsung-after-reboot.png" width="240" alt="Samsung A9+ zeigt nach vollständigem Neustart im Heim-WLAN das HA-Dashboard im Vollhöhenlayout"> |
 
+### Vom Nutzer bestätigte Bedienungstests vom 21.11.2026
+
+Zusätzlich hat der Nutzer die Steuerung von Pumpe und Heizung im manuellen Modus über das HA-Dashboard praktisch geprüft:
+
+- **Samsung Galaxy Tab A9+:** Pumpe und Heizung erfolgreich aktiviert. Die geänderten Zustände wurden sofort auf dem **Fire HD 10** angezeigt.
+- **Fire HD 10:** Pumpe und Heizung erfolgreich ein- und ausgeschaltet.
+- **Reaktionszeit über VPN:** Bei der Bedienung war laut Nutzer keine Verzögerung gegenüber der Steuerung mit der **Home-Assistant-App auf dem Handy im WLAN** wahrnehmbar. Dies ist ein subjektiver Praxisvergleich ohne instrumentierte Latenzmessung.
+
+Damit sind die Bedienung über beide Tablets und die unmittelbare Zustandsanzeige auf dem Fire nach einer Bedienung am A9+ durch den Nutzer bestätigt. Die Tests betreffen Steuerbefehle im HA-Dashboard und dessen Zustandsanzeige.
+
 ### CPU-Auslastung bei geöffnetem Dashboard
 
 Momentaufnahme vom **21.11.2026** mit den oben genannten Versionen. Auf beiden Tablets liefen Fully und Tailscale; gemessen wurde nur die CPU-Zeit des **Tailscale-Prozesses**. Das Fire war am Handy-Hotspot, das Samsung im Heim-WLAN.

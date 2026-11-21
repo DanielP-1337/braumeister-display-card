@@ -1,0 +1,11 @@
+{
+  "startURL": "http://192.168.2.56:8123/firehd-braumeister/braumeister_tablet",
+  "fullscreen": true,
+  "showActionBar": false,
+  "keepScreenOn": true,
+  "launchOnBoot": true,
+  "screenOrientation": "1",
+  "reloadOnWifiOn": true,
+  "autoImportSettings": true,
+  "injectJsCode": "// Fully > Advanced Web Settings > Inject JavaScript. Tablet-local only.\n(() => {\n  if (window.__braumeisterKiosk) return;\n  window.__braumeisterKiosk = true;\n  function style(root, css) {\n    if (!root || root.querySelector('#braumeister-kiosk-style')) return;\n    const node = document.createElement('style');\n    node.id = 'braumeister-kiosk-style';\n    node.textContent = css;\n    root.appendChild(node);\n  }\n  function visit(root) {\n    for (const element of root.querySelectorAll('*')) {\n      if (!element.shadowRoot) continue;\n      const name = element.localName;\n      if (name === 'hui-root') {\n        style(element.shadowRoot, ':host{--header-height:0px!important;--ha-header-height:0px!important}.header,app-header,ha-menu-button{display:none!important}#view,hui-view-container{padding-top:0!important;margin-top:0!important}');\n        continue;\n      }\n      if (name === 'home-assistant-main') {\n        style(element.shadowRoot, ':host{--ha-sidebar-width:0px!important;--mdc-drawer-width:0px!important}ha-sidebar{display:none!important}');\n      }\n      if (name === 'ha-drawer') {\n        style(element.shadowRoot, ':host{--ha-sidebar-width:0px!important;--mdc-drawer-width:0px!important}.sidebar-shell,.mdc-drawer,wa-drawer{display:none!important}.app-content,.mdc-drawer-app-content{padding-inline-start:0!important;margin-left:0!important;margin-inline-start:0!important;width:100%!important}');\n      }\n      visit(element.shadowRoot);\n    }\n  }\n  function apply() {\n    if (location.host !== '192.168.2.56:8123' || !location.pathname.startsWith('/firehd-braumeister/')) return;\n    visit(document);\n  }\n  apply();\n  setInterval(apply, 1000);\n})();\n"
+}

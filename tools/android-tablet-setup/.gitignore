@@ -1,0 +1,12 @@
+# Downloaded binaries and local Android tools
+/tools/
+*.apk
+*.zip
+
+# Device reports and screenshots (local only)
+/Android-Geraeteinformationen.txt
+/FireHD10-Geraeteinformationen.txt
+*.png
+
+# Temporary deployment/test files
+.adb-report.*

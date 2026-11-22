@@ -25,6 +25,19 @@ temperature, which can differ from the temperature inside the pump. The feature
 provides a warning only. The next brew step or an offline connection clears the
 card indication.
 
+### Fire HD 10 hardware test
+
+On November 22, 2026, the frost-style checkbox passed a hardware test on an
+Amazon Fire HD 10 running Display Card `v0.7.0-beta.39`. The start delay was
+active, the warning threshold was set to 8 °C, and the water measured 7 °C.
+
+| Frost-style checkbox | Display keys | Four navigation rings | Frost warning |
+| --- | --- | --- | --- |
+| On (USB screenshot below) | Round, ice blue | Cyan | Blue frame and message visible |
+| Off (observed by the tester on the tablet) | Yellow | Yellow | Blue frame and message still visible |
+
+<a href="images/fire-hd-10-frost-warning-beta39.png"><img src="images/fire-hd-10-frost-warning-beta39.png" width="300" alt="Fire HD 10 showing a 57-minute start delay at 7 °C, a blue frost warning, ice-blue Cancel and Start now keys, and four cyan navigation rings"></a>
+
 ### Optional hourly forecast and phone notification
 
 The [frost warning automation blueprint](blueprints/braumeister-frost-warning.yaml)

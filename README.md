@@ -10,6 +10,13 @@
 
 ## Frost warning during a delayed start
 
+If you use the upstream Speidel Braumeister integration, the frost warning
+requires a release that includes [PR #33](https://github.com/omphteliba/ha-speidel-braumeister/pull/33).
+Upstream [v3.3.0](https://github.com/omphteliba/ha-speidel-braumeister/releases/tag/v3.3.0)
+lacks the `display_start_delay_seconds` attribute on the current step sensor.
+Both the card and the optional blueprint use this attribute to tell when the
+start delay is active, so their frost warnings stay inactive with v3.3.0.
+
 Enable **Frost warning** in the visual card editor and choose a water temperature
 threshold (default 3 °C). The card shows a quiet blue frame and a text notice on
 the current tab when the reported water temperature reaches that threshold. It

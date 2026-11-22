@@ -80,6 +80,27 @@ the timer silently. The timer clears when the countdown ends or the available
 inputs confirm recovery. If evaluations stop, the last warning expires within
 12 minutes. An unavailable forecast still permits a warning from cold water.
 
+#### Hardware test with an hourly forecast and mobile push
+
+On November 22, 2026, the tester started a delayed brew using Display Card
+`v0.7.0-beta.39` and the frost warning blueprint. The blue frame and frost
+message appeared immediately on the Home Assistant dashboard and on the Fire HD 10.
+The tester also confirmed that the notification arrived on the Samsung Galaxy S25.
+
+The automation trace shows how Home Assistant evaluated the warning at 19:02:43 CET.
+
+| Trace evidence | Recorded result |
+| --- | --- |
+| Water temperature (`water_c`) | 5.0 °C, exactly at the 5 °C warning threshold |
+| Lowest hourly forecast before the scheduled start (`forecast_c`) | 1.2 °C from Met.no |
+| Timer state before the warning (`already_active`) | `false` |
+| Actions executed | Fetched the hourly forecast, started the warning timer, and called the Companion App notification action |
+
+Both temperature conditions were met. A forecast-only test would require the
+water to stay above 5 °C when the warning starts.
+
+<a href="images/frost-warning-delayed-start-beta39.png"><img src="images/frost-warning-delayed-start-beta39.png" width="300" alt="Frost warning with a blue frame at 5 °C and 2 hours, 29 minutes, 48 seconds left before the brew starts"></a>
+
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 
 ## Install through HACS

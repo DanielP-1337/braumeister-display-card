@@ -96,10 +96,31 @@ The automation trace shows how Home Assistant evaluated the warning at 19:02:43 
 | Timer state before the warning (`already_active`) | `false` |
 | Actions executed | Fetched the hourly forecast, started the warning timer, and called the Companion App notification action |
 
-Both temperature conditions were met. A forecast-only test would require the
-water to stay above 5 °C when the warning starts.
+Both the water temperature and the forecast met the warning threshold in this run.
 
 <a href="images/frost-warning-delayed-start-beta39.png"><img src="images/frost-warning-delayed-start-beta39.png" width="300" alt="Frost warning with a blue frame at 5 °C and 2 hours, 29 minutes, 48 seconds left before the brew starts"></a>
+
+#### Forecast-only frost warning on the Fire HD 10 and Galaxy S25
+
+On November 22, 2026, at 20:08 CET, the tester linked the Fire HD 10 card to the
+blueprint's warning timer. The card immediately showed the blue frame and frost
+message for the active warning. For the forecast-only test, the start delay kept
+running, the automation threshold was set to 3 °C, and the timer was reset to `idle` once.
+
+The Home Assistant trace for the scheduled check at **20:15:00 CET** (run
+`b6e9ee4251d282c7893c822a38665e37`) recorded the following values.
+
+| Trace field | Recorded value |
+| --- | --- |
+| Monitoring during the start delay (`armed`) | `true` |
+| Automation threshold (`threshold`) | 3 °C |
+| Water temperature (`water_c`) | 4.5 °C |
+| Lowest Met.no hourly forecast before brew start (`forecast_c`) | 0.9 °C |
+| Warning timer already active (`already_active`) | `false` |
+
+The forecast alone triggered a new warning. The trace shows that Home
+Assistant started the timer and called the S25-DP notification action. The tester
+confirmed an audible notification on the phone after unmuting its notification sound.
 
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 

@@ -38,6 +38,13 @@ active, the warning threshold was set to 8 °C, and the water measured 7 °C.
 
 <a href="images/fire-hd-10-frost-warning-beta39.png"><img src="images/fire-hd-10-frost-warning-beta39.png" width="300" alt="Fire HD 10 showing a 57-minute start delay at 7 °C, a blue frost warning, ice-blue Cancel and Start now keys, and four cyan navigation rings"></a>
 
+After the tester canceled the brew, the tablet returned to the main menu.
+The water still measured 7 °C. With the start delay over, the frost message
+and blue frame cleared, and the menu keys and all four rings showed the saved
+yellow color.
+
+<a href="images/fire-hd-10-main-menu-after-cancel-beta39.png"><img src="images/fire-hd-10-main-menu-after-cancel-beta39.png" width="300" alt="Fire HD 10 after cancellation, showing the main menu at 7 °C with four yellow keys and four yellow navigation rings"></a>
+
 ### Optional hourly forecast and phone notification
 
 The [frost warning automation blueprint](blueprints/braumeister-frost-warning.yaml)

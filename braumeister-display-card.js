@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.38 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.39 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -54,6 +54,7 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+    "Bei Frostwarnung Tasten in Eisoptik anzeigen": "Use icy button colors during a frost warning",
     "Frostschutz": "Frost warning",
     "Bei Startvorwahl vor Frost warnen": "Warn about frost during a delayed start",
     "Warntemperatur des Wassers": "Water warning temperature",
@@ -392,7 +393,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.38`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.39`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -691,8 +692,8 @@
         const disabled=this.pending||!available?'disabled':'';
         body=`<h2>${T('Zwischenstecker')}</h2>${row('Schaltzustand','plug')}${row('Gesamtleistung','power','W')}<div class="power-buttons"><button data-power="turn_on" ${disabled}>${T('Einschalten')}</button><button data-power="turn_off" ${disabled}>${T('Ausschalten')}</button></div><label>${T('Nach Stromausfall')}<select id="behavior" ${this.pending||!options.length?'disabled':''}><option disabled ${!options.includes(this.state('behavior'))?'selected':''}>${T('Bitte wählen')}</option>${options.map(o=>`<option value="${E(o)}" ${this.state('behavior')===o?'selected':''}>${T(({on:'Ein',off:'Aus',previous:'Vorheriger Zustand',toggle:'Zustand umkehren'})[o]||o)}</option>`).join('')}</select></label><p class="hint">${T('Schaltet die gesamte Stromversorgung des Braumeisters.')}</p>`;
       }
-      // Only a confirmed plug-off overrides presentation; keep the saved choice intact.
-      const lighting=off?'off':lightingValue(this.config.button_color);
+      const frostButtons = frost && this.config.frost_button_style !== false;
+      const lighting = frostButtons ? '#00cfff' : off ? 'off' : lightingValue(this.config.button_color);
       const ringColor=lighting==='off'?'#666666':lighting==='default'?'#f4f4f4':lighting;
       this.shadowRoot.innerHTML=`<style>
         .keys button.menu-pending { position: relative; opacity: 1; }
@@ -710,6 +711,20 @@
       .screen{background:#f4f4f4;box-shadow:inset 0 0 15px #999;min-height:0}
       .screen.frost{outline:3px solid #1565c0;box-shadow:inset 0 0 12px #90caf9}
       .screen .frost-notice{background:#dceeff;color:#103c68}
+      .frost-buttons .keys button{
+        border-radius:50%;border:1px solid #079cc5;color:#06516d;
+        background:
+          linear-gradient(115deg,transparent 24%,#ffffff52 25% 30%,transparent 31% 64%,#ffffff38 65% 70%,transparent 71%),
+          radial-gradient(ellipse at 44% 20%,#e8fdff 0%,#a4eefa 48%,#55cfe8 76%,#13b6dc 100%);
+        box-shadow:inset 0 -4px 0 #009dc7,inset 0 0 0 2px #e6fcff,0 1px 2px #06496059;
+      }
+      .frost-buttons .keys .control-icon{
+        stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;
+        filter:drop-shadow(0 1px 0 #fff);
+      }
+      .frost-buttons .keys button:disabled{opacity:.4;filter:saturate(.4)}
+      .frost-buttons .keys button.menu-pending{opacity:1}
+      .frost-buttons .menu-pending::after{border-color:#e6fcff;border-top-color:#06516d}
       .screen.program-paused{outline:3px solid #b00020;box-shadow:inset 0 0 18px #e66868}
       .screen.program-paused.pulse{animation:program-pause-pulse 1.4s ease-in-out infinite}
       @keyframes program-pause-pulse{50%{box-shadow:inset 0 0 30px #cf3030;outline-color:#ff6565}}
@@ -726,7 +741,7 @@
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
-      </style><ha-card><div class="screen${alarmFrame?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:frost?' frost':''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}${progressBar}</header>${connectionNotice}${frostNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.alarmActive() === true && !this._alarmMuted ? `<button type="button" data-audio="mute">${T("Ton stummschalten")}</button>` : ""}${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
+      </style><ha-card${frostButtons ? ' class="frost-buttons"' : ''}><div class="screen${alarmFrame?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:frost?' frost':''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}${progressBar}</header>${connectionNotice}${frostNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.alarmActive() === true && !this._alarmMuted ? `<button type="button" data-audio="mute">${T("Ton stummschalten")}</button>` : ""}${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
   class BraumeisterDisplayEditor extends HTMLElement {
@@ -741,6 +756,7 @@
         const field = event.target.dataset?.frostSetting;
         if (field) {
           if (field === 'enabled') this.config = {...this.config, frost_enabled: event.target.checked};
+          else if (field === 'button-style') this.config = {...this.config, frost_button_style: event.target.checked};
           else if (field === 'threshold' && event.target.validity.valid && Number.isFinite(event.target.valueAsNumber))
             this.config = {...this.config, frost_threshold: event.target.valueAsNumber};
           else if (field === 'timer') {
@@ -819,7 +835,8 @@
         <p>${T('Nur die Tastenringe dieser Karte ändern sich.')}</p></fieldset>
       <fieldset><legend>${T('Frostschutz')}</legend>
         <label><input type="checkbox" data-frost-setting="enabled" ${this.config.frost_enabled === true ? 'checked' : ''}> ${T('Bei Startvorwahl vor Frost warnen')}</label>
-        ${this.config.frost_enabled === true ? `<label>${T('Warntemperatur des Wassers')} (°C)
+        ${this.config.frost_enabled === true ? `<label><input type="checkbox" data-frost-setting="button-style" ${this.config.frost_button_style !== false ? 'checked' : ''}> ${T('Bei Frostwarnung Tasten in Eisoptik anzeigen')}</label>
+          <label>${T('Warntemperatur des Wassers')} (°C)
           <input type="number" min="0" max="10" step="0.5" required data-frost-setting="threshold" value="${esc(this.config.frost_threshold ?? 3)}" ${this.config.entities?.frost_timer ? 'disabled' : ''}></label>
           <label>${T('Warntimer der HA-Automation (optional)')} <input type="text" list="frost-timers" data-frost-setting="timer" value="${esc(this.config.entities?.frost_timer || '')}" placeholder="timer.braumeister_frost"></label>
           <datalist id="frost-timers">${Object.keys(this._hass?.states || {}).filter(id=>id.startsWith('timer.')).map(id=>`<option value="${esc(id)}"></option>`).join('')}</datalist>` : ''}
@@ -836,5 +853,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.38'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.39'});
 })();

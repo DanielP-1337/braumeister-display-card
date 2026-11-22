@@ -48,6 +48,16 @@ require('./dist/braumeister-display-card.js');
  }
  console.log('PASS: plug on/off transitions, saved colors preserved, deliberate lights off, all pages, cloud independence and uncertain/missing plug states');
  const editor=Card.getConfigElement();editor.setConfig(config);await editor._languageReady;
+ assert.doesNotMatch(editor.shadowRoot.innerHTML,/data-frost-setting="button-style"/);
+ editor.setConfig({...config,frost_enabled:true,button_color:'#ab1234'});
+ assert.match(editor.shadowRoot.innerHTML,/data-frost-setting="button-style" checked/);
+ editor.listeners.change({target:{dataset:{frostSetting:'button-style'},checked:false}});
+ const frostConfig=editor.events.at(-1).detail.config;
+ assert.equal(frostConfig.frost_button_style,false);assert.equal(frostConfig.frost_enabled,true);
+ assert.equal(frostConfig.button_color,'#ab1234');assert.deepEqual(frostConfig.entities,config.entities);
+ const reopened=Card.getConfigElement();reopened.setConfig(frostConfig);
+ assert.doesNotMatch(reopened.shadowRoot.innerHTML,/data-frost-setting="button-style" checked/);
+ editor.setConfig(config);
  assert.equal((editor.shadowRoot.innerHTML.match(/class="swatch"/g)||[]).length,8);
  assert(editor.shadowRoot.innerHTML.includes('type="color"'));
  editor.listeners.click({target:{closest:selector=>selector.includes('data-color')?({dataset:{color:'#00cfff'}}):null}});

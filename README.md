@@ -4,7 +4,7 @@
 
 > New hardware-mapping beta: [versions, installation and test guide](release-v0.7.0-beta.23.md).
 
-# Braumeister Display 0.7.0-beta.38
+# Braumeister Display 0.7.0-beta.39
 
 ## Frost warning during a delayed start
 
@@ -13,6 +13,11 @@ threshold (default 3 °C). The card shows a quiet blue frame and a text notice o
 the current tab when the reported water temperature reaches that threshold. It
 clears once the water warms more than 1 °C above it. A device alarm or pause takes
 priority. This option starts disabled.
+
+During a frost warning, the four navigation rings turn cyan and the display keys
+take on a round, icy appearance. Clear **Use icy button colors during a frost warning**
+in the card editor to keep your usual button style. The blue warning frame and
+message stay visible with either choice.
 
 The water confirmation followed by a running countdown (screen 2120) arms the
 warning. This is an operator confirmation. The Braumeister reports the kettle
@@ -28,7 +33,7 @@ runs in Home Assistant even when the dashboard is closed.
 1. In **Settings → Devices & services → Helpers**, create a **Timer** dedicated
    to this Braumeister. Enable state restoration if you want an active warning
    to survive an HA restart.
-2. [Import the beta.38 blueprint into Home Assistant](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FDanielP-1337%2Fbraumeister-display-card%2Fblob%2Fv0.7.0-beta.38%2Fblueprints%2Fbraumeister-frost-warning.yaml).
+2. [Import the beta.39 blueprint into Home Assistant](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FDanielP-1337%2Fbraumeister-display-card%2Fblob%2Fv0.7.0-beta.39%2Fblueprints%2Fbraumeister-frost-warning.yaml).
    Choose **Create automation** under **Settings → Automations & scenes → Blueprints**.
 3. In the blueprint form, choose the step, connection, water temperature and
    timer entities. Set the warning threshold. Optionally select a local weather

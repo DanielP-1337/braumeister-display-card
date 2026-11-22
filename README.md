@@ -4,7 +4,49 @@
 
 > New hardware-mapping beta: [versions, installation and test guide](release-v0.7.0-beta.23.md).
 
-# Braumeister Display 0.7.0-beta.8
+# Braumeister Display 0.7.0-beta.38
+
+## Frost warning during a delayed start
+
+Enable **Frost warning** in the visual card editor and choose a water temperature
+threshold (default 3 °C). The card shows a quiet blue frame and a text notice on
+the current tab when the reported water temperature reaches that threshold. It
+clears once the water warms more than 1 °C above it. A device alarm or pause takes
+priority. This option starts disabled.
+
+The water confirmation followed by a running countdown (screen 2120) arms the
+warning. This is an operator confirmation. The Braumeister reports the kettle
+temperature, which can differ from the temperature inside the pump. The feature
+provides a warning only. The next brew step or an offline connection clears the
+card indication.
+
+### Optional hourly forecast and phone notification
+
+The [frost warning automation blueprint](blueprints/braumeister-frost-warning.yaml)
+runs in Home Assistant even when the dashboard is closed.
+
+1. In **Settings → Devices & services → Helpers**, create a **Timer** dedicated
+   to this Braumeister. Enable state restoration if you want an active warning
+   to survive an HA restart.
+2. [Import the beta.38 blueprint into Home Assistant](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2FDanielP-1337%2Fbraumeister-display-card%2Fblob%2Fv0.7.0-beta.38%2Fblueprints%2Fbraumeister-frost-warning.yaml).
+   Choose **Create automation** under **Settings → Automations & scenes → Blueprints**.
+3. In the blueprint form, choose the step, connection, water temperature and
+   timer entities. Set the warning threshold. Optionally select a local weather
+   entity that provides hourly forecasts and choose a lookahead. The automation
+   checks the forecast only through the scheduled start, up to the chosen horizon.
+4. For a push, add your HA Companion App phone's notification action and enter
+   a message such as “Frostgefahr während der Startvorwahl. Bitte Braumeister
+   und Pumpe prüfen.” Leave the action empty for a dashboard-only warning.
+5. In the card's **Frost warning** settings, select the same timer. The
+   automation now supplies the threshold and warning state for both channels.
+   Use the automation's enable switch to control background monitoring.
+
+HA checks on countdown entry, connection changes, startup and every five minutes.
+Either a cold kettle or a low forecast can start a warning. The phone action
+runs once when the timer first becomes active. Subsequent cold readings renew
+the timer silently. The timer clears when the countdown ends or the available
+inputs confirm recovery. If evaluations stop, the last warning expires within
+12 minutes. An unavailable forecast still permits a warning from cold water.
 
 **Disclaimer:** This project is an independent open-source development and is not affiliated with, funded by, or endorsed by Speidel Tank- und Behälterbau GmbH or any of its affiliates. "Braumeister" and "MySpeidel" are trademarks of their respective owners.
 

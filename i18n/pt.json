@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Não foi possível identificar a receita atual de forma inequívoca. Selecione uma receita do dispositivo.",
   "Hopfengaben · Minuten vor Kochende": "Adições de lúpulo · minutos antes do fim da fervura",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programa guardado no dispositivo. As alterações durante a brassagem podem diferir. Esta seleção não controla o dispositivo.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Iniciar a fervura? A bomba e o aquecimento podem arrancar."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Iniciar a fervura? A bomba e o aquecimento podem arrancar.",
+  "Frostschutz": "Aviso de geada",
+  "Bei Startvorwahl vor Frost warnen": "Avisar sobre geada durante o início diferido",
+  "Warntemperatur des Wassers": "Limite de temperatura da água",
+  "Warntimer der HA-Automation (optional)": "Temporizador de aviso do HA (opcional)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Risco de geada durante o início diferido. Verifique o Braumeister e a bomba."
 }

@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.",
   "Hopfengaben · Minuten vor Kochende": "Hopfengaben · Minuten vor Kochende",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Hopfenkochen starten? Pumpe und Heizung können anlaufen."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Hopfenkochen starten? Pumpe und Heizung können anlaufen.",
+  "Frostschutz": "Frostschutz",
+  "Bei Startvorwahl vor Frost warnen": "Bei Startvorwahl vor Frost warnen",
+  "Warntemperatur des Wassers": "Warntemperatur des Wassers",
+  "Warntimer der HA-Automation (optional)": "Warntimer der HA-Automation (optional)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen."
 }

@@ -1,0 +1,123 @@
+blueprint:
+  name: Braumeister — frost warning during delayed start
+  description: >
+    Checks the water temperature and optionally the hourly outdoor forecast while
+    the confirmed start delay is counting down. Use a dedicated Timer helper.
+    Select the same timer in the Display Card to show a blue warning on every tab.
+  domain: automation
+  input:
+    step:
+      name: Braumeister current step
+      selector: {entity: {domain: sensor}}
+    connection:
+      name: Braumeister connection (online/offline)
+      selector: {entity: {domain: sensor}}
+    temperature:
+      name: Braumeister water temperature
+      selector: {entity: {domain: sensor, device_class: temperature}}
+    warning_timer:
+      name: Dedicated frost warning timer
+      selector: {entity: {domain: timer}}
+    threshold:
+      name: Warning threshold for water or forecast
+      default: 3
+      selector: {number: {min: 0, max: 10, step: 0.5, unit_of_measurement: °C}}
+    weather:
+      name: Local weather with hourly forecasts (optional)
+      default: []
+      selector: {entity: {domain: weather, multiple: true}}
+    horizon:
+      name: Maximum forecast lookahead, limited by remaining start delay
+      default: 12
+      selector: {number: {min: 1, max: 24, step: 1, unit_of_measurement: h}}
+    notification:
+      name: Optional notification on first warning
+      description: Choose your phone's notification action and set its message.
+      default: []
+      selector: {action: {}}
+mode: restart
+triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: time_pattern
+    minutes: "/5"
+  - trigger: state
+    entity_id: !input step
+    attribute: display_state_code
+  - trigger: state
+    entity_id: !input step
+    attribute: display_interrupt
+  - trigger: state
+    entity_id: !input connection
+    to: null
+variables:
+  step: !input step
+  connection: !input connection
+  water: !input temperature
+  timer_id: !input warning_timer
+  weather_ids: !input weather
+  threshold: !input threshold
+  hours: !input horizon
+  outlook: {}
+  armed: >-
+    {{ is_state(connection, 'online') and has_value(step)
+       and state_attr(step, 'display_state_code') == 2120
+       and state_attr(step, 'display_interrupt') != 1
+       and state_attr(step, 'display_start_delay_seconds') | int(0) > 0 }}
+actions:
+  - if: "{{ not armed }}"
+    then:
+      - if: "{{ is_state(timer_id, 'active') }}"
+        then:
+          - action: timer.cancel
+            target: {entity_id: !input warning_timer}
+      - stop: Countdown inactive
+  - if: "{{ weather_ids | length > 0 }}"
+    then:
+      - action: weather.get_forecasts
+        target: {entity_id: !input weather}
+        data: {type: hourly}
+        response_variable: outlook
+        continue_on_error: true
+  - variables:
+      # Compare fresh observations against Celsius thresholds even in °F installations.
+      water_c: >-
+        {% set v = states(water) %}
+        {% set unit = state_attr(water, 'unit_of_measurement') %}
+        {{ (v | float if unit == '°C' else ((v | float - 32) * 5 / 9) | round(4))
+           if is_number(v) and unit in ['°C', '°F'] else none }}
+      forecast_c: >-
+        {% set start = as_timestamp(now()) %}
+        {% set end = start + [hours * 3600, state_attr(step, 'display_start_delay_seconds') | int(0)] | min %}
+        {% set ns = namespace(low=none) %}
+        {% for entity in weather_ids %}
+          {% set unit = state_attr(entity, 'temperature_unit') %}
+          {% set report = (outlook | default({}, true)).get(entity, {}) %}
+          {% for slot in report.get('forecast', []) or [] if has_value(entity) and unit in ['°C', '°F'] %}
+            {% set t = as_timestamp(slot.get('datetime'), none) %}
+            {% set v = slot.get('temperature') %}
+            {% if t is not none and start - 3600 < t <= end and is_number(v) %}
+              {% set c = v | float if unit == '°C' else ((v | float - 32) * 5 / 9) | round(4) %}
+              {% set ns.low = c if ns.low is none else [ns.low, c] | min %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+        {{ ns.low }}
+      already_active: "{{ is_state(timer_id, 'active') }}"
+  - choose:
+      - conditions: >-
+          {% set limit = threshold + (1 if already_active else 0) %}
+          {{ (water_c is number and water_c <= limit) or
+             (forecast_c is number and forecast_c <= limit) }}
+        sequence:
+          - action: timer.start
+            target: {entity_id: !input warning_timer}
+            data: {duration: "00:12:00"}
+          - if: "{{ not already_active }}"
+            then: !input notification
+      - conditions: >-
+          {{ already_active and water_c is number and
+             (not weather_ids or forecast_c is number) }}
+        sequence:
+          - action: timer.cancel
+            target: {entity_id: !input warning_timer}

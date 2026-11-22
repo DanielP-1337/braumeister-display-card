@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Nie można jednoznacznie dopasować bieżącej receptury. Wybierz recepturę urządzenia.",
   "Hopfengaben · Minuten vor Kochende": "Dodatki chmielu · minuty przed końcem gotowania",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Program zapisany w urządzeniu. Zmiany podczas warzenia mogą się różnić. Ten wybór nie steruje urządzeniem.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Rozpocząć gotowanie? Pompa i grzałka mogą się uruchomić."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Rozpocząć gotowanie? Pompa i grzałka mogą się uruchomić.",
+  "Frostschutz": "Ostrzeżenie przed mrozem",
+  "Bei Startvorwahl vor Frost warnen": "Ostrzegaj przed mrozem podczas opóźnionego startu",
+  "Warntemperatur des Wassers": "Próg temperatury wody",
+  "Warntimer der HA-Automation (optional)": "Minutnik ostrzeżeń HA (opcjonalny)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Ryzyko zamarznięcia podczas opóźnionego startu. Sprawdź Braumeister i pompę."
 }

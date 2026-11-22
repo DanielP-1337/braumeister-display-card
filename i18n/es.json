@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "No se pudo identificar la receta actual de forma única. Seleccione una receta del equipo.",
   "Hopfengaben · Minuten vor Kochende": "Adiciones de lúpulo · minutos antes del fin del hervor",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programa guardado en el equipo. Los cambios durante la elaboración pueden diferir. Esta selección no controla el equipo.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "¿Iniciar el hervor? La bomba y el calentador pueden arrancar."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "¿Iniciar el hervor? La bomba y el calentador pueden arrancar.",
+  "Frostschutz": "Aviso de helada",
+  "Bei Startvorwahl vor Frost warnen": "Avisar de heladas durante el inicio diferido",
+  "Warntemperatur des Wassers": "Umbral de temperatura del agua",
+  "Warntimer der HA-Automation (optional)": "Temporizador de aviso de HA (opcional)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Riesgo de helada durante el inicio diferido. Comprueba el Braumeister y la bomba."
 }

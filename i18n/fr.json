@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "La recette actuelle ne peut pas être identifiée sans ambiguïté. Sélectionnez une recette de l’appareil.",
   "Hopfengaben · Minuten vor Kochende": "Ajouts de houblon · minutes avant la fin de l’ébullition",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programme enregistré sur l’appareil. Les modifications pendant le brassage peuvent différer. Cette sélection ne commande pas l’appareil.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Démarrer l’ébullition ? La pompe et le chauffage peuvent démarrer."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Démarrer l’ébullition ? La pompe et le chauffage peuvent démarrer.",
+  "Frostschutz": "Alerte au gel",
+  "Bei Startvorwahl vor Frost warnen": "Signaler le gel pendant un départ différé",
+  "Warntemperatur des Wassers": "Seuil de température de l’eau",
+  "Warntimer der HA-Automation (optional)": "Minuterie d’alerte HA (facultative)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Risque de gel pendant le départ différé. Vérifiez le Braumeister et la pompe."
 }

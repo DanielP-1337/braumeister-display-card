@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Impossibile identificare univocamente la ricetta attuale. Seleziona una ricetta del dispositivo.",
   "Hopfengaben · Minuten vor Kochende": "Aggiunte di luppolo · minuti prima della fine della bollitura",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Programma salvato sul dispositivo. Le modifiche durante la cotta possono differire. Questa selezione non controlla il dispositivo.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Avviare la bollitura? La pompa e il riscaldamento potrebbero avviarsi."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Avviare la bollitura? La pompa e il riscaldamento potrebbero avviarsi.",
+  "Frostschutz": "Avviso gelo",
+  "Bei Startvorwahl vor Frost warnen": "Avvisa del gelo durante la partenza ritardata",
+  "Warntemperatur des Wassers": "Soglia di temperatura dell’acqua",
+  "Warntimer der HA-Automation (optional)": "Timer di avviso HA (opzionale)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Rischio di gelo durante la partenza ritardata. Controlla il Braumeister e la pompa."
 }

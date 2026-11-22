@@ -1,4 +1,4 @@
-/* Braumeister Display 0.7.0-beta.37 — native HA telemetry card, no cloud credentials. */
+/* Braumeister Display 0.7.0-beta.38 — native HA telemetry card, no cloud credentials. */
 (() => {
   // Entity IDs depend on the installation; configure them in the card YAML.
   const defaults = Object.fromEntries(['temperature', 'target', 'step', 'recipe', 'recipes', 'mode', 'connection', 'connection_warning', 'pump', 'heater', 'progress', 'time', 'alarm', 'plug', 'power', 'behavior'].map(key => [key, '']));
@@ -54,6 +54,11 @@
   const menuTitles = {101: 'Hauptmenü', 8101: 'Einstellungen', 4006: 'Manueller Betrieb',
     6010: 'Rezepte bearbeiten', 2015: 'Rezept auswählen'};
   const ENGLISH = {
+    "Frostschutz": "Frost warning",
+    "Bei Startvorwahl vor Frost warnen": "Warn about frost during a delayed start",
+    "Warntemperatur des Wassers": "Water warning temperature",
+    "Warntimer der HA-Automation (optional)": "HA automation warning timer (optional)",
+    "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Frost risk during the start delay. Check the Braumeister and pump.",
   "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Start boiling? The pump and heater may start.",
   "Keine Geräterezeptdaten verfügbar. Rezept-Entität in der Kartenkonfiguration zuordnen.": "No device recipe data available. Map the recipe-list entity in the card configuration.",
   "Geräterezept ansehen": "View device recipe",
@@ -289,6 +294,21 @@
       this.refreshRecipePicker();
     }
 
+    frostWarning(live, attrs) {
+      const delay = attrs.display_start_delay_seconds;
+      if (this.config.frost_enabled !== true || !live || attrs.display_state_code !== 2120 ||
+          !Number.isInteger(delay) || delay <= 0 || attrs.display_interrupt === 1) return false;
+      if (this.ids.frost_timer) return this.state('frost_timer') === 'active';
+      const sensor = this._hass.states[this.ids.temperature];
+      const unit = sensor?.attributes?.unit_of_measurement;
+      if (!['°C', '°F'].includes(unit) || typeof sensor?.state !== 'string' || !sensor.state.trim()) return false;
+      const value = Number(sensor.state);
+      const threshold = this.config.frost_threshold ?? 3;
+      const limit = threshold + (this._frostVisible ? 1 : 0);
+      return Number.isFinite(value) && Number.isFinite(threshold) && threshold >= 0 && threshold <= 10 &&
+        value <= (unit === '°F' ? limit * 9 / 5 + 32 : limit);
+    }
+
     alarmActive() {
       const attrs = this._hass?.states[this.ids?.step]?.attributes || {};
       const code = this.menuStateCode(attrs.display_state_code);
@@ -372,7 +392,7 @@
       const base = language.split('-')[0];
       const candidates = [...new Set(['en-US', base, language])].filter(code => code !== 'en');
       this._languageReady = Promise.all(candidates.map(code =>
-        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.37`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
+        loadLanguage(`${path}/${encodeURIComponent(code)}.json?v=0.7.0-beta.38`).then(external => ({...BUNDLED_LANGUAGES[code], ...external})))).then(dictionaries => {
         if (signature !== this._languageSignature) return;
         this._translations = Object.assign({}, ...dictionaries);
         this.render();
@@ -628,6 +648,9 @@
       if(attentionKey && attentionKey!==this._attentionKey) this.page='display';
       this._attentionKey=attentionKey;
       const alarmFrame=programPaused || (attention && !['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(alarmType));
+      const frost = !alarmFrame && this.frostWarning(live, attrs);
+      this._frostVisible = frost;
+      const frostNotice = frost ? `<div class="notice frost-notice" role="status">${T('Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.')}</div>` : '';
       const flag=k=>live?attrs[k==='pump'?'display_pump_flag':'display_heater_flag']:null;
       const brandIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="brand-icon" width="20" height="20" viewBox="0 0 256 256" aria-hidden="true" focusable="false">
   <path fill="#15393B" d="M64 0 H192 Q256 0 256 64 V192 Q256 256 192 256 H64 Q0 256 0 192 V64 Q0 0 64 0 Z"/>
@@ -685,6 +708,8 @@
       :host{display:block;color:#080808;font-family:Arial,sans-serif;container-type:inline-size}*{box-sizing:border-box}
       ha-card{display:block;background:linear-gradient(135deg,#505050,#060606);padding:clamp(14px,5cqw,34px);border-radius:16px;color:#080808;overflow:hidden}
       .screen{background:#f4f4f4;box-shadow:inset 0 0 15px #999;min-height:0}
+      .screen.frost{outline:3px solid #1565c0;box-shadow:inset 0 0 12px #90caf9}
+      .screen .frost-notice{background:#dceeff;color:#103c68}
       .screen.program-paused{outline:3px solid #b00020;box-shadow:inset 0 0 18px #e66868}
       .screen.program-paused.pulse{animation:program-pause-pulse 1.4s ease-in-out infinite}
       @keyframes program-pause-pulse{50%{box-shadow:inset 0 0 30px #cf3030;outline-color:#ff6565}}
@@ -701,7 +726,7 @@
       .hint{font-size:12px;line-height:1.5;color:#555;margin:20px 0 0}.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #ddd;font-size:14px}.value{background:transparent;color:black;font-weight:bold;text-align:right;overflow-wrap:anywhere;max-width:65%}
       footer{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}footer button{color:white;background:none;padding:0;font-size:11px}footer .ring{display:grid;place-items:center;margin:0 auto 10px;width:clamp(42px,11cqw,74px);height:clamp(42px,11cqw,74px);aspect-ratio:1;border:5px solid ${ringColor};border-radius:50%;font-size:22px}footer button[aria-pressed=true] .ring{border-color:${lighting==='default'?'#ffda16':ringColor};background:black;color:${lighting==='default'?'#ffda16':'white'}}footer button[aria-pressed=true]{text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
       .power-buttons{display:flex;gap:12px;margin:20px 0}.power-buttons button{padding:14px;background:#ffda16;border-radius:8px;color:black;flex:1;font-weight:bold}.power-buttons button:disabled{opacity:.4;cursor:not-allowed}label{display:block;font-size:14px}select{display:block;width:100%;margin-top:8px;padding:12px;background:white;color:black;border:1px solid #888;border-radius:6px}.notice{padding:10px 16px;background:#ffda16;font-size:13px}.connection-warning.risk{background:#ffd3d3;color:#700;border:2px solid #b00020}.error{background:#ffd3d3;padding:12px;overflow-wrap:anywhere}
-      </style><ha-card><div class="screen${alarmFrame?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}${progressBar}</header>${connectionNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.alarmActive() === true && !this._alarmMuted ? `<button type="button" data-audio="mute">${T("Ton stummschalten")}</button>` : ""}${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
+      </style><ha-card><div class="screen${alarmFrame?` program-paused${this.config.program_alarm_animation !== false ? ' pulse' : ''}`:frost?' frost':''}"><header>${brandIcon}<span class="title">${T(title)}</span>${live&&attrs.display_clock?`<time title="${T('Vom Braumeister gemeldete Uhrzeit')}">${E(attrs.display_clock)}</time>`:''}${badge('pump','P')}${badge('heater','H')}${progressBar}</header>${connectionNotice}${frostNotice}${this.config.alarm_sound === true ? `<div class="hint"><button type="button" data-audio="test">${T("Ton testen / freigeben")}</button>${this.alarmActive() === true && !this._alarmMuted ? `<button type="button" data-audio="mute">${T("Ton stummschalten")}</button>` : ""}${this.audioError ? `<p role="alert">${T("Ton nicht verfügbar. Bitte Ton testen und Browserfreigabe prüfen.")}</p>` : ""}</div>` : ""}${this.state('alarm')==='on'?`<div class="notice">${T(['mash_in_temperature_reached','rest_end_reached','hop_addition','brew_finished'].includes(this._hass.states[this.ids.alarm]?.attributes?.alarm_type) && !programPaused ? 'Hinweis vom Braumeister' : 'Alarm vom Braumeister gemeldet')}</div>`:''}<main>${body}</main>${this.error?`<div class="error" role="alert">${T(this.error)}</div>`:''}</div><footer>${[['display','▣','Display'],['recipe','☷','Rezept'],['power','⏻','Strom'],['details','ⓘ','Status']].map(([p,i,t])=>`<button data-page="${p}" aria-pressed="${this.page===p}"><span class="ring">${controlIcon(i)}</span>${T(t)}</button>`).join('')}</footer></ha-card>`;
     }
   }
   class BraumeisterDisplayEditor extends HTMLElement {
@@ -713,6 +738,20 @@
         if(button) this.updateColor(button.dataset.color);
       });
       this.shadowRoot.addEventListener('change',event=>{
+        const field = event.target.dataset?.frostSetting;
+        if (field) {
+          if (field === 'enabled') this.config = {...this.config, frost_enabled: event.target.checked};
+          else if (field === 'threshold' && event.target.validity.valid && Number.isFinite(event.target.valueAsNumber))
+            this.config = {...this.config, frost_threshold: event.target.valueAsNumber};
+          else if (field === 'timer') {
+            const id = event.target.value.trim();
+            if (id && !/^timer\.[a-z0-9_]+$/.test(id)) return;
+            this.config = {...this.config, entities: {...this.config.entities, frost_timer: id}};
+          } else return;
+          this.render();
+          this.dispatchEvent(new CustomEvent('config-changed',{detail:{config:{...this.config}},bubbles:true,composed:true}));
+          return;
+        }
         const key=event.target.dataset?.audioSetting;
         if(!['alarm_sound','alarm_repeat','alarm_sound_url','alarm_volume'].includes(key)) return;
         const value=['alarm_sound','alarm_repeat'].includes(key)?event.target.checked:key==='alarm_volume'?Number(event.target.value):event.target.value;
@@ -735,7 +774,12 @@
       if(this.config && JSON.stringify(config)===JSON.stringify(this.config)) return;
       this.config={...config};this.refreshLanguage();this.render();
     }
-    set hass(value){this._hass=value;this.refreshLanguage();}
+    set hass(value){
+      const first = !this._hass;
+      this._hass=value;
+      this.refreshLanguage();
+      if (first && this.config?.frost_enabled) this.render();
+    }
     refreshLanguage(){BraumeisterDisplay.prototype.refreshLanguage.call(this);}
     translate(key,params){return BraumeisterDisplay.prototype.translate.call(this,key,params);}
     async testAlarmAudio(){return BraumeisterDisplay.prototype.testAlarmAudio.call(this);}
@@ -773,7 +817,13 @@
         <label for="picker">${T('Eigene Farbe')}</label><input id="picker" type="color" value="${custom}">
         <label for="hex">${T('HEX-Farbe')}</label><input id="hex" type="text" value="${custom}" pattern="#[0-9a-fA-F]{6}" maxlength="7" spellcheck="false" aria-describedby="hex-help"><p id="hex-help">${T('Bitte #RRGGBB eingeben.')}</p>
         <p>${T('Nur die Tastenringe dieser Karte ändern sich.')}</p></fieldset>
-      <fieldset><legend>${T('Alarmton')}</legend>
+      <fieldset><legend>${T('Frostschutz')}</legend>
+        <label><input type="checkbox" data-frost-setting="enabled" ${this.config.frost_enabled === true ? 'checked' : ''}> ${T('Bei Startvorwahl vor Frost warnen')}</label>
+        ${this.config.frost_enabled === true ? `<label>${T('Warntemperatur des Wassers')} (°C)
+          <input type="number" min="0" max="10" step="0.5" required data-frost-setting="threshold" value="${esc(this.config.frost_threshold ?? 3)}" ${this.config.entities?.frost_timer ? 'disabled' : ''}></label>
+          <label>${T('Warntimer der HA-Automation (optional)')} <input type="text" list="frost-timers" data-frost-setting="timer" value="${esc(this.config.entities?.frost_timer || '')}" placeholder="timer.braumeister_frost"></label>
+          <datalist id="frost-timers">${Object.keys(this._hass?.states || {}).filter(id=>id.startsWith('timer.')).map(id=>`<option value="${esc(id)}"></option>`).join('')}</datalist>` : ''}
+      </fieldset><fieldset><legend>${T('Alarmton')}</legend>
       <label><input type="checkbox" data-audio-setting="alarm_sound" ${this.config.alarm_sound === true ? 'checked' : ''}> ${T('Ton bei Alarm / Pause')}</label>
       <label><input type="checkbox" data-audio-setting="alarm_repeat" ${this.config.alarm_repeat !== false ? 'checked' : ''}> ${T('Bis zur Quittierung wiederholen')}</label>
       <label>${T('Sound-URL (leer: Signalton)')}<input type="url" data-audio-setting="alarm_sound_url" value="${esc(this.config.alarm_sound_url || '')}" placeholder="/local/sounds/alarm.mp3"></label>
@@ -786,5 +836,5 @@
   if(!customElements.get('braumeister-display-card-editor')) customElements.define('braumeister-display-card-editor',BraumeisterDisplayEditor);
   if(!customElements.get('braumeister-display-card')) customElements.define('braumeister-display-card',BraumeisterDisplay);
   window.customCards=window.customCards||[];
-  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.37'});
+  window.customCards.push({type:'braumeister-display-card',name:'Braumeister Display',description:'Live display and smart plug, version 0.7.0-beta.38'});
 })();

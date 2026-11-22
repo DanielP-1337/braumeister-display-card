@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "The current recipe could not be matched uniquely. Select a device recipe.",
   "Hopfengaben · Minuten vor Kochende": "Hop additions · minutes before boil ends",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Stored device schedule. Changes during brewing may differ. Selecting a recipe here does not control the device.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Start boiling? The pump and heater may start."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Start boiling? The pump and heater may start.",
+  "Frostschutz": "Frost warning",
+  "Bei Startvorwahl vor Frost warnen": "Warn about frost during a delayed start",
+  "Warntemperatur des Wassers": "Water warning temperature",
+  "Warntimer der HA-Automation (optional)": "HA automation warning timer (optional)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Frost risk during the start delay. Check the Braumeister and pump."
 }

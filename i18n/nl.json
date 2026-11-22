@@ -154,5 +154,10 @@
   "Aktuelles Rezept nicht eindeutig zugeordnet. Bitte ein Geräterezept auswählen.": "Het huidige recept kon niet eenduidig worden gekoppeld. Kies een apparaatrecept.",
   "Hopfengaben · Minuten vor Kochende": "Hopgiften · minuten voor einde koken",
   "Gespeicherter Geräteplan. Änderungen im laufenden Brauprozess können abweichen. Die Auswahl hier steuert das Gerät nicht.": "Opgeslagen apparaatprogramma. Wijzigingen tijdens het brouwen kunnen afwijken. Deze keuze bedient het apparaat niet.",
-  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Koken starten? De pomp en verwarming kunnen starten."
+  "Hopfenkochen starten? Pumpe und Heizung können anlaufen.": "Koken starten? De pomp en verwarming kunnen starten.",
+  "Frostschutz": "Vorstwaarschuwing",
+  "Bei Startvorwahl vor Frost warnen": "Waarschuw voor vorst tijdens de startvertraging",
+  "Warntemperatur des Wassers": "Waarschuwingsgrens watertemperatuur",
+  "Warntimer der HA-Automation (optional)": "Waarschuwingstimer van HA (optioneel)",
+  "Frostgefahr bei Startvorwahl. Bitte Braumeister und Pumpe prüfen.": "Vorstgevaar tijdens de startvertraging. Controleer de Braumeister en de pomp."
 }
